@@ -37,10 +37,66 @@ When you are manufacturing thousands or millions of a product a small cost reduc
 
 ### Common features left behind:
     JTAG or SWD connections: 
-        * Used by the hardware fab to verify function and to do initial firmware loads, can be used to dump and modify ram, interact with the cpu and halt or step through instructions, read and write flash memory. Pretty much god mode.
+        Used by the hardware fab to verify function and to do initial firmware loads, can be used to dump and modify ram, interact with the cpu and halt or step through instructions, read and write flash memory. Pretty much god mode.
     UART connections: 
-        * Similar to above but with a serial interface running at 3.3v or 5v, common to see it drop right to a linux root shell or login prompt or even into the U-Boot interface on boot. Sometimes has its RX line disabled in production or shell disabled in linux.
+        Similar to above but with a serial interface running at 3.3v or 5v, common to see it drop right to a linux root shell or login prompt or even into the U-Boot interface on boot. Sometimes has its RX line disabled in production or shell disabled in linux.
     TFTP booting: 
-        * Often a secondary boot mode that can be enabled through resetting the device and preventing the initial OS load, used by the manufacturer to load firmware at scale, can be used to subvert onboard firmware.
+        Often a secondary boot mode that can be enabled through resetting the device and preventing the initial OS load, used by the manufacturer to load firmware at scale, can be used to subvert onboard firmware.
     Software backdoors:
-        * These can be blatant or pretty tricky to identify. Hardcoded root passwords, port knocking, hidden admin web pages, SSH or telnet services on standard or nonstandard ports.
+        These can be blatant or pretty tricky to identify. Hardcoded root passwords, port knocking, hidden admin web pages, SSH or telnet services on standard or nonstandard ports.
+
+Prepare your environment.
+======
+
+This is a bit of a free form exercise in the real world attack on a poor semi-defenseless consumer electronics device. The format of this will be in two parts, the end of each section is just letting you go at the firmware to look for tresure. I have collected only the finest e-waste from my private reserve for you today.
+
+![Internet Of Shit](/images/InternetOfShit1.jpg)
+![Internet Of Shit](/images/InternetOfShit1.jpg)
+
+First steps are going to be following instructions in your Debian/Ubuntu based linux environment. A VM with about 1G of free storage will work, if you decide to go straight hardware then by all means do what you want! A live cd install with no mass storage probably won't work. If you want to do this some other way (Mac or maybe Windows 10 Ubuntu?) then I won't stop you, I will also assume that you know how to install the packages you need for your distro.
+
+Why Debian/Ubuntu?
+This has a fairly smooth install process for the required tools, some of these are severely out of date on other distros. The main reason for this is binwalk and its requirements.
+
+Tools you will need:
+
+    proot:
+        Similar to chroot but does not require root privs, will be used to run cross architecture binaries. Most of these binaries are built to run in an extremely limited environment and this helps to simulate their natural environment.
+    qemu:
+        Allows you to run ARM or MIPS binaries on an x86_64 host.
+    radare2: [https://github.com/radare/radare2.git](https://github.com/radare/radare2.git)
+        Personal choice for a reverse engineering tool, not for everyone. Optional however, an alternative of your choice is recommended.
+    binwalk: [https://github.com/ReFirmLabs/binwalk.git](https://github.com/ReFirmLabs/binwalk.git)
+        Extremely powerful tool for analyzing firmware binary blobs. Allows extraction of data and much much more.
+    tcpdump:
+        Analyze network traffic.
+    nmap/ncat:
+        Ncat can be used to make network connections and send raw data to a port.
+    uboot-mdb-dump: [https://github.com/gmbnomis/uboot-mdb-dump](https://github.com/gmbnomis/uboot-mdb-dump)
+        Convert what you downloaded in the memory dump from the device over a serial connection into binary data.
+
+## Download The Archive
+
+I will be sharing a link that will be good through today that contains this documentation as well as the data that will be used, download this in your VM and extract it.
+
+```
+wget https://example.com/Embedded_Reversing.zip
+unzip Embedded_Reversing.zip
+```
+
+Install with the following, if you are working with the material that has been shared then you can run "buildreqs.sh" from that extracted folder.
+
+```
+sudo apt-get install git proot qemu build-essential python -y
+cd ~
+git clone https://github.com/radare/radare2.git && cd radare2/
+sys/install.sh # requires sudo perms
+cd ~
+git clone https://github.com/ReFirmLabs/binwalk.git && cd binwalk/
+sudo ./deps.sh --yes # Requires a Debian or Ubuntu environment, the long steps are available here. https://github.com/ReFirmLabs/binwalk/blob/master/INSTALL.md
+sudo python setup.py install
+cd ~
+git clone https://github.com/gmbnomis/uboot-mdb-dump.git
+```
+
+You are now ready to continue to part 2!
