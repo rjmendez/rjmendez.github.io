@@ -51,7 +51,7 @@ Prepare your environment.
 This is a bit of a free form exercise in the real world attack on a poor semi-defenseless consumer electronics device. The format of this will be in two parts, the end of each section is just letting you go at the firmware to look for tresure. I have collected only the finest e-waste from my private reserve for you today.
 
 ![Internet Of Shit](/images/InternetOfShit1.jpg)
-![Internet Of Shit](/images/InternetOfShit1.jpg)
+![Internet Of Shit](/images/InternetOfShit2.jpg)
 
 First steps are going to be following instructions in your Debian/Ubuntu based linux environment. A VM with about 1G of free storage will work, if you decide to go straight hardware then by all means do what you want! A live cd install with no mass storage probably won't work. If you want to do this some other way (Mac or maybe Windows 10 Ubuntu?) then I won't stop you, I will also assume that you know how to install the packages you need for your distro.
 
