@@ -12,21 +12,29 @@ tags:
   - Reverse Engineering
 ---
 
-#MIPS Network Appliance 
+MIPS Network Appliance
+======
 
-What we will be seeing today
+## What we will be seeing today
 
 The victim today is a DPH153-AT, manufactured by Cisco and sold by AT&T as a wireless cell signal booster. The device has some anti tampering features in the form of these pin headers and shunts, some of these shunts are real and some of them are "fake" having no conductive material. The case has plastic fingers that lock into the assembly around the shunts and will rip them off the board and effectivly scatter them if the case is pulled open. When these shunts do not match the original configuration when it was closed in the factory the device will flag itself as having been tampered with and phone home to the mothership when connected. To bypass this I have taken a Chinesium drill bit and used it to mill away the fingers from the case. Inside of the case five main areas can be identified.
 
-###Power:
+![Bad Idea](/images/DPH153-Drill.jpg)
+![Plastic Fingers](/images/DPH153-Fingers.jpg)
+![Factory Original](/images/DPH153-NotTampered2.jpg)
+![Not Tampered](/images/DPH153-NotTampered1.jpg)
+![Back of PCB](/images/DPH153-BoardBack.jpg)
+![Front of PCB](/images/DPH153-BoardFront.jpg)
+
+### Power:
     Converts 12volts DC into 5v, 3.3v, and 1.2v power rails. This isnt an area we are concerned with.
-###Cellular radio:
+### Cellular radio:
     Acts as a small cellular tower transmitter, does have some interesting areas but still not an easy path of attack.
-###FPGA+CPU and its own ram and flash memory:
+### FPGA+CPU and its own ram and flash memory:
     This is extremely interesting, a very powerful processor with connections to the cellular radio. This module is doing the signal processing and heavy math behind the cellular tower, needs more investigation but no obvious points of entry.
-###GPS module:
+### GPS module:
     Used by the device to determine precise time and if it is in an area where it is allowed to transmit without interfering with other towers. Has super capacitor for a real time clock and a UART connection that transmits GPS data, interesting but not an easy path of attack.
-###Network interconnect:
+### Network interconnect:
     Lower power MIPS CPU with its own ram and flash memory, has an ethernet chip and low voltage signaling to a switch on a chip and the FPGA module that also connects to the higher voltage external ports. This provides a convenient UART port for us with boot messages! Lets poke at this.
 
 Watching this boot will just show us some status messages but not drop us to a root shell or a login prompt. The terminal seems to be disabled after Linux boots, lets see what we can do before that happens.
@@ -120,9 +128,13 @@ bf0001d0: a9 01 00 10 00 00 00 00 a7 01 00 10 00 00 00 00    ................
 bf0001e0: a5 01 00 10 00 00 00 00 a3 01 00 10 00 00 00 00    ................
 ```
 
+# LIVE DEMO!!!!1
+
 With this running overnight we can record the output and use an awesome tool to process the output.
 
-https://github.com/gmbnomis/uboot-mdb-dump
+```
+python3 ~/uboot-mdb-dump/uboot_mdb_to_image.py < dumpflash_mdb.txt > dumpflash.bin
+```
 
 Our resulting file can be run through binwalk to get some useful information, keep in mind that this will return some false positive matches on files magic bytes. Moving to extraction will give us multiple Linux filesystems and more.
 
@@ -232,7 +244,7 @@ cat <(python3 -c "import sys; sys.stdout.write('\x08'+'\x00'*136)") | ncat 127.0
 000000a9
 ```
 
-##Question: What is the value that will trigger a tamper reset?
+## Question: What is the value that will trigger a tamper reset?
 
 Open the ipc_server binary with radare2 and examine its strings with izz.
 
@@ -674,5 +686,5 @@ Num Paddr      Vaddr      Len Size Section  Type  String
 171 0x000044ff 0x00000097   4   5 (.shstrtab) ascii .pdr
 ```
 
-##Question: What does the backdoor in /bin/wizard seem to be capable of?
-Side note: This work has been done by others, what is interesting was that it was patched. Can you tell what the manufacturer changed? https://fail0verflow.com/blog/2012/microcell-fail/
+## Question: What does the backdoor in /bin/wizard seem to be capable of?
+Side note: This work has been done by others, what is interesting was that it was patched. Can you tell what the manufacturer changed? [https://fail0verflow.com/blog/2012/microcell-fail/](https://fail0verflow.com/blog/2012/microcell-fail/)
