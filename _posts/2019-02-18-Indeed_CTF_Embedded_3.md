@@ -85,6 +85,8 @@ Attach the clip to the chip, it is sometimes possible to read one of these while
 The hardware used is a MiniPRO TL866CS, these are still available on ebay and amazon but a lot of them are fakes, the original manufacturer has stopped releasing software for it because of this but I could only get it to install on windows XP anyway. I am using an open source version that is much less of a pain in the ass. 
 [https://gitlab.com/DavidGriffith/minipro/](https://gitlab.com/DavidGriffith/minipro/)
 
+![TL866CS](/images/TL866cs.jpg)
+
 ```
 $ minipro -L mx25l6445e
 MX25L6445E @SOP16
