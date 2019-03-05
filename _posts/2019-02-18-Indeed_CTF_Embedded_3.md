@@ -349,7 +349,7 @@ sym.md5_ex_encrypt_hex 0x30a94 [CALL] bl sym.md5_ex_encrypt
 ```
 
 **WAT**
-The password looks like am md5? md5 encryption has been invented! To the proot!
+The password looks like an md5? md5 encryption has been invented! To the proot!
 
 ```
 cd ../../
