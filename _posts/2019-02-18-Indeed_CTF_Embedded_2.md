@@ -41,6 +41,20 @@ Used by the device to determine precise time and if it is in an area where it is
 ### Network interconnect:
 Lower power MIPS CPU with its own ram and flash memory, has an ethernet chip and low voltage signaling to a switch on a chip and the FPGA module that also connects to the higher voltage external ports. This provides a convenient UART port for us with boot messages! Lets poke at this.
 
+The tool I'm using for the UART interface is a JTAGULATOR, hot pink and ready to kick some ass. [http://www.grandideastudio.com/jtagulator/](http://www.grandideastudio.com/jtagulator/)
+
+![jtagulator](/images/jtagulator.jpg)
+
+The UART has ground, TX, RX, and +3.3v pins. We only really care about ground and the data lines.
+
+![jtagulator UART](/images/jtagulator_UART.jpg)
+
+Wired up and ready to go.
+
+![jtagulator DPH153](/images/jtagulator_DPH153.jpg)
+
+The jtagulator looks like a USB serial adapter and can be configured to act as a UART passthrough.
+
 Watching this boot will just show us some status messages but not drop us to a root shell or a login prompt. The terminal seems to be disabled after Linux boots, lets see what we can do before that happens.
 
 A U-Boot shell for debugging is available, reading some of the messages lets us know where to look in ram for where the flash memory is loaded, on devices like this flash memory is so slow and error prone that it is faster and safer to load everything into a ramdisk.
