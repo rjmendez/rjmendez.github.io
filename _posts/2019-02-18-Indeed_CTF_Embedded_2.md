@@ -27,15 +27,19 @@ The victim today is a DPH153-AT, manufactured by Cisco and sold by AT&T as a wir
 ![Front of PCB](/images/DPH153-BoardFront.jpg)
 
 ### Power:
-    Converts 12volts DC into 5v, 3.3v, and 1.2v power rails. This isnt an area we are concerned with.
+Converts 12volts DC into 5v, 3.3v, and 1.2v power rails. This isnt an area we are concerned with.
+
 ### Cellular radio:
-    Acts as a small cellular tower transmitter, does have some interesting areas but still not an easy path of attack.
+Acts as a small cellular tower transmitter, does have some interesting areas but still not an easy path of attack.
+
 ### FPGA+CPU and its own ram and flash memory:
-    This is extremely interesting, a very powerful processor with connections to the cellular radio. This module is doing the signal processing and heavy math behind the cellular tower, needs more investigation but no obvious points of entry.
+This is extremely interesting, a very powerful processor with connections to the cellular radio. This module is doing the signal processing and heavy math behind the cellular tower, needs more investigation but no obvious points of entry.
+
 ### GPS module:
-    Used by the device to determine precise time and if it is in an area where it is allowed to transmit without interfering with other towers. Has super capacitor for a real time clock and a UART connection that transmits GPS data, interesting but not an easy path of attack.
+Used by the device to determine precise time and if it is in an area where it is allowed to transmit without interfering with other towers. Has super capacitor for a real time clock and a UART connection that transmits GPS data, interesting but not an easy path of attack.
+
 ### Network interconnect:
-    Lower power MIPS CPU with its own ram and flash memory, has an ethernet chip and low voltage signaling to a switch on a chip and the FPGA module that also connects to the higher voltage external ports. This provides a convenient UART port for us with boot messages! Lets poke at this.
+Lower power MIPS CPU with its own ram and flash memory, has an ethernet chip and low voltage signaling to a switch on a chip and the FPGA module that also connects to the higher voltage external ports. This provides a convenient UART port for us with boot messages! Lets poke at this.
 
 Watching this boot will just show us some status messages but not drop us to a root shell or a login prompt. The terminal seems to be disabled after Linux boots, lets see what we can do before that happens.
 
