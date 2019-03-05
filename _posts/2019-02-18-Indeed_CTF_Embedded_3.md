@@ -10,8 +10,6 @@ tags:
   - Reverse Engineering
 ---
 
-# WARNING WIP!
-
 # ARM Cloud Conected Camera 
 
 This example will be looking for ways to get a root shell on this camera. 
@@ -26,6 +24,88 @@ Unlike the previous device we can take another route, for this I was able to get
 ![cloud camera front](/images/Cloudipcam_UART_pins.jpg)
 
 The UART runs at 38.4k baud so I used the hot air wand on the PCB rework station to remove the chip and loaded it in a socket to read.
+
+### Extraction Demo
+
+#### Tools
+
+The following was copied from another of my posts.
+
+Chipquik low temp solder: This lets us use less heat to remove the component and prevents damage to the pads and component. It isnt really solder, this stuff contains bismuth and will expand when it crystalizes. This will give you some disgusting looking solder joints that will also be brittle as hell, its important to clean this a few times with fresh solder and braid.
+
+![Chipquik_box](/images/Chipquik_box.jpg)
+![Chipquik_alloy](/images/Chipquik_alloy.jpg)
+
+Amtech 559 flux: I love this stuff, it doesnt burn up the same way as other fluxes and does not deposit a hard layer of rosin after use. It also doesn't stink as bad when you hit it with a hot air wand.
+
+![Amtech_559_flux](/images/Amtech_559_flux.jpg)
+
+#### Removal Process
+
+Unfortunatly I did not get photos or document this process on the original hardware, I did get a similar chip from another donor board that I can show here.
+
+![donor board start](/images/Donorboard_start.jpg)
+
+The first step is to clean the board with anhydrous isopropyl alcohol to remove oil/dust/contaminants that will either burn off and choke me with fumes or foul the solder joint. We can now see our target clearly.
+
+![MX25L6445E on board](/images/MX25L6445E_on_board.jpg)
+
+These are pretty common parts and the pin assignments can be found all over the internet by searching for the part numbers, for this example I'll use the larger mx25l12835f that was found on the original camera. Note that pin 1 is indicated by the dot on the lower left and upper left in the datasheet.
+
+![mxic25l12835f pinout](/images/mxic25l12835f.png)
+
+We flux the pins to help the solder flow, flux is a chemical cleaning agent that will donate electrons and strip oxygen from the surface of the solder. Oxygen will turn the lead and tin in solder into a clumpy crumbly mess, I have overapplied it here because the hot air will blow it away.
+
+![MX25L6445E flux applied](/images/MX25L6445E_fluxed.jpg)
+
+The next step is using some of my favorite stuff, Chipquik is magic.
+
+![MX25L6445E Chipquik applied](/images/MX25L6445E_chipquik.jpg)
+
+Heat the legs evenly and lightly jiggle the chip with the tweezers until the chip lifts free, jiggling helps to get the low melt alloy displace the actual solder in the joint.
+
+![MX25L6445E free](/images/MX25L6445E_free.jpg)
+
+Use desoldering braid and alcohol to clean up the pads on the board, do the same with the legs on your chip. I find that disposable lint free antistatic wipes do a great job here.
+
+![Donor board cleaned](/images/Donorboard_clean.jpg)
+
+![MX25L6445E clean on palm](/images/MX25L6445E_cleanonpalm.jpg)
+
+#### Reading Data
+
+Verify pin 1 on the clip, these are usually color coded to help with this process.
+
+![MX25L6445E aligned pin one](/images/MX25L6445E_alignedpinone.jpg)
+
+Attach the clip to the chip, it is sometimes possible to read one of these while it is still installed on a board by halting the cpu while it is powered up. Removal allows for complete control and is a little bit safer than worrying about weird ground loops killing your chip/board/reader/USB port/...
+
+![MX25L6445E in clip](/images/MX25L6445E_inclip.jpg)
+
+The hardware used is a MiniPRO TL866CS, these are still available on ebay and amazon but a lot of them are fakes, the original manufacturer has stopped releasing software for it because of this but I could only get it to install on windows XP anyway. I am using an open source version that is much less of a pain in the ass. 
+https://gitlab.com/DavidGriffith/minipro/
+
+```
+$ minipro -L mx25l6445e
+MX25L6445E @SOP16
+MX25L6445E @SOP8
+MX25L6445E @WSON8
+
+$ minipro -p "MX25L6445E @SOP8" -r MX25L6445E.bin
+Found TL866CS 03.2.72 (0x248)
+Chip ID OK: 0xC22017
+Reading Code...  83.42Sec  OK
+
+$ ls -laht MX25L6445E.bin 
+-rw-rw-r-- 1 rjmendez rjmendez 8.0M Mar  4 20:31 MX25L6445E.bin
+$ file MX25L6445E.bin 
+MX25L6445E.bin: data
+```
+
+### Binwalk
+
+Lets move on from the other chip to the target of this section.
+Within the provided archive navigate to the cloudipcamera folder where "cloudipcamera_mxic25l12835f.BIN" sits.
 
 Run binwalk on the file and note the important addresses.
 
