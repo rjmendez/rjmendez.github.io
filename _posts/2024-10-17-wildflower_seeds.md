@@ -23,8 +23,8 @@ The drone flight controller is a [SpeedyBee F7 V3](https://www.speedybee.com/spe
 The motor controller outputs more than enough power for a 9g servo, that servo rotates the control horn releasing the rubber band and flinging seeds. Depending on the type of seeds they can be wind dispersed or scattered by gravity alone, below is an example of wind dispersed [Joe Pye weed](https://www.inaturalist.org/taxa/132717-Eutrochium-fistulosum) and wild lettuces.
 ![Wild Lettuce](/images/WildflowerSeeds.jpg)
 ![Wind Dispersed Seeds](/images/WindDispersedSeeds.jpg)
-![Joe Pye Weed](/images/JoePyeWeed1.jpg)
-![Joe Pye Weed](/images/JoePyeWeed2.jpg)
+![Joe Pye Weed](/images/JoePyeWeed1.JPG)
+![Joe Pye Weed](/images/JoePyeWeed2.JPG)
 
 Other seeds like to be in a soil seed bank and they can be packed into "seed balls" made of clay and compost.
 ![Seed Balls](/images/SeedBalls.jpg)
@@ -33,7 +33,8 @@ Still others are perfect for dropping loose but packed for flight using "natural
 ![Seed Packet](/images/DroneSeedPacket.jpg)
 
 Demonstration of the loose seed deployer in action.
-[![Drone Servo](https://img.youtube.com/vi/q6Zp8Fsnwuo/0.jpg)](https://www.youtube.com/watch?v=q6Zp8Fsnwuo)
+
+[![Drone Dropper](https://img.youtube.com/vi/q6Zp8Fsnwuo/0.jpg)](https://www.youtube.com/watch?v=q6Zp8Fsnwuo)
 
 Software
 ======
@@ -45,6 +46,6 @@ resource SERVO 1 B07
 ```
 Next we need to make sure that CHANNEL_FORWARDING is enabled in betaflight, I'm using channel `AUX 1` for the seed deployer Servo 1 with that mapped to a pushbutton on the radio transmitter. By default the `channel_forwarding_start` param maps `AUX 1` to `Servo 1`
 References: 
-https://betaflight.com/docs/wiki/guides/current/servos-and-servo_tilt-for-3-1
-https://youtu.be/L-6r2iX1p6s?t=804
+[https://betaflight.com/docs/wiki/guides/current/servos-and-servo_tilt-for-3-1](https://betaflight.com/docs/wiki/guides/current/servos-and-servo_tilt-for-3-1)
+[https://youtu.be/L-6r2iX1p6s?t=804](https://youtu.be/L-6r2iX1p6s?t=804)
 [![Drone Servo](https://img.youtube.com/vi/9vQyFJy8Ob8/0.jpg)](https://www.youtube.com/watch?v=9vQyFJy8Ob8)
