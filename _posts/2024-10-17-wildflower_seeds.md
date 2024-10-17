@@ -21,7 +21,8 @@ The drone is a pretty common custom made 5 inch prop FPV drone, its running a [b
 The drone flight controller is a [SpeedyBee F7 V3](https://www.speedybee.com/speedybee-f7-v3-bl32-50a-30x30-stack/) with the servo signal line going to motor pad 5 (M5) with the ground and +5v to their pads.
 ![Drone Electronics](/images/DroneElectronics.jpg)
 The motor controller outputs more than enough power for a 9g servo, that servo rotates the control horn releasing the rubber band and flinging seeds. Depending on the type of seeds they can be wind dispersed or scattered by gravity alone, below is an example of wind dispersed [Joe Pye weed](https://www.inaturalist.org/taxa/132717-Eutrochium-fistulosum) and wild lettuces.
-![Wild Lettuce](/images/WildflowerSeeds.jpg)
+
+![Wild Lettuce](/images/WildflowerSeeds.JPG)
 ![Wind Dispersed Seeds](/images/WindDispersedSeeds.jpg)
 ![Joe Pye Weed](/images/JoePyeWeed1.JPG)
 ![Joe Pye Weed](/images/JoePyeWeed2.JPG)
@@ -45,7 +46,11 @@ resource MOTOR 5 NONE
 resource SERVO 1 B07
 ```
 Next we need to make sure that CHANNEL_FORWARDING is enabled in betaflight, I'm using channel `AUX 1` for the seed deployer Servo 1 with that mapped to a pushbutton on the radio transmitter. By default the `channel_forwarding_start` param maps `AUX 1` to `Servo 1`
+
 References: 
+
 [https://betaflight.com/docs/wiki/guides/current/servos-and-servo_tilt-for-3-1](https://betaflight.com/docs/wiki/guides/current/servos-and-servo_tilt-for-3-1)
+
 [https://youtu.be/L-6r2iX1p6s?t=804](https://youtu.be/L-6r2iX1p6s?t=804)
+
 [![Drone Servo](https://img.youtube.com/vi/9vQyFJy8Ob8/0.jpg)](https://www.youtube.com/watch?v=9vQyFJy8Ob8)
