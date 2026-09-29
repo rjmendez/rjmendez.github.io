@@ -9,61 +9,56 @@ tags:
   - Software
 ---
 
-FlyBrain is a private repo with two parts: a data layer, and an experimental brain-growing layer.
+FlyBrain is a private repo with two parts: data and simulation.
 
 What FlyBrain is
 ======
-**Data layer.** Integrates neuroscience datasets so a question like "what is this neuron, what does it connect to, what neurotransmitter does it use" doesn't require hopping between tools by hand.
+**Data.** Answers core biology questions without manual tool-jumping:
 
-**Brain-growing layer.** Builds small neural-network controllers whose wiring is derived from real fly connectome data (FlyWire, the hemibrain), and tests whether that wiring gives them any advantage over an equivalent random network of the same size.
+- What is this cell type?
+- Where is it in the anatomy hierarchy?
+- What does it connect to?
+- What transmitter family is it associated with?
 
-What the data layer already does
+**Simulation.** Builds controllers from connectome structure, runs them in task environments, and compares behavior against matched controls.
+
+What we already have in data
 ======
-- Term and ID resolution across datasets (same entity, different names)
-- Hierarchy data (neuron class / brain region parent-child relationships)
-- Connectivity summaries, grounded in FlyWire (139,255 neurons, 3.7M+ connections) and the hemibrain (21,739 neurons, 3.55M weighted edges)
-- Neurotransmitter data (curated labels and prediction-based outputs)
-- Cross-dataset comparison
+Current data capabilities:
 
-In production use for lookups and cross-checks, not a demo.
+- term/ID resolution across naming variants
+- hierarchy lookups for regions and cell classes
+- connectivity summaries
+- curated + predicted neurotransmitter signals
+- dataset-aware comparison views
 
-What the brain-growing layer has shown so far
+Current lanes: FlyWire/Hemibrain-derived flows plus BANC, L1EM, FAFB, MC, MV, and OL.
+
+How the sim actually runs
 ======
-Result: none of the grown or evolved controllers built so far beat a size- and budget-matched random network on held-out tests. Zero of 20 in the latest realism check.
+Execution path:
 
-What changed as a result:
+1. Build or sample a circuit graph from a genome/connectome representation
+2. Convert it to a bounded recurrent dynamics model
+3. Project observations into sensory nodes and read actions from motor/descending nodes
+4. Run episodes in body adapters with explicit reward/termination logic
+5. Compare outcomes against strict controls and held-out evaluation slices
 
-- Every wiring claim now requires four matched controls (random sparse, degree-scrambled, dense random, small MLP), not a bare "better than nothing" comparison.
-- Evaluation runs against a held-out animal and held-out statistics, not the data the model was fit on.
-- The significance test behind these comparisons had a real bug: it falsely rejected a true null result more often than its stated rate. Replaced.
-- The simulated test environment had a sensor giving an exact, noiseless bearing to the goal — effectively a cheat. Removed.
+Mechanics: normalized adjacency, transmitter-aware inhibitory sign handling, `tanh` state updates, clipped action outputs, step-wise closed-loop episodes.
 
-Recent code + sim changes
+What this means
 ======
-Quick plain-language summary of the latest work:
+This is a usable pipeline, not a demo:
 
-- Added more connectome coverage with adapters/sample builders for **BANC, L1EM, FAFB, MC, MV, and OL** datasets.
-- Added a stronger dataset registry so each dataset lane is easier to track and compare.
-- Added grouped split + hash stamping checks so training/eval data handling is less fragile and easier to reproduce.
-- Added a **circuit dynamics engine** to run grown circuit behavior in simulation instead of only static checks.
-- Added a **C. elegans locomotion body adapter** plus reward functions and episode simulation (obs=8, action=4) so we can test closed-loop behavior.
-
-Why this matters: we can now evaluate "does this circuit *do* the right thing over time?" not just "does this lookup return the right row?"
+- answer structural/circuit questions from integrated data
+- run controllers in simulation repeatedly
+- reject weak wiring ideas under controlled evaluation
 
 Applications
 ======
-Current, on the data layer:
-
-1. Faster hypothesis building (especially for circuit questions)
-2. Cleaner experiment planning (less time lost resolving terminology)
-3. Better communication (plain summaries for mixed technical/non-technical teams)
-4. Reproducible data pulls (same query pattern, same output shape)
-5. Simulation-backed iteration (tune behavior in episodes before moving to more expensive experiments)
-
-Contingent on the brain-growing layer clearing its own held-out bar: a path to model-assisted analysis grounded in real connectome structure, not just architecture that resembles one.
-
-Next
-======
-Data layer: keep the query layer stable, keep output easy to read. Brain-growing layer: keep running it against held-out tests until it shows a real, repeatable advantage, or doesn't.
+1. Faster hypothesis generation for circuit questions
+2. Cleaner experiment planning with less naming friction
+3. Reproducible dataset-to-sim runs
+4. Better communication of technical results to mixed audiences
 
 Private repo for now, public-friendly explanations here.

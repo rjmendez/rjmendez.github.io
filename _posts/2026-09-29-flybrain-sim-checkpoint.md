@@ -1,5 +1,5 @@
 ---
-title: 'FlyBrain sim checkpoint: what changed this week and why it matters'
+title: 'FlyBrain simulation: architecture and evaluation'
 date: 2026-09-29
 permalink: /posts/2026/09/flybrain-sim-checkpoint/
 tags:
@@ -10,50 +10,58 @@ tags:
   - Software
 ---
 
-Quick simulation-focused checkpoint from the private FlyBrain work.
+This post describes the current simulation stack in concrete terms.
 
-This one is less "what is FlyBrain?" and more "what actually changed in the sim lane?"
-
-What changed
+Simulation architecture
 ======
-Three big chunks landed recently:
+The sim layer has three parts:
 
-1. **Circuit dynamics engine**
-   - Added a recurrent rate-model execution path for grown connectome circuits.
-   - Includes role-based input/output projection (sensory in, motor out), bounded state updates, and neurotransmitter-aware inhibitory sign handling.
+1. **Circuit dynamics**
+   - recurrent rate-model execution over connectome-derived adjacency
+   - normalized weights, inhibitory sign handling (`gaba`, `octopamine`)
+   - bounded hidden state update (`tanh`) and clipped action output
 
-2. **Body adapter expansion**
-   - Added and hardened body-adapter execution for closed-loop episodes, including C. elegans locomotion behavior paths.
-   - Supports vector actions, stateful step updates, and per-step reward accounting.
+2. **Role projections**
+   - observation projected to sensory neurons
+   - action readout projected from motor/descending neurons
+   - deterministic fallback indexing when role labels are missing
 
-3. **Episode + reward plumbing**
-   - Added explicit episode runners and reward-focused tests so sim quality is measured over trajectories, not just static snapshots.
+3. **Body adapters**
+   - closed-loop `reset -> step -> reward -> done` execution
+   - vector-action path for episode simulation
+   - task-specific observation/reward definitions
 
-If you want the short version: we moved from "can this graph be built?" toward "can this controller run repeatedly and score behavior under constraints?"
-
-What data/method changed around the sim
+Task environments
 ======
-The simulation updates were paired with data-path hardening work:
+- **Radio source seeking**
+  - observation includes position, source bearing terms, signal, and previous movement
+  - reward increases when distance-to-source decreases
+  - terminal bonus on arrival
 
-- more dataset lanes in active use (BANC, L1EM, FAFB, MC, MV, OL)
-- grouped split + hash-stamped artifacts for reproducibility
-- stronger baseline and gate checks before calling progress
+- **C. elegans locomotion**
+  - compact obs/action interface (`obs=8`, `action=4`)
+  - one-dimensional locomotion reward in vector-action mode
+  - legacy biomechanical step path retained for discrete-action tests
 
-That matters because simulator improvements are only useful if the data side is consistent enough to trust comparisons.
-
-Why this matters in practice
+Evaluation protocol
 ======
-This gives us better leverage for:
+- episode rollouts with accumulated return
+- deterministic reset path via seeds
+- shape/bounds checks in unit tests
+- control comparisons against matched non-connectome baselines
 
-1. Running the same episode setup repeatedly and getting traceable results
-2. Comparing connectome-derived controllers against controls with less hand-waving
-3. Catching fragile behavior earlier (reward collapse, unstable policy output, poor generalization)
-4. Iterating faster before expensive downstream experiments
-
-Current honest status
+Data dependencies
 ======
-The sim lane is definitely more rigorous than it was a week ago.
+Simulation currently runs against standardized dataset lanes:
 
-That does **not** automatically mean "we solved it." It means the test harness is less forgiving, more reproducible, and better at telling us when we are wrong.
+- FlyWire/Hemibrain-derived flows
+- BANC, L1EM, FAFB
+- MC, MV, OL
 
-That's exactly where we need to be right now.
+These are wired through registry + grouped split + hash-stamped artifacts so runs are reproducible.
+
+Current status
+======
+- The stack can execute connectome-derived controllers end-to-end in episodes.
+- The instrumentation is good enough to reject weak results quickly.
+- Claims remain gated by held-out controls; no free passes.
