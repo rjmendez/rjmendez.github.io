@@ -38,14 +38,27 @@ What changed as a result:
 - The significance test behind these comparisons had a real bug: it falsely rejected a true null result more often than its stated rate. Replaced.
 - The simulated test environment had a sensor giving an exact, noiseless bearing to the goal — effectively a cheat. Removed.
 
+Recent code + sim changes
+======
+Quick plain-language summary of the latest work:
+
+- Added more connectome coverage with adapters/sample builders for **BANC, L1EM, FAFB, MC, MV, and OL** datasets.
+- Added a stronger dataset registry so each dataset lane is easier to track and compare.
+- Added grouped split + hash stamping checks so training/eval data handling is less fragile and easier to reproduce.
+- Added a **circuit dynamics engine** to run grown circuit behavior in simulation instead of only static checks.
+- Added a **C. elegans locomotion body adapter** plus reward functions and episode simulation (obs=8, action=4) so we can test closed-loop behavior.
+
+Why this matters: we can now evaluate "does this circuit *do* the right thing over time?" not just "does this lookup return the right row?"
+
 Applications
 ======
 Current, on the data layer:
 
-1. Faster hypothesis building for circuit questions
-2. Less time lost resolving terminology during experiment planning
-3. Plain summaries for mixed technical/non-technical teams
-4. Reproducible data pulls: same query, same output shape
+1. Faster hypothesis building (especially for circuit questions)
+2. Cleaner experiment planning (less time lost resolving terminology)
+3. Better communication (plain summaries for mixed technical/non-technical teams)
+4. Reproducible data pulls (same query pattern, same output shape)
+5. Simulation-backed iteration (tune behavior in episodes before moving to more expensive experiments)
 
 Contingent on the brain-growing layer clearing its own held-out bar: a path to model-assisted analysis grounded in real connectome structure, not just architecture that resembles one.
 
