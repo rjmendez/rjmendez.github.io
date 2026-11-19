@@ -83,6 +83,8 @@ one-word ISR hook on DSP4
 
 That round-trip — change one instruction, observe the running system react, put it back exactly — is reversible, observed live, and it is my code on their DSP. As a control, I used the same hook to flip a SPORT chip-select word (`0x3100208C`) from `1` to `0x001FFFFF` and read it back changed, then rolled it back: before `00000001`, after `001fffff`, restore `00000001`. The hook does what I say.
 
+![A diagram of the sharcload pipeline in five stages — parse the .ldr block headers, pass the board-ID gate, clock over SPI at 750 kHz, wait per-DSP on the readiness register, then verify and identify — with the two walls called out: the board-ID strncmp that segfaults before the DSP is ever clocked (fixed by a 12-byte patch at vaddr = file_offset + 0x8000) and the inverted, latched readiness register 0x6400010E where a set bit means NOT ready. Below, the reversible one-word ISR hook on DSP4: stock 0x00251002, overwritten with 0x0018063e while the ISR rate stays ~6000/s, then rolled back bit-for-bit.](/images/BMA360_sharc_load_handshake.svg)
+
 What I own now
 ======
 
