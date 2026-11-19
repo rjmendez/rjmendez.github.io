@@ -139,6 +139,8 @@ fw_setenv imagesize <hex-filesize>
 
 The safe kernel at `0x4220000` is never touched, so `bootcmd` still tries normal, then safe. Reverting is re-writing `uImage.stock` the same way. Always prove the new kernel over TFTP first — `tftp 0xc0700000 uImage.new; bootm` — because of the sequential-fallback trap above: a kernel that hangs after a successful `bootm` will not fall through to the parachute.
 
+![The OMAP boot chain from ROM through UBL and U-Boot to the normal/safe kernels, beside the 512 MB NAND partition map. The fallback is sequential, not conditional; the two recovery postures are an NFS root that changes nothing and a persistent kernel written only into the primary slot, leaving the factory safe kernel at 0x4220000 intact.](/images/BMA360_boot_chain.svg)
+
 That is the whole recovery posture. One NFS path that touches nothing, one flash path that keeps the factory's own recovery image intact, and a serial console to watch both. On a board I own, that is just ordinary bring-up — but on an appliance that expects to only ever run `heb_app.bin`, it is the difference between a research platform and a paperweight.
 
 There is a second computer in the tile, though, and it boots its own Linux over a connector I had written off as dark. That is Part 3.
