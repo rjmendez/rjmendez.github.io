@@ -32,6 +32,8 @@ FRAME LAYOUT (21 words/slot-set)
   slot 20    sync  0x123456
 ```
 
+![DSP4's receive ring: one pointer in data memory names the buffer the ISR just filled, cycling through three buffers; each 21-word frame carries mic audio, zeros, and two constant sync witnesses (0xff00, 0x123456) that give the read a built-in alignment check. Measured, read-only, on one array.](/images/BMA360_dsp4_receive_ring.svg)
+
 The sync words are the gift. Slots 19 and 20 carry constant witnesses (`ff00`, `123456`) in every single frame, so any read that does not land those two constants in the right place is misaligned — you get an alignment check for free, built into the data. The ISR advances the frame counter about 6000 times a second, and the pointer at `0x256dc4` is never anything but one of the three buffer addresses. That is a clean, self-checking place to read from.
 
 A frame of real audio
