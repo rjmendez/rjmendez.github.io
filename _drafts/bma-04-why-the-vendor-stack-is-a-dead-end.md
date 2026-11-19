@@ -11,6 +11,8 @@ tags:
 
 By this point I had shells on both computers in the tile and still could not read a microphone. The remaining obvious route was the vendor's own application: let `heb_app.bin` run, and borrow its access to the FPGA and the DSPs. This part is why that route does not get you raw audio either, and how I proved each wall instead of assuming it.
 
+![The Altera Cyclone V on the main board — the only FPGA in the audio path, and the one that self-loads its bitstream](/images/BMA360_Cyclone_V.jpg)
+
 The front door: /dev/c1fpga
 ======
 

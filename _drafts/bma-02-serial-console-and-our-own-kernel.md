@@ -19,6 +19,8 @@ The main board has a 4-pin 0.1" header silkscreened `J8` and, next to it in the 
 
 What comes out is a TI boot chain, three stages deep before Linux even starts.
 
+![The TI OMAP-L138 (OMAPL138E) and, to its lower right, the SanDisk NAND that holds the boot stages](/images/BMA360_OMAP-L138.jpg)
+
 The boot chain
 ======
 

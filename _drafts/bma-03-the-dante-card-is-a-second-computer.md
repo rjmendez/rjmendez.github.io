@@ -12,6 +12,8 @@ tags:
 
 Part 2 got me a shell on the OMAP. But the OMAP is only half the tile. The audio leaves the main board over a card-edge TDM bus and lands on an Audinate Brooklyn-3 module — a Xilinx Zynq-7000 XC7Z015 with its own QSPI flash. For a while my notes called the card "dark": no console found, no obvious way in. The way I was wrong is the useful part.
 
+![The Audinate Brooklyn-3 card: the Xilinx Zynq-7000 XC7Z015, the Dante silkscreen, and the Mini-PCI card edge it mounts on](/images/BMA360_Brooklyn3_Zynq.jpg)
+
 The card is not dark, it is on the network
 ======
 

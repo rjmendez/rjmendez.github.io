@@ -22,6 +22,8 @@ What is actually in the tile
 
 I took one apart and read the part numbers off the silicon. There are two separate boards doing two separate jobs, and that single fact set the shape of everything after it.
 
+![ClearOne main board, with the CONNECT One assembly label and the 18 V / 5 V rail test points](/images/BMA360_mainboard_ClearOne.jpg)
+
 ```
           121-element MEMS disc  (radial spokes)  + a small ring on the main board
                          |  FFC / mezzanine
