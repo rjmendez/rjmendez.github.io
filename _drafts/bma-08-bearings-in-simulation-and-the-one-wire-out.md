@@ -31,6 +31,10 @@ MISSING for the real thing:
 
 The DOA harness produces bearings, and in simulation they are correct for the synthetic sources I feed it. That is a useful component test and nothing more. The "virtual edge" tracks you might see in development logs are built from short or noise-level inputs; I do not treat them as validated detections, and neither should you. Run the bearing harness with fixed evaluation seeds and it reports simulation results — labeled as such, every time.
 
+The geometry the finished instrument is meant to run is simple enough to draw; what is missing is the join to live audio:
+
+![Each tile sweeps its delay-and-sum beam to find a bearing; several tiles' bearings cross at a position, and successive fixes make a track. Labeled SIMULATED: today this runs on generated signals, not live array audio.](/images/BMA360_bearing_crossing.svg)
+
 The egress daemon that only has a synthetic source
 ======
 
