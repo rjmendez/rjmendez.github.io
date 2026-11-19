@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 548" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#555"/>
+    </marker>
+    <marker id="ahg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#2e7d32"/>
+    </marker>
+    <style>
+      .ttl{font-size:18px;font-weight:600;fill:#1a1a1a}
+      .hd{font-size:12px;font-weight:600;fill:#777;letter-spacing:.5px}
+      .lbl{font-size:13px;fill:#1a1a1a}
+      .sm{font-size:11.5px;fill:#555}
+      .mono{font-family:Consolas,monospace;font-size:12px;fill:#1a1a1a}
+      .monr{font-family:Consolas,monospace;font-size:12px;fill:#c0392b}
+      .mong{font-family:Consolas,monospace;font-size:12px;fill:#2e7d32}
+      .box{fill:#fff;stroke:#777;stroke-width:1.4}
+      .flow{stroke:#555;stroke-width:2;fill:none}
+      .wall{fill:#fdf4f3;stroke:#c0392b;stroke-width:1.3}
+      .warn{fill:#fdf8ee;stroke:#b8860b;stroke-width:1.3}
+      .good{fill:#eef7ee;stroke:#2e7d32;stroke-width:1.3}
+    </style>
+  </defs>
+
+  <text x="24" y="30" class="ttl">sharcload: the pipeline, the three walls, and my own instruction on DSP4</text>
+
+  <!-- PIPELINE -->
+  <text x="24" y="58" class="hd">THE LOAD PIPELINE (my loader, vendor binary out of the path)</text>
+
+  <rect x="24"  y="70" width="150" height="62" rx="5" class="box"/>
+  <text x="99"  y="94" text-anchor="middle" class="lbl">.ldr image</text>
+  <text x="99"  y="111" text-anchor="middle" class="sm">16-byte block</text>
+  <text x="99"  y="125" text-anchor="middle" class="sm">headers</text>
+
+  <rect x="204" y="70" width="160" height="62" rx="5" class="box"/>
+  <text x="284" y="94" text-anchor="middle" class="lbl">board-ID gate</text>
+  <text x="284" y="111" text-anchor="middle" class="mono">getPCBAssembly()</text>
+  <text x="284" y="125" text-anchor="middle" class="sm">runs before any clock</text>
+
+  <rect x="394" y="70" width="140" height="62" rx="5" class="box"/>
+  <text x="464" y="94" text-anchor="middle" class="lbl">clock over SPI</text>
+  <text x="464" y="111" text-anchor="middle" class="sm">750 kHz,</text>
+  <text x="464" y="125" text-anchor="middle" class="sm">4-byte words</text>
+
+  <rect x="564" y="70" width="150" height="62" rx="5" class="box"/>
+  <text x="639" y="94" text-anchor="middle" class="lbl">readiness wait</text>
+  <text x="639" y="111" text-anchor="middle" class="sm">per DSP, before</text>
+  <text x="639" y="125" text-anchor="middle" class="sm">its blocks go</text>
+
+  <rect x="744" y="70" width="132" height="62" rx="5" class="box"/>
+  <text x="810" y="94" text-anchor="middle" class="lbl">verify +</text>
+  <text x="810" y="111" text-anchor="middle" class="lbl">identify</text>
+  <text x="810" y="127" text-anchor="middle" class="sm">read-back</text>
+
+  <line x1="174" y1="101" x2="202" y2="101" class="flow" marker-end="url(#ah)"/>
+  <line x1="364" y1="101" x2="392" y2="101" class="flow" marker-end="url(#ah)"/>
+  <line x1="534" y1="101" x2="562" y2="101" class="flow" marker-end="url(#ah)"/>
+  <line x1="714" y1="101" x2="742" y2="101" class="flow" marker-end="url(#ah)"/>
+
+  <!-- connectors down to callouts -->
+  <line x1="284" y1="132" x2="284" y2="168" stroke="#c0392b" stroke-width="1.2" stroke-dasharray="3,3"/>
+  <line x1="639" y1="132" x2="639" y2="168" stroke="#b8860b" stroke-width="1.2" stroke-dasharray="3,3"/>
+  <line x1="810" y1="132" x2="810" y2="168" stroke="#2e7d32" stroke-width="1.2" stroke-dasharray="3,3"/>
+
+  <!-- WALL 1: board-ID -->
+  <rect x="24" y="170" width="356" height="92" rx="6" class="wall"/>
+  <text x="38" y="190" class="sm" fill="#c0392b" font-weight="600">WALL 1 &#8212; the gate segfaults before the DSP is touched</text>
+  <text x="38" y="210" class="sm"><tspan class="mono">strncmp</tspan> vs <tspan class="mono">"ASY-0514"</tspan> walks a null pointer on a</text>
+  <text x="38" y="226" class="sm">bare rig; the process dies, the DSP is never clocked.</text>
+  <text x="38" y="248" class="monr">FIX: 12-byte patch at  vaddr = file_offset + 0x8000</text>
+
+  <!-- WALL 2: readiness register -->
+  <rect x="396" y="170" width="300" height="92" rx="6" class="warn"/>
+  <text x="410" y="190" class="sm" fill="#b8860b" font-weight="600">WALL 2 &#8212; a register that reads backwards</text>
+  <text x="410" y="210" class="mono">0x6400010E</text><text x="500" y="210" class="sm">inverted &amp; latched:</text>
+  <text x="410" y="228" class="sm">bit N <tspan font-weight="600">SET</tspan> = DSP N <tspan font-weight="600">NOT</tspan> ready. Wait for CLEAR</text>
+  <text x="410" y="244" class="sm">per DSP before sending its blocks.</text>
+  <text x="410" y="258" class="mono">observed sweep  0x007F -&gt; 0x03FF</text>
+
+  <!-- GOOD: identify -->
+  <rect x="712" y="170" width="164" height="92" rx="6" class="good"/>
+  <text x="794" y="190" text-anchor="middle" class="sm" fill="#2e7d32" font-weight="600">result</text>
+  <text x="794" y="210" text-anchor="middle" class="sm">9-DSP load, empty:</text>
+  <text x="794" y="226" text-anchor="middle" class="sm">52 s, 41/41 soak</text>
+  <text x="794" y="246" text-anchor="middle" class="mono">reply[3] = DSP idx</text>
+  <text x="794" y="259" text-anchor="middle" class="sm">(0002 .. 0009)</text>
+
+  <!-- PROOF PANEL -->
+  <text x="24" y="296" class="hd">MY INSTRUCTIONS, EXECUTING &#8212; a one-word ISR hook on DSP4, fully reversible</text>
+
+  <rect x="24" y="308" width="852" height="150" rx="8" fill="#f7f7f7" stroke="#ccc"/>
+
+  <rect x="48" y="334" width="230" height="86" rx="6" class="box"/>
+  <text x="163" y="356" text-anchor="middle" class="sm">1. stock ISR instruction</text>
+  <text x="163" y="382" text-anchor="middle" class="mono">addr(ISR): 0x00251002</text>
+  <text x="163" y="404" text-anchor="middle" class="sm">running untouched</text>
+
+  <rect x="335" y="334" width="230" height="86" rx="6" fill="#eef7ee" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="450" y="356" text-anchor="middle" class="sm" fill="#2e7d32" font-weight="600">2. write my hook word</text>
+  <text x="450" y="382" text-anchor="middle" class="mong">0x0018063e</text>
+  <text x="450" y="404" text-anchor="middle" class="sm">ISR rate stays ~6000/s &#8212; it ran, didn't hang</text>
+
+  <rect x="622" y="334" width="230" height="86" rx="6" class="box"/>
+  <text x="737" y="356" text-anchor="middle" class="sm">3. roll back exactly</text>
+  <text x="737" y="382" text-anchor="middle" class="mono">0x00251002</text>
+  <text x="737" y="404" text-anchor="middle" class="sm">identical behavior returns</text>
+
+  <line x1="278" y1="377" x2="333" y2="377" class="flow" marker-end="url(#ahg)"/>
+  <line x1="565" y1="377" x2="620" y2="377" class="flow" marker-end="url(#ah)"/>
+
+  <text x="450" y="444" text-anchor="middle" class="sm">Change one instruction, watch the live system react, put it back bit-for-bit. That round-trip is my code on their DSP &#8212; control, not yet capture.</text>
+</svg>
