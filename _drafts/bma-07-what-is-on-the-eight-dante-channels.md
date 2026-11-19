@@ -29,6 +29,8 @@ If the 8 channels are GATED/FORMED beams:
    already baked in and thrown away -> NOT raw aperture, DOA is not mine to do
 ```
 
+![Signal flow from the 121 MEMS elements through the Cyclone V, the SHARC beamformer and the Brooklyn-3/Zynq Dante card to eight channels on the wire — and the fork that decides everything: if those eight are raw microphones I can do my own DOA off-array; if they are gated/formed beams the directionality is already baked in and discarded. The firmware describes it both ways (fleet.md vs STATUS.md); a controlled-stimulus capture is what settles it.](/images/BMA360_eight_channel_question.svg)
+
 Everything downstream — whether I can do direction-of-arrival at all — hinges on which of those it is. So I went looking for the answer in the firmware.
 
 The firmware contradicts itself
