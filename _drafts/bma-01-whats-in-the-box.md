@@ -78,6 +78,10 @@ Piecing the front end together from the Cyclone image and the kernel driver, fro
 [G] 36-slot TDM out -> 8 lanes -> Brooklyn-3 -> Dante
 ```
 
+Stages C and D are the beamformer — the step that turns 121 microphones into one steerable pickup. The principle is delay-and-sum, and it is the reason an acoustic camera needs the *raw* elements rather than a finished channel:
+
+![Delay-and-sum beamforming: a wavefront reaches each element at a slightly different time; applying compensating delays and summing reinforces one direction and cancels the rest. On the BMA360 this is stage D.](/images/BMA360_delay_and_sum.svg)
+
 Stage B is where the short plan died for good. The 121 microphones are folded down to 36 channels inside the Cyclone before anything downstream can see them. Raw per-element audio exists only on the main board, up in the FPGA and the SHARC side. An acoustic camera wants the raw elements — that is the aperture you beamform with — and the product is built specifically to never let them off the tile.
 
 It gets worse before it gets better. A later measurement showed that of the 121 elements, the shipped bitstream only carries mics 1-96 and mic 121; mics 97-120 are silent. Twenty-four elements of aperture are switched off in firmware. That is a Part 4 problem.
