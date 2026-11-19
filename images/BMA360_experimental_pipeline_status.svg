@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 594" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#777"/>
+    </marker>
+    <style>
+      .title{font-size:19px;font-weight:600;fill:#1a1a1a}
+      .section{font-size:12px;font-weight:600;fill:#666;letter-spacing:.5px}
+      .label{font-size:13px;font-weight:600;fill:#1a1a1a}
+      .small{font-size:11.5px;fill:#444}
+      .mono{font-family:Consolas,monospace;font-size:11.5px;fill:#1a1a1a}
+      .box{stroke-width:1.5}
+      .measured{fill:#eef7ee;stroke:#2e7d32}
+      .failed{fill:#fdf4f3;stroke:#c0392b}
+      .pending{fill:#fdf8ee;stroke:#b8860b}
+      .sim{fill:#f2f2f2;stroke:#888}
+    </style>
+  </defs>
+  <text x="24" y="30" class="title">Pieces exist at different evidence levels; the live chain does not</text>
+
+  <text x="24" y="59" class="section">FROM REAL DSP MEMORY TO AN ACOUSTIC BEARING</text>
+
+  <rect x="24" y="74" width="154" height="84" rx="6" class="box measured"/>
+  <text x="101" y="97" text-anchor="middle" class="label">DSP4 ring</text>
+  <text x="101" y="117" text-anchor="middle" class="small">real 21-word frames</text>
+  <text x="101" y="134" text-anchor="middle" class="small">sync aligned 24/24</text>
+  <text x="101" y="150" text-anchor="middle" class="small" fill="#2e7d32">MEASURED</text>
+
+  <line x1="178" y1="116" x2="208" y2="116" stroke="#777" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <rect x="214" y="74" width="154" height="84" rx="6" class="box measured"/>
+  <text x="291" y="97" text-anchor="middle" class="label">Snapshot beam</text>
+  <text x="291" y="117" text-anchor="middle" class="small">same-instant, in memory</text>
+  <text x="291" y="134" text-anchor="middle" class="small">bit-exact arithmetic</text>
+  <text x="291" y="150" text-anchor="middle" class="small" fill="#2e7d32">NOT direction proof</text>
+
+  <line x1="368" y1="116" x2="398" y2="116" stroke="#777" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+
+  <rect x="404" y="74" width="154" height="84" rx="6" class="box failed"/>
+  <text x="481" y="97" text-anchor="middle" class="label">Indexed history</text>
+  <text x="481" y="117" text-anchor="middle" class="small">v1: 42 of 48 differed</text>
+  <text x="481" y="134" text-anchor="middle" class="small">model corrected</text>
+  <text x="481" y="150" text-anchor="middle" class="small" fill="#c0392b">v2 NOT on silicon</text>
+
+  <line x1="558" y1="116" x2="588" y2="116" stroke="#777" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+
+  <rect x="594" y="74" width="132" height="84" rx="6" class="box pending"/>
+  <text x="660" y="97" text-anchor="middle" class="label">R9 → W13</text>
+  <text x="660" y="117" text-anchor="middle" class="small">8 × 24-bit words</text>
+  <text x="660" y="134" text-anchor="middle" class="small">512 cells/frame</text>
+  <text x="660" y="150" text-anchor="middle" class="small" fill="#b8860b">NO wire capture</text>
+
+  <line x1="726" y1="116" x2="756" y2="116" stroke="#777" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+
+  <rect x="762" y="74" width="114" height="84" rx="6" class="box pending"/>
+  <text x="819" y="97" text-anchor="middle" class="label">PL ring</text>
+  <text x="819" y="117" text-anchor="middle" class="small">reader exists</text>
+  <text x="819" y="134" text-anchor="middle" class="small">needs live writer</text>
+  <text x="819" y="150" text-anchor="middle" class="small" fill="#b8860b">NOT loaded</text>
+
+  <rect x="24" y="178" width="852" height="42" rx="6" fill="#f3f3f3" stroke="#aaa"/>
+  <text x="450" y="196" text-anchor="middle" class="label" fill="#555">No continuous DSP → R9 → W13 → PL ring → host stream has run on an array.</text>
+  <text x="450" y="213" text-anchor="middle" class="small">Dashed arrows are joins still to be demonstrated, not verified signal flow.</text>
+
+  <text x="24" y="253" class="section">THE HOST SIDE HAS TWO DIFFERENT INPUT STATES</text>
+  <rect x="24" y="267" width="402" height="98" rx="6" class="box measured"/>
+  <text x="42" y="291" class="label">Vendor-path audio to the hub</text>
+  <text x="42" y="313" class="small">One input: about 3,000 packets/s; zero-block fraction returns to</text>
+  <text x="42" y="331" class="small">0.0 after reboot; one DSP-load/capture window measured 0.05–0.19.</text>
+  <text x="42" y="349" class="small">Real vendor-path input; not proof of custom R9/W13 egress.</text>
+
+  <rect x="450" y="267" width="426" height="98" rx="6" class="box sim"/>
+  <text x="468" y="291" class="label">Bearings and tracks</text>
+  <text x="468" y="313" class="small">Generated-source bearing map: SIMULATED.</text>
+  <text x="468" y="331" class="small">Live virtual-edge tracks: short/noise-level, median about 2 s;</text>
+  <text x="468" y="349" class="small">no stable source or validated direction yet.</text>
+
+  <text x="24" y="399" class="section">WHAT COUNTS AS THE NEXT RESULT</text>
+  <rect x="24" y="413" width="852" height="145" rx="8" fill="#fff" stroke="#bbb" stroke-width="1.2"/>
+  <circle cx="48" cy="440" r="13" fill="#2e7d32"/><text x="48" y="444" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">1</text>
+  <text x="72" y="444" class="small">On DSP4, v2 indexed copy matches the absolute copy word-for-word, with both sync witnesses in place.</text>
+  <circle cx="48" cy="470" r="13" fill="#b8860b"/><text x="48" y="474" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">2</text>
+  <text x="72" y="474" class="small">A real sample crosses R9 → W13; frame alignment, CRC, and sequence are checked at the PL ring.</text>
+  <circle cx="48" cy="500" r="13" fill="#b8860b"/><text x="48" y="504" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">3</text>
+  <text x="72" y="504" class="small">The received audio passes the real-audio checker and can be listened to; a synthetic source is not acceptance.</text>
+  <circle cx="48" cy="530" r="13" fill="#2c6cb0"/><text x="48" y="534" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">4</text>
+  <text x="72" y="534" class="small">A known source yields repeatable bearings on two arrays with measured poses and verified microphone mapping.</text>
+</svg>
