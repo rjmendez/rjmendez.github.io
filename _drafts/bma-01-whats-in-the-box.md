@@ -15,6 +15,8 @@ The BMA 360D is a ceiling microphone for meeting rooms: a 24-inch square tile, a
 
 The datasheet is the whole reason it is interesting. Inside the tile are 121 microphone elements. Stock, it forms up to twelve beams at once, puts each beam on its own Dante channel next to an echo-cancelled mix, and reports beam activity over a plain-text TCP port so that a PTZ camera can turn toward whoever is speaking. A box that already points a camera at a talker is most of the way to pointing at a bird.
 
+![The circular BMA360 microphone-array board held outdoors, with its radial traces and microphone positions visible](/images/BMA360_array_held.jpg)
+
 So the plan looked short: buy a few, read the beams off Dante, cross the bearings on a PC. I thought the tracking math would be the hard part. The hard part turned out to be getting a sample out of the tile at all.
 
 What is actually in the tile
@@ -22,7 +24,7 @@ What is actually in the tile
 
 I took one apart and read the part numbers off the silicon. There are two separate boards doing two separate jobs, and that single fact set the shape of everything after it.
 
-![ClearOne main board, with the CONNECT One assembly label and the 18 V / 5 V rail test points](/images/BMA360_mainboard_ClearOne.jpg)
+![The Brooklyn-3 Dante card installed on the red main board; its Dante label and card-edge connector are visible](/images/BMA360_mainboard_with_Brooklyn3.jpg)
 
 ```
           121-element MEMS disc  (radial spokes)  + a small ring on the main board
