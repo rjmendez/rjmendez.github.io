@@ -12,6 +12,8 @@ tags:
 
 The audio lives on the TDM buses, and the chips sitting on those buses are the SHARC+ DSPs (ADSP-2156x). If I want samples, I have to run my own code on one. This part is how I got there, including a wrong belief I held for weeks.
 
+![One of the ADSP-2156x SHARC+ DSPs and the DSP power-rail test points beside it (1.0 V, 1.8Vdsp, 24.576 MHz)](/images/BMA360_SHARC_DSP.jpg)
+
 The DSPs were never dead
 ======
 

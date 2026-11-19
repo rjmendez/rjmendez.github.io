@@ -16,6 +16,8 @@ Eight channels, and the only question that matters
 
 A conference-phone ceiling tile does not stream 121 raw microphones. It runs its beamformer and sends a handful of *processed* channels — the design's whole job is to collapse 121 elements into a few clean voice pickups. The BMA360's output is eight channels.
 
+![The Brooklyn-3 card that puts those eight channels on the wire — what the channels actually carry is the unresolved question of this post](/images/BMA360_Dante_card.jpg)
+
 For an acoustic camera, the difference between the two things those eight channels could be is the difference between a usable instrument and a toy:
 
 ```

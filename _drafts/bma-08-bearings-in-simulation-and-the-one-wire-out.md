@@ -10,7 +10,9 @@ tags:
   - BMA360
 ---
 
-This is the last post in the series, and the one most likely to be misread. So, up front: **the acoustic camera does not work yet.** The pictures of bird bearings are simulated. What is real is a pile of mechanism results — a shell on each computer, my code on a DSP, a frame of microphone audio — and a clear-eyed list of the gap between those and a working instrument.
+This is the last post in the series, and the one most likely to be misread. So, up front: **the acoustic camera does not work yet.**
+
+![The main board's SMSC LAN9500A Ethernet PHY and the Power-over-Ethernet input section — the tile takes one cable in and sends its channels back out the same way](/images/BMA360_LAN9500_ethernet.jpg) The pictures of bird bearings are simulated. What is real is a pile of mechanism results — a shell on each computer, my code on a DSP, a frame of microphone audio — and a clear-eyed list of the gap between those and a working instrument.
 
 Where the bearings come from today
 ======
