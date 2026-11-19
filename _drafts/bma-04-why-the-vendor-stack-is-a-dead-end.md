@@ -67,6 +67,8 @@ With working reads I did the obvious thing and swept the entire CS4 window — 1
 
 The only thing that changes bank to bank is one word that echoes the address: `word[+0x002] = (addr >> 11) << 4`. That killed a standing assumption — there were notes claiming "per-channel routing blocks at `0x64000800 + N*0x800`", and those blocks are simply the same registers seen sixteen times. The negative result is the useful one: **the audio does not pass through a register the OMAP can read.** It stays on the TDM buses between the Cyclone, the SHARCs and the Dante card. There is nothing here to tap.
 
+![A map of the audio datapath across the top — 121 MEMS into the Cyclone V, out over TDM to the SHARC+ DSPs, then over TDM to the Brooklyn-3 Dante card — with a band marking that the samples live on those TDM buses, never in a memory-mapped register. Below it, the OMAP-L138 reaches only the CS4 register window through /dev/c1fpga: sixteen 2 KB mirror banks and zero audio FIFOs. The level meters are readable through two registers (levels only, no waveform), and the Cyclone self-loads an opaque bitstream from its own SPI flash with Linux never in the path.](/images/BMA360_tdm_vs_registers.svg)
+
 Borrowing the vendor's ears
 ======
 
