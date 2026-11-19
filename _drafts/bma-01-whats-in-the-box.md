@@ -1,6 +1,6 @@
 ---
 layout: single
-title: "BMA360, Part 1: What's in the box"
+title: "BMA360, Part 1: What's in the Box"
 excerpt: "Opening up a conference room ceiling mic to see if several of them can be a multi-array acoustic camera. First finding: it's at least two computers."
 tags:
   - Hardware
