@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <style>
+    .lbl{fill:#1a1a1a;font-size:13px}
+    .sm{fill:#555;font-size:11.5px}
+    .mono{font-family:Consolas, Menlo, monospace}
+    .ttl{fill:#1a1a1a;font-size:18px;font-weight:600}
+    .node{fill:#f4f4f4;stroke:#1a1a1a;stroke-width:1.2}
+    .hot{fill:#fff7e0;stroke:#b8860b;stroke-width:1.6}
+    .norm{fill:#eaf2fb;stroke:#2c6cb0;stroke-width:1.5}
+    .safe{fill:#fdf1e3;stroke:#c57a1d;stroke-width:1.5}
+    .seg{stroke:#1a1a1a;stroke-width:1}
+    .flow{stroke:#1a1a1a;stroke-width:1.5;fill:none}
+  </style>
+
+  <text class="ttl" x="30" y="32">The OMAP boot chain, and the flash it reads &#8212; three stages before Linux</text>
+
+  <!-- ===== left: boot chain ===== -->
+  <text class="sm" x="30" y="58">BOOT CHAIN</text>
+
+  <rect class="node" x="30" y="66" width="300" height="34" rx="4"/>
+  <text class="lbl" x="44" y="88">ROM boot (on-chip)</text>
+
+  <line x1="180" y1="100" x2="180" y2="112" class="flow" marker-end="url(#a)"/>
+  <rect class="node" x="30" y="114" width="300" height="42" rx="4"/>
+  <text class="lbl" x="44" y="133">UBL 1.65_3_c1 &#8212; TI AIS loader &#8220;TIPA&#8221;</text>
+  <text class="sm mono" x="44" y="149">NAND @0x20000</text>
+
+  <line x1="180" y1="156" x2="180" y2="168" class="flow" marker-end="url(#a)"/>
+  <rect class="hot" x="30" y="170" width="300" height="56" rx="4"/>
+  <text class="lbl" x="44" y="189">U-Boot 2010.12 (Jul 2016)</text>
+  <text class="sm mono" x="44" y="205">NAND @0x40000 &#183; loadaddr 0xc0700000</text>
+  <text class="sm" x="44" y="221" fill="#9a6a06" font-weight="600">3-second prompt window &#8212; interrupt HERE</text>
+
+  <line x1="180" y1="226" x2="180" y2="238" class="flow" marker-end="url(#a)"/>
+  <rect class="node" x="30" y="240" width="300" height="34" rx="4"/>
+  <text class="lbl mono" x="44" y="262">bootcmd: run nandimage</text>
+
+  <!-- branch to two kernel slots -->
+  <line x1="110" y1="274" x2="110" y2="298" class="flow" marker-end="url(#a)"/>
+  <line x1="250" y1="274" x2="250" y2="298" class="flow" marker-end="url(#a)"/>
+  <rect class="norm" x="30" y="300" width="150" height="48" rx="4"/>
+  <text class="lbl" x="42" y="317">nandimage1</text>
+  <text class="sm" x="42" y="332">kernel-normal</text>
+  <text class="sm mono" x="42" y="345">@0x200000</text>
+  <rect class="safe" x="190" y="300" width="140" height="48" rx="4"/>
+  <text class="lbl" x="202" y="317">nandimage2</text>
+  <text class="sm" x="202" y="332">kernel-safe</text>
+  <text class="sm mono" x="202" y="345">@0x4220000</text>
+
+  <text class="sm" x="30" y="366" fill="#c0392b">nandimage2 runs ONLY if bootm of normal RETURNS &#8212; sequential, not conditional.</text>
+
+  <!-- converge to kernel -->
+  <line x1="110" y1="348" x2="110" y2="392" class="flow"/>
+  <line x1="250" y1="348" x2="250" y2="380" class="flow"/>
+  <path d="M250 380 Q250 392 180 392" class="flow"/>
+  <line x1="110" y1="392" x2="110" y2="404" class="flow" marker-end="url(#a)"/>
+  <rect class="node" x="30" y="406" width="300" height="58" rx="4"/>
+  <text class="sm mono" x="44" y="425">kernel (uImage, gzip)</text>
+  <text class="sm mono" x="44" y="441">&#8594; initramfs = cpio linked into kernel</text>
+  <text class="sm mono" x="44" y="457">&#8594; /sbin/init &#8594; heb_app.bin</text>
+
+  <!-- ===== right: NAND map ===== -->
+  <text class="sm" x="600" y="58">NAND 512 MB  (segments not to scale)</text>
+
+  <g>
+    <rect class="seg" x="600" y="66"  width="110" height="26" fill="#f4f4f4"/>
+    <rect class="seg" x="600" y="92"  width="110" height="26" fill="#efefef"/>
+    <rect class="seg" x="600" y="118" width="110" height="30" fill="#f4f4f4"/>
+    <rect class="seg" x="600" y="148" width="110" height="30" fill="#efefef"/>
+    <rect class="norm" x="600" y="178" width="110" height="54"/>
+    <rect class="seg" x="600" y="232" width="110" height="34" fill="#f7f7f7"/>
+    <rect class="safe" x="600" y="266" width="110" height="54"/>
+    <rect class="seg" x="600" y="320" width="110" height="40" fill="#fbfbfb"/>
+    <rect class="seg" x="600" y="360" width="110" height="66" fill="#f7f7f7"/>
+  </g>
+
+  <!-- offsets (left of bar) -->
+  <g class="sm mono" text-anchor="end" fill="#777">
+    <text x="592" y="83">0x0</text>
+    <text x="592" y="109">0x20000</text>
+    <text x="592" y="137">0x40000</text>
+    <text x="592" y="167">0xC0000</text>
+    <text x="592" y="209">0x200000</text>
+    <text x="592" y="253">0x2200000</text>
+    <text x="592" y="297">0x4220000</text>
+    <text x="592" y="344">0x6220000</text>
+    <text x="592" y="397">0x8220000</text>
+  </g>
+
+  <!-- names (right of bar) -->
+  <g class="sm">
+    <text x="720" y="83">u-boot env (128K)</text>
+    <text x="720" y="109">UBL (128K)</text>
+    <text x="720" y="137">u-boot (512K)</text>
+    <text x="720" y="167">env2 backup (1.1M)</text>
+    <text x="720" y="203" fill="#235a8f" font-weight="600">kernel-normal (32M)</text>
+    <text x="720" y="219" fill="#235a8f">&#8592; primary, writable slot</text>
+    <text x="720" y="253">Rsvd1 (32M)</text>
+    <text x="720" y="291" fill="#9a5a12" font-weight="600">kernel-safe (32M)</text>
+    <text x="720" y="307" fill="#9a5a12">&#8592; factory parachute</text>
+    <text x="720" y="344">FileSystem (32M, all 0xFF)</text>
+    <text x="720" y="397">Rsvd2 (~382M)</text>
+  </g>
+
+  <!-- bottom note -->
+  <rect x="30" y="476" width="840" height="74" rx="4" fill="#f4f4f4" stroke="#cccccc"/>
+  <text class="sm" x="42" y="496">A kernel with a bad header falls through to the parachute; a kernel that boots then <tspan font-style="italic">hangs</tspan> does not &#8212; bootm never returns. Prove any new kernel over TFTP first.</text>
+  <text class="sm" x="42" y="516">Recovery posture 1: boot an NFS root over the network &#8212; the device flash is untouched, reversible with a power cycle.</text>
+  <text class="sm" x="42" y="536">Recovery posture 2: write a persistent kernel into the <tspan fill="#235a8f" font-weight="600">primary</tspan> slot only, leaving the <tspan fill="#9a5a12" font-weight="600">safe</tspan> kernel at 0x4220000 intact as a parachute.</text>
+
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#1a1a1a"/></marker>
+  </defs>
+</svg>
