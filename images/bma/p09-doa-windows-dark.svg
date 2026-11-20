@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="156" viewBox="0 0 960 156" font-family="Segoe UI, DejaVu Sans, Arial, sans-serif" font-size="13" fill="#f2f2f2">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c9c9c9"/></marker></defs>
+<text x="20" y="22" font-weight="600" font-size="14">Direction estimator windows: 4,800 samples (100 ms), hop 2,400 (50 ms)</text>
+<text x="20" y="40" font-size="12" fill="#c9c9c9">illustration of the rule, not a capture; positions are arbitrary</text>
+<rect x="40.0" y="58" width="160.0" height="18" rx="3" fill="#3b3f45" stroke="#7cb6ff" stroke-width="1.6"/>
+<text x="120.0" y="71" text-anchor="middle" font-size="11" fill="#c9c9c9">estimate</text>
+<rect x="120.0" y="82" width="160.0" height="18" rx="3" fill="#3b3f45" stroke="#7cb6ff" stroke-width="1.6"/>
+<text x="200.0" y="95" text-anchor="middle" font-size="11" fill="#c9c9c9">estimate</text>
+<rect x="200.0" y="58" width="160.0" height="18" rx="3" fill="none" stroke="#ff8a7a" stroke-width="1.6" stroke-dasharray="4 3"/>
+<text x="280.0" y="71" text-anchor="middle" font-size="11" fill="#ff8a7a">masked</text>
+<rect x="280.0" y="82" width="160.0" height="18" rx="3" fill="none" stroke="#ff8a7a" stroke-width="1.6" stroke-dasharray="4 3"/>
+<text x="360.0" y="95" text-anchor="middle" font-size="11" fill="#ff8a7a">masked</text>
+<rect x="360.0" y="58" width="160.0" height="18" rx="3" fill="#3b3f45" stroke="#7cb6ff" stroke-width="1.6"/>
+<text x="440.0" y="71" text-anchor="middle" font-size="11" fill="#c9c9c9">estimate</text>
+<rect x="520.0" y="58" width="160.0" height="18" rx="3" fill="#3b3f45" stroke="#86d98f" stroke-width="1.6"/>
+<text x="600.0" y="71" text-anchor="middle" font-size="11" fill="#c9c9c9">estimate</text>
+<rect x="600.0" y="82" width="160.0" height="18" rx="3" fill="#3b3f45" stroke="#86d98f" stroke-width="1.6"/>
+<text x="680.0" y="95" text-anchor="middle" font-size="11" fill="#c9c9c9">estimate</text>
+<rect x="680.0" y="58" width="160.0" height="18" rx="3" fill="#3b3f45" stroke="#86d98f" stroke-width="1.6"/>
+<text x="760.0" y="71" text-anchor="middle" font-size="11" fill="#c9c9c9">estimate</text>
+<rect x="760.0" y="82" width="160.0" height="18" rx="3" fill="#3b3f45" stroke="#86d98f" stroke-width="1.6"/>
+<text x="840.0" y="95" text-anchor="middle" font-size="11" fill="#c9c9c9">estimate</text>
+<line x1="40.0" y1="124" x2="520.0" y2="124" stroke="#8a8a8a" stroke-width="2"/>
+<line x1="520.0" y1="124" x2="920.0" y2="124" stroke="#8a8a8a" stroke-width="2"/>
+<line x1="330.0" y1="54" x2="330.0" y2="130" stroke="#ff8a7a" stroke-width="2"/>
+<text x="330.0" y="146" text-anchor="middle" font-size="12" fill="#ff8a7a">one missing sample</text>
+<line x1="520.0" y1="54" x2="520.0" y2="130" stroke="#f0c24b" stroke-width="2" stroke-dasharray="6 3"/>
+<text x="526.0" y="146" font-size="12" fill="#f0c24b">index jump: new epoch, local tracks dropped</text>
+<text x="40.0" y="146" font-size="12" fill="#7cb6ff">epoch n</text>
+<text x="920.0" y="146" text-anchor="end" font-size="12" fill="#86d98f">epoch n+1</text>
+</svg>

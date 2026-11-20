@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 245" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#1a1a1a"/></marker>
+  </defs>
+  <style>
+    .k{fill:#555555;font-size:12px;font-weight:600}
+    .n{fill:#1a1a1a;font-size:24px;font-weight:600}
+    .u{fill:#555555;font-size:11.5px}
+    .d{fill:#1a1a1a;font-size:12.5px}
+    .box{fill:#f7f9fc;stroke:#9a9a9a;stroke-width:1.2}
+    .bf{fill:#fdf8ee;stroke:#b8860b;stroke-width:1.6}
+    .f{stroke:#1a1a1a;stroke-width:1.4}
+  </style>
+  <g>
+    <rect class="box" x="10" y="40" width="112" height="120" rx="5"/>
+    <text class="k" x="22" y="60">A</text><text class="n" x="22" y="94">121</text>
+    <text class="u" x="22" y="114">MEMS mics</text><text class="u" x="22" y="130">24-bit, 48 kHz</text>
+
+    <rect class="box" x="138" y="40" width="112" height="120" rx="5"/>
+    <text class="k" x="150" y="60">B</text><text class="n" x="150" y="94">36</text>
+    <text class="u" x="150" y="114">time-multiplexed</text><text class="u" x="150" y="130">pre-combine</text>
+
+    <rect class="bf" x="266" y="40" width="112" height="120" rx="5"/>
+    <text class="k" x="278" y="60">C</text><text class="n" x="278" y="94">13</text>
+    <text class="u" x="278" y="114">FIR bands,</text><text class="u" x="278" y="130">1024 taps each</text>
+
+    <rect class="bf" x="394" y="40" width="112" height="120" rx="5"/>
+    <text class="k" x="406" y="60">D</text><text class="n" x="406" y="94">12</text>
+    <text class="u" x="406" y="114">beams: weights +</text><text class="u" x="406" y="130">8-tap frac. delay</text>
+
+    <rect class="box" x="522" y="40" width="112" height="120" rx="5"/>
+    <text class="k" x="534" y="60">E</text><text class="n" x="534" y="94">matrix</text>
+    <text class="u" x="534" y="114">routing / gain</text><text class="u" x="534" y="130">crosspoints</text>
+
+    <rect class="box" x="650" y="40" width="112" height="120" rx="5"/>
+    <text class="k" x="662" y="60">F</text><text class="n" x="662" y="94">24&#8594;16</text>
+    <text class="u" x="662" y="114">bit reduction</text>
+
+    <rect class="box" x="778" y="40" width="112" height="120" rx="5"/>
+    <text class="k" x="790" y="60">G</text><text class="n" x="790" y="94">36&#8594;8</text>
+    <text class="u" x="790" y="114">TDM slots to lanes</text><text class="u" x="790" y="130">&#8594; Brooklyn-3</text>
+  </g>
+  <g>
+    <line class="f" x1="122" y1="100" x2="136" y2="100" marker-end="url(#a)"/>
+    <line class="f" x1="250" y1="100" x2="264" y2="100" marker-end="url(#a)"/>
+    <line class="f" x1="378" y1="100" x2="392" y2="100" marker-end="url(#a)"/>
+    <line class="f" x1="506" y1="100" x2="520" y2="100" marker-end="url(#a)"/>
+    <line class="f" x1="634" y1="100" x2="648" y2="100" marker-end="url(#a)"/>
+    <line class="f" x1="762" y1="100" x2="776" y2="100" marker-end="url(#a)"/>
+  </g>
+  <line x1="130" y1="32" x2="130" y2="196" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="6 4"/>
+  <text class="d" x="10" y="214" fill="#c0392b">per-mic audio ends here,</text>
+  <text class="d" x="10" y="232" fill="#c0392b">inside the Cyclone</text>
+  <path d="M266 176 L266 186 L506 186 L506 176" fill="none" stroke="#b8860b" stroke-width="1.6"/>
+  <text class="d" x="300" y="206">the beamformer</text>
+  <text class="u" x="140" y="22">front end, recovered from the Cyclone image and the kernel driver</text>
+</svg>

@@ -1,0 +1,415 @@
+{
+ "provenance": "sharcload full load from empty plus identify soak, 2026-10-04 (Loci 568bf757); lone DSP4 load 2026-11-16 (Loci 9807b0e1). Times are board uptime seconds from the soak log. The loader logs only start and end of the whole load, so per-DSP spans are estimated from word counts.",
+ "load_start_up": 880.14,
+ "load_end_up": 932.5,
+ "dsps": [
+  {
+   "dsp": 0,
+   "image": "sharc1g",
+   "words": 63642,
+   "version": "1.0.1.49",
+   "role": "control plane, SPI master to the FPGA",
+   "identify_reply": "000000000000000000000000"
+  },
+  {
+   "dsp": 1,
+   "image": null,
+   "words": 0,
+   "version": null,
+   "role": "site not fitted",
+   "identify_reply": null
+  },
+  {
+   "dsp": 2,
+   "image": "sharc3g",
+   "words": 14774,
+   "version": "1.0.1.8",
+   "role": "sharc3g image, role not decoded",
+   "identify_reply": "000000020000000000000002"
+  },
+  {
+   "dsp": 3,
+   "image": "sharc2g",
+   "words": 16016,
+   "version": "1.0.1.15",
+   "role": "sharc2g image, mic DSP (DSP4-9 carry the 36 data channels)",
+   "identify_reply": "000000030000000000000003"
+  },
+  {
+   "dsp": 4,
+   "image": "sharc2g",
+   "words": 16016,
+   "version": "1.0.1.15",
+   "role": "sharc2g image, mic DSP (DSP4-9 carry the 36 data channels)",
+   "identify_reply": "000000040000000000000004"
+  },
+  {
+   "dsp": 5,
+   "image": "sharc2g",
+   "words": 16016,
+   "version": "1.0.1.15",
+   "role": "sharc2g image, mic DSP (DSP4-9 carry the 36 data channels)",
+   "identify_reply": "000000050000000000000005"
+  },
+  {
+   "dsp": 6,
+   "image": "sharc2g",
+   "words": 16016,
+   "version": "1.0.1.15",
+   "role": "sharc2g image, mic DSP (DSP4-9 carry the 36 data channels)",
+   "identify_reply": "000000060000000000000006"
+  },
+  {
+   "dsp": 7,
+   "image": "sharc2g",
+   "words": 16016,
+   "version": "1.0.1.15",
+   "role": "sharc2g image, mic DSP (DSP4-9 carry the 36 data channels)",
+   "identify_reply": "000000070000000000000007"
+  },
+  {
+   "dsp": 8,
+   "image": "sharc2g",
+   "words": 16016,
+   "version": "1.0.1.15",
+   "role": "sharc2g image, mic DSP (DSP4-9 carry the 36 data channels)",
+   "identify_reply": "000000080000000000000008"
+  },
+  {
+   "dsp": 9,
+   "image": "sharc2g",
+   "words": 16016,
+   "version": "1.0.1.15",
+   "role": "sharc2g image, mic DSP (DSP4-9 carry the 36 data channels)",
+   "identify_reply": "000000090000000000000009"
+  }
+ ],
+ "soak": {
+  "interval_s": 15,
+  "rounds": [
+   {
+    "t": 15,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 30,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 45,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 60,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 75,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 90,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 105,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 120,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 135,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 150,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 165,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 180,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 195,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 210,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 225,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 240,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 255,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 270,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 285,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 300,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 315,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 330,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 345,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 360,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 375,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 390,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 405,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 420,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 435,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 450,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 465,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   },
+   {
+    "t": 480,
+    "dsps": [
+     2,
+     5,
+     9
+    ],
+    "ok": true
+   }
+  ],
+  "end_up": 1417.14
+ },
+ "lone_dsp4": {
+  "words": 16016,
+  "start_s": 5841,
+  "end_s": 5845,
+  "identify_reply": "000000040000000000000004",
+  "version": "1.0.1.15",
+  "ready_10e_after": "0002",
+  "isr_per_s": [
+   6145,
+   6148,
+   6149,
+   6145
+  ]
+ },
+ "ready_10e": {
+  "idle": "0002",
+  "vendor_timeout_log": {
+   "DSP6": "007F",
+   "DSP7": "00FF",
+   "DSP8": "01FF",
+   "DSP9": "03FF"
+  },
+  "after_vendor_reset": {
+   "10E": [
+    "0002",
+    "03FF"
+   ],
+   "104": [
+    "0000",
+    "03FD"
+   ]
+  },
+  "decode": "bit n follows DSP n's ready pad, active-low: set = not ready. Read live, not latched (Loci 3e20e65c). The 007F..03FF values are what the vendor loader logged at each timeout."
+ }
+}

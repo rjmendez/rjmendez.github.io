@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#b6b6b6"/>
+    </marker>
+    <style>
+      .ttl{font-size:18px;font-weight:600;fill:#e2e2e2}
+      .lbl{font-size:13.5px;fill:#e2e2e2}
+      .lb2{font-size:13px;font-weight:600;fill:#e2e2e2}
+      .sm{font-size:11.5px;fill:#b6b6b6}
+      .mono{font-family:Consolas,monospace;font-size:11.5px;fill:#e2e2e2}
+      .board{fill:#303a48;stroke:#93bce7;stroke-width:1.6}
+      .fab{fill:#2e3f52;stroke:#93bce7;stroke-width:1.2}
+      .cpu{fill:#512e2a;stroke:#e7928a;stroke-width:1.2}
+    </style>
+  </defs>
+
+  <text x="24" y="30" class="ttl">Two computers in one tile, two links between them</text>
+
+  <!-- MAIN BOARD -->
+  <rect x="24" y="52" width="344" height="168" rx="8" class="board"/>
+  <text x="40" y="74" class="lb2">Main board</text>
+  <rect x="40" y="86" width="312" height="40" rx="4" class="cpu"/>
+  <text x="196" y="103" text-anchor="middle" class="lbl">OMAP-L138: Linux, shell</text>
+  <text x="196" y="118" text-anchor="middle" class="sm" fill="#e7928a">no PCM</text>
+  <rect x="40" y="132" width="151" height="78" rx="4" class="fab"/>
+  <text x="115" y="152" text-anchor="middle" class="lbl">Cyclone V</text>
+  <text x="115" y="170" text-anchor="middle" class="sm">PDM&#8594;PCM, FIR,</text>
+  <text x="115" y="184" text-anchor="middle" class="sm">beamform matrix</text>
+  <rect x="201" y="132" width="151" height="78" rx="4" class="fab"/>
+  <text x="276" y="152" text-anchor="middle" class="lbl">SHARC+ DSPs</text>
+  <text x="276" y="170" text-anchor="middle" class="sm">beamform, AEC,</text>
+  <text x="276" y="184" text-anchor="middle" class="sm">gating, 48 kHz</text>
+
+  <!-- BROOKLYN-3 CARD -->
+  <rect x="532" y="52" width="344" height="168" rx="8" class="board"/>
+  <text x="548" y="74" class="lb2">Brooklyn-3 card: Zynq XC7Z015</text>
+  <rect x="548" y="86" width="312" height="52" rx="4" class="cpu"/>
+  <text x="704" y="105" text-anchor="middle" class="lbl">Zynq PS: ARM, Linux, telnet</text>
+  <text x="704" y="124" text-anchor="middle" class="sm" fill="#e7928a">no PCM</text>
+  <rect x="548" y="144" width="312" height="66" rx="4" class="fab"/>
+  <text x="704" y="166" text-anchor="middle" class="lbl">Zynq PL (programmable logic)</text>
+  <text x="704" y="186" text-anchor="middle" class="sm">packetizes the audio for Dante</text>
+
+  <!-- LINKS -->
+  <line x1="368" y1="100" x2="532" y2="100" stroke="#93bce7" stroke-width="2.4" marker-start="url(#ah)" marker-end="url(#ah)"/>
+  <text x="450" y="92" text-anchor="middle" class="sm" fill="#93bce7" font-weight="600">card-edge TDM audio</text>
+  <text x="450" y="118" text-anchor="middle" class="sm">Mini-PCI Type III, 124-pin</text>
+
+  <line x1="368" y1="180" x2="532" y2="180" stroke="#b6b6b6" stroke-width="2.2" stroke-dasharray="6,3" marker-start="url(#ah)" marker-end="url(#ah)"/>
+  <text x="450" y="172" text-anchor="middle" class="sm" font-weight="600">internal Ethernet (eth1)</text>
+  <text x="450" y="198" text-anchor="middle" class="mono">LAN9500A &#8594; telnet :23</text>
+
+  <!-- channel count -->
+  <rect x="24" y="236" width="852" height="44" rx="6" fill="#3e3e3e" stroke="#5e5e5e"/>
+  <text x="40" y="263" class="sm">Brooklyn-3 capacity: 64 &#215; 64 channels at 48 kHz over 8 SDIN / 8 SDOUT.  This tile sends <tspan font-weight="600" fill="#e2e2e2">8</tspan>, set by the Cyclone's TDM output.</text>
+</svg>

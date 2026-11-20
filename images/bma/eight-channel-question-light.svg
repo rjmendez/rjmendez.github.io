@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <style>
+    .lbl{fill:#1a1a1a;font-size:13px}
+    .sm{fill:#555555;font-size:12px}
+    .ttl{fill:#1a1a1a;font-size:18px;font-weight:600}
+    .node{fill:#f4f4f4;stroke:#1a1a1a;stroke-width:1.2}
+    .q{fill:#fff7e0;stroke:#b8860b;stroke-width:1.8}
+    .off{fill:#fafafa;stroke:#9aa0a6;stroke-width:1.2;stroke-dasharray:5 4}
+    .flow{stroke:#1a1a1a;stroke-width:1.5;fill:none}
+    .branch{stroke:#b8860b;stroke-width:1.6;fill:none;stroke-dasharray:5 4}
+    .good{fill:#eef7ee;stroke:#2e7d32;stroke-width:1.6}
+    .bad{fill:#fdecea;stroke:#c0392b;stroke-width:1.6}
+    .gt{fill:#1e6b23;font-size:14px;font-weight:600}
+    .bt{fill:#a5281b;font-size:14px;font-weight:600}
+    .step{fill:#1a1a1a;font-size:12.5px}
+  </style>
+
+  <text class="ttl" x="30" y="32">Eight channels on the wire: microphones or beams?</text>
+
+  <rect class="node" x="26"  y="64" width="104" height="54" rx="4"/>
+  <text class="lbl" x="44" y="88">121 MEMS</text><text class="sm" x="54" y="106">elements</text>
+  <rect class="node" x="160" y="64" width="104" height="54" rx="4"/>
+  <text class="lbl" x="188" y="88">Cyclone V</text><text class="sm" x="196" y="106">FPGA, TDM</text>
+  <rect class="node" x="294" y="64" width="110" height="54" rx="4"/>
+  <text class="lbl" x="318" y="88">SHARC DSPs</text><text class="sm" x="316" y="106">beamformer</text>
+  <rect class="node" x="434" y="64" width="116" height="54" rx="4"/>
+  <text class="lbl" x="452" y="88">Brooklyn-3</text><text class="sm" x="452" y="106">Zynq / Dante</text>
+  <rect class="q"    x="580" y="64" width="104" height="54" rx="4"/>
+  <text class="lbl" x="604" y="88">8 channels</text><text class="sm" x="606" y="106">on the wire</text>
+  <rect class="off"  x="714" y="64" width="112" height="54" rx="4"/>
+  <text class="lbl" x="745" y="88">host</text><text class="sm" x="729" y="106">DOA estimator</text>
+
+  <g class="flow">
+    <line x1="130" y1="91" x2="158" y2="91" marker-end="url(#a)"/>
+    <line x1="264" y1="91" x2="292" y2="91" marker-end="url(#a)"/>
+    <line x1="404" y1="91" x2="432" y2="91" marker-end="url(#a)"/>
+    <line x1="550" y1="91" x2="578" y2="91" marker-end="url(#a)"/>
+    <line x1="684" y1="91" x2="712" y2="91" marker-end="url(#a)"/>
+  </g>
+  <text class="sm" x="138" y="56">TDM</text>
+  <text class="sm" x="272" y="56">TDM</text>
+  <text class="sm" x="410" y="56">TDM</text>
+  <text class="sm" x="556" y="56">Dante</text>
+
+  <path d="M615 118 L615 150 L220 150 L220 172" class="branch" marker-end="url(#ab)"/>
+  <path d="M648 118 L648 150 L670 150 L670 172" class="branch" marker-end="url(#ab)"/>
+
+  <rect class="good" x="30" y="174" width="400" height="120" rx="5"/>
+  <text class="gt" x="46" y="198">Raw microphones</text>
+  <text class="sm" x="46" y="222">Inter-channel delays follow the element positions</text>
+  <text class="sm" x="46" y="240">and move with the source bearing.</text>
+  <text class="sm" x="46" y="258">Level tracks the source; no gain pumping.</text>
+  <text class="sm" x="46" y="280">Host model: positions + delays, as written today.</text>
+
+  <rect class="bad" x="470" y="174" width="400" height="120" rx="5"/>
+  <text class="bt" x="486" y="198">Gated / formed beams</text>
+  <text class="sm" x="486" y="222">Aperture and gating are already in the signal.</text>
+  <text class="sm" x="486" y="240">Delays do not fit any element geometry;</text>
+  <text class="sm" x="486" y="258">levels jump as gates open and close.</text>
+  <text class="sm" x="486" y="280">Host model: needs a calibrated beam estimator.</text>
+
+  <rect x="30" y="312" width="840" height="140" rx="4" fill="#f4f4f4" stroke="#cccccc"/>
+  <text class="lbl" x="44" y="336" font-weight="600">The capture that decides it</text>
+  <text class="step" x="44" y="360">1  All eight channels, routing / gains / auto-processing fixed and recorded; silence first.</text>
+  <text class="step" x="44" y="380">2  Broadband source at two or more surveyed bearings.</text>
+  <text class="step" x="44" y="400">3  Relative levels and cross-correlation lags per position, against delays predicted from measured geometry.</text>
+  <text class="step" x="44" y="420">4  Step the source level; watch for gating, gain changes, dropouts.</text>
+  <text class="step" x="44" y="440">5  Independent channel-to-element check.</text>
+
+  <defs>
+    <marker id="a"  markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#1a1a1a"/></marker>
+    <marker id="ab" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#b8860b"/></marker>
+  </defs>
+</svg>

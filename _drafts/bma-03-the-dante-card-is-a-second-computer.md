@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "BMA360, Part 3: The Dante Card Is a Second Computer"
-excerpt: "The Brooklyn-3 card looked dark from the main board. It isn't. It's a Zynq running its own Linux, reachable over an internal Ethernet link, with its own flash partitions one dd apart. And its PL does the packetizing, which matters later."
+excerpt: "The Brooklyn-3 card looked dark from the main board. It is a Zynq running its own Linux, reachable over an internal Ethernet link, with its own flash partitions one dd apart. Its programmable logic does the packetizing, which comes back in Part 8."
 tags:
   - Hardware
   - Zynq
@@ -10,14 +10,18 @@ tags:
   - Reverse Engineering
 ---
 
-Part 2 got me a shell on the OMAP. But the OMAP is only half the tile. The audio leaves the main board over a card-edge TDM bus and lands on an Audinate Brooklyn-3 module — a Xilinx Zynq-7000 XC7Z015 with its own QSPI flash. For a while my notes called the card "dark": no console found, no obvious way in. The way I was wrong is the useful part.
+Part 2 got me a shell on the OMAP, which is half the tile. The audio leaves the main board over a card-edge TDM bus and lands on an Audinate Brooklyn-3 module: a Xilinx Zynq-7000 XC7Z015 with its own QSPI flash. For a while my notes called the card "dark", with no console found and no obvious way in. That turned out to be wrong.
 
-![The Audinate Brooklyn-3 card: the Xilinx Zynq-7000 XC7Z015, the Dante silkscreen, and the Mini-PCI card edge it mounts on](/images/BMA360_Brooklyn3_Zynq.jpg)
+![The Brooklyn-3 card with three numbered callouts: the Zynq XC7Z015 under its thermal pad, the J12 Mini-PCI Type III card edge, and the board revision silkscreen](/images/bma/p03-card-photo-light.jpg){: .only-light}
+![The Brooklyn-3 card with three numbered callouts: the Zynq XC7Z015 under its thermal pad, the J12 Mini-PCI Type III card edge, and the board revision silkscreen](/images/bma/p03-card-photo-dark.jpg){: .only-dark}
+*The module's serial label is blacked out.*
 
-The card is not dark, it is on the network
+![The Brooklyn-3 card with the Xilinx Zynq-7000 XC7Z015 exposed](/images/BMA360_Brooklyn3_Zynq.jpg)
+
+The card is on the network
 ======
 
-The main board and the Brooklyn-3 card are joined by an internal Ethernet link, not just the audio TDM bus. From the OMAP shell, the card's own management interface is one subnet away:
+The main board and the Brooklyn-3 card share an internal Ethernet link as well as the audio TDM bus. From the OMAP shell, the card's management interface is one subnet away:
 
 ```
 board$ ip link set eth1 up
@@ -32,27 +36,20 @@ board$ busybox telnet <card-ip>
   <hostname> login:
 ```
 
-A telnet login prompt. The "dark card" was just a card I had not brought the link up to. Every earlier note that treated the Zynq as unreachable was corrected by that one transcript.
+A telnet login prompt. The card had been dark only because I had never brought `eth1` up. That transcript corrected every earlier note that treated the Zynq as unreachable.
 
 Its own Linux, its own flash
 ======
 
-Once on the card it is plainly a second Linux system, and its flash is carved into named partitions through a Zynq flash driver (char major 90; the block nodes are major 31, mtdblock):
+On the card is a second Linux system, built by the vendor: kernel 6.6.80 and U-Boot 2019.01 on two of my cards, an older 4.19.36 kernel on the third. Its 64 MiB QSPI flash is cut into named partitions, read from the card's `/proc/mtd`:
 
-```
-/dev/flash/skd         c 90 0     /dev/flash/fsbl        c 90 2
-/dev/flash/safefpga    c 90 4     /dev/flash/safeboot    c 90 6
-/dev/flash/safebootenv c 90 8     /dev/flash/fpga        c 90 10
-/dev/flash/boot        c 90 12    /dev/flash/bootenv     c 90 14
-/dev/flash/kernel      c 90 16    /dev/flash/rootfs      c 90 18
-/dev/flash/userblock   b 31 10    /dev/flash/userarea    c 90 20
-/dev/flash/brdinfo     c 90 22    /dev/flash/license     b 31 12
-/dev/flash/config      c 90 30    /dev/flash/image       c 90 34
-```
+![A to-scale map of the card's 64 MiB QSPI flash: small boot partitions at the start, safefpga and safeboot followed by the live fpga and boot partitions, then kernel, a 32 MiB rootfs, userarea, small license and config partitions, and about 10.9 MiB unpartitioned at the end](/images/bma/p03-flash-map-light.svg){: .only-light}
+![A to-scale map of the card's 64 MiB QSPI flash: small boot partitions at the start, safefpga and safeboot followed by the live fpga and boot partitions, then kernel, a 32 MiB rootfs, userarea, small license and config partitions, and about 10.9 MiB unpartitioned at the end](/images/bma/p03-flash-map-dark.svg){: .only-dark}
+*Measured: `/proc/mtd` on a running card, offsets cross-checked against a second, independently recorded offset table.*
 
-Note the pattern: a `safefpga`/`safeboot` pair mirroring the live `fpga`/`boot` ones — the same parachute idea as the OMAP's safe kernel, one level down. The `fsbl` (first-stage boot loader) is a single `dd` away. These nodes are created at boot by the driver, so searching the rootfs image on disk for `/dev/flash` finds nothing; you only see them on a running card.
+The `safefpga`/`safeboot` pair mirrors the live `fpga`/`boot` pair, the same fallback idea as the OMAP's safe kernel one level down. The `fsbl` (first-stage boot loader) is a single `dd` away. A Zynq flash driver exposes the partitions as `/dev/flash/<name>` (char major 90, mtdblock major 31). The driver creates those nodes at boot, so searching the rootfs image on disk for `/dev/flash` finds nothing.
 
-The boot stages announce themselves over the card's own serial lines. Its device tree brings up two `xuartps` ports as `u-boot,dm-pre-reloc`, meaning there is console output from the very first boot stage, at 115200:
+The boot stages print to the card's own serial lines. Its device tree marks both `xuartps` ports `u-boot,dm-pre-reloc`, so there is console output from the first boot stage, at 115200:
 
 ```
 serial0 = /amba/serial@e0000000
@@ -62,28 +59,22 @@ serial1 = /amba/serial@e0001000     (both xuartps, both pre-reloc)
 The physical fallback
 ======
 
-If the internal link is ever unavailable, the card is a Mini-PCI Type III module (Amp 1318228-1, 124 pins) and the console is on the card edge. The reliable, non-NDA part of that connector is the power and ground map, which is all you actually need to probe safely:
+If the internal link is unavailable, the console is on the card edge. The card is a Mini-PCI Type III module (Amp 1318228-1, 124 pins). The power and ground map is public and is enough to probe safely:
 
-```
-Connector: Mini-PCI Type III, 124 pins (2 rows x 62); KEY between pins 2 & 3
- 3.3V    19, 24, 28, 63, 70, 88, 89
- VCC5VA  123        3.3VAUX  124
- GND     23, 27, 55, 62, 69, 74, 77, 82, 83, 85, 119, 120
-Edge functions (module datasheet): 2x RS232 | 4x GPIO | 2x SPI | 1x I2C
-                                   8x SDIN + 8x SDOUT (TDM) | RGMII | word clock
-```
+![The 124-pin Mini-PCI Type III connector as a 2 by 62 grid, with the 3.3 V, 5 V, 3.3 V auxiliary and ground pins coloured and the key between pins 2 and 3](/images/bma/p03-minipci-pins-light.svg){: .only-light}
+![The 124-pin Mini-PCI Type III connector as a 2 by 62 grid, with the 3.3 V, 5 V, 3.3 V auxiliary and ground pins coloured and the key between pins 2 and 3](/images/bma/p03-minipci-pins-dark.svg){: .only-dark}
+*From the module datasheet. The edge also carries 2x RS-232, 4x GPIO, 2x SPI, I2C, 8x SDIN + 8x SDOUT (TDM), RGMII and word clock.*
 
-One honest gap, flagged because it can cost you a chip: the exact signal-to-pin assignment for the RS-232 console is under NDA and I do not have it, and the MIO bank's I/O voltage (`VCC_IO`) is undocumented — it may be 1.8 V. Measure before you attach a 3.3 V dongle. Find the console the slow way: TX idles high, so scope the candidates for an idle-high line that bursts at power-up.
+The RS-232 signal-to-pin assignment is under NDA and I do not have it. The MIO bank's I/O voltage (`VCC_IO`) is undocumented and may be 1.8 V, so measure it before attaching a 3.3 V adapter. To find the console, scope the candidate pins for a line that idles high and bursts at power-up.
 
-Why this card matters to the project
+What the card changes
 ======
 
-Two facts from the card change the plan later.
+The Brooklyn-3 supports 64 Dante channels each way. The tile sends eight because the Cyclone on the main board puts eight on its TDM output, so "what are the eight channels?" is a question about the Cyclone's configuration.
 
-First, the eight-channel ceiling is not a hardware limit of the module — the Brooklyn-3 supports far more Dante channels. Eight is a configuration choice in the main-board FPGA's TDM output, which means the question "what are the eight channels?" is a question about the Cyclone's config, not about this card.
+On the stock image the Zynq's programmable logic packetizes the audio itself, and the ARM side never sees a sample. The card's Linux is as blind to PCM as the OMAP's. Getting raw samples out through this card means putting my own logic in its PL, which is where Part 8 picks up.
 
-Second, and this is the one that bites in Part 8: on the stock bitstream the Zynq's **programmable logic packetizes the audio itself, and the processor side never sees the samples**. The ARM on this card is as blind to PCM as the OMAP is. So "just read the audio off the Dante card's Linux" is not a path either. If I want raw samples out through this card, I have to put my own logic in its PL — not write a userspace program on it.
+![Two computers in one tile. The main board holds the OMAP-L138 running Linux, the Cyclone V and the SHARC+ DSPs. The Brooklyn-3 card holds the Zynq processor running Linux and telnet, and the Zynq logic that packetizes audio for Dante. Neither Linux side carries PCM. Two links join them: card-edge TDM audio over the 124-pin Mini-PCI connector, and internal Ethernet on eth1 through the LAN9500A to telnet port 23.](/images/bma/two-computers-light.svg){: .only-light}
+![Two computers in one tile. The main board holds the OMAP-L138 running Linux, the Cyclone V and the SHARC+ DSPs. The Brooklyn-3 card holds the Zynq processor running Linux and telnet, and the Zynq logic that packetizes audio for Dante. Neither Linux side carries PCM. Two links join them: card-edge TDM audio over the 124-pin Mini-PCI connector, and internal Ethernet on eth1 through the LAN9500A to telnet port 23.](/images/bma/two-computers-dark.svg){: .only-dark}
 
-![A topology diagram of the two computers in the tile. The main board (OMAP-L138 running Linux, plus the Cyclone V and SHARC+ DSPs that actually move the audio) and the Brooklyn-3 card (a Zynq with its own ARM Linux on the PS and a PL that packetizes the audio) are joined by two links: the card-edge TDM audio bus on a 124-pin Mini-PCI connector, and an internal Ethernet link over which the card answers telnet on port 23. A band notes that the fabric moves the audio on each side and neither Linux CPU ever sees PCM. Below, the card's flash is shown as safe/live parachute pairs, and the eight-channel ceiling is marked as a main-board FPGA TDM config choice, not a card limit.](/images/BMA360_two_computers.svg)
-
-That is both computers in the tile with a shell on each — OMAP Linux and Brooklyn-3 Linux — and audio I still cannot touch from either of them. The next part is about why the obvious remaining route, the vendor application and the Cyclone bitstream, is also a dead end, and how I proved it rather than assumed it.
+So there is a shell on both computers in the tile and no audio reachable from either. Part 4 looks at the remaining obvious route, the vendor application and the Cyclone bitstream.
