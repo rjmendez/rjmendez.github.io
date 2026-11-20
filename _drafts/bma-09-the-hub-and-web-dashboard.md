@@ -46,6 +46,10 @@ On the WSL side, a mono branch feeds BirdNET; an analysis branch takes the multi
 
 Direction runs on a separate branch. With direction estimation enabled and a complete microphone map configured, each tile's worker takes the multichannel audio and reports angle estimates to the fleet hub. The hub, not the classifier or browser, decides whether reports from different tiles support a single position. A configured microphone map is enough to start the worker; it is not evidence that the physical channel ordering has been checked.
 
+The host direction estimator processes **4,800-sample windows (100 ms) every 2,400 samples (50 ms)**. A missing sample masks its window: the estimator does not bridge the hole with made-up continuity. A confirmed sample-index jump starts a new epoch and discards local tracks. The detection record carries the sample index, epoch, registry clock domain, measurement and quality flags. It does **not** carry an absolute timestamp: BMAA has no PTP timestamp, so `t_ns` and `epoch_ns` are null. A host-derived wall time is available for class hints, not proof of cross-array synchronization.
+
+That distinction showed up in the live hub. In one fleet-feed snapshot at **2026-11-20 03:20:47 UTC**, the two units were configured as PTP-locked and shared the same reference, yet both reported `not_fused_reason=clock_local`. The feed had two rays, two per-array bearing tracks and zero fused tracks; the adjacent hub log reported `clock_rebooted=2`. This is a timed operational snapshot, not evidence that PTP itself failed or a diagnosis of why each unit was excluded. The code has a restart guard that can mark a unit clock-local when its sample index after restart is more than 60 seconds from the shared timeline. That is a plausible explanation to test, not a confirmed cause. A clock label in the registry and a ray on screen do not prove that the hub can compare two arrays in time.
+
 ## What the browser knows
 
 The Python web service reads analysis logs and the hub's fleet feed. It reads the logs incrementally, handles rotation, and stores hourly summaries so a restart doesn't wipe out the charts. It does not derive positions from audio in the browser. The Fleet and Targets views use the same hub feed:
@@ -54,16 +58,47 @@ The Python web service reads analysis logs and the hub's fleet feed. It reads th
 |---|---|---|
 | **Live / analysis** | Spectrum, levels, detections and history | Packet and signal health do not validate a direction; model scores do not confirm a species |
 | **Targets** | Per-array polar plots in the tile's own frame; fused tracks listed separately when available | A local angle is not a compass bearing without the tile's orientation |
-| **Fleet** | Registered tile poses marked surveyed, bearing rays and angular uncertainty, plus positions reported by the hub; a separate relative-calibration view | The registry label is not proof of a physical survey. The browser does not intersect rays and turn the crossing into a fix. Relative calibration is not a geographic position |
+| **Fleet** | Registered tile poses, bearing rays and angular uncertainty, plus positions reported by the hub | The registry label is not proof of a physical survey. The browser does not intersect rays and turn the crossing into a fix |
 
-Fleet and Targets distinguish stale or missing data from a fresh feed with no tracks. That's why a dashboard with two healthy audio inputs and an empty fused-track list can be working correctly. The poses entered for this installation began as estimates, not measured positions; the registry's `surveyed` label alone doesn't establish their accuracy. The hub still needs compatible timing and verified poses, consistent microphone geometry, and bearings that agree on the same source.
+Targets reads the fleet feed; the legacy `/api/v2/targets` payload has no producer and the current view no longer reads it. The view distinguishes loading, unavailable, live and stale from a live feed with no tracks. That's why a dashboard with two healthy audio inputs and an empty fused-track list can be working correctly. The poses entered for this installation began as estimates, not measured positions; the registry's `surveyed` label alone doesn't establish their accuracy. The hub still needs compatible timing and verified poses, consistent microphone geometry, and bearings that agree on the same source.
+
+Freshness is a separate signal too. In the current interface implementation, spectrum becomes stale after 3 seconds and the fleet feed after 5. Those timers say when a file or sample stopped updating; they do not grade its contents. A fresh feed with zero fused tracks is a real state, not a browser failure and not a localization. Relative-calibration support was included in the November 15 deployment, but its opt-in was absent in that snapshot, so it was not active fleet output.
 
 ## Listening is a separate output
 
-The listening engine can steer a host-side delay-and-sum beam at one array's bearing or at a fused target when one exists. It builds 20 ms chunks with fractional delays and checks inter-array alignment using cross-correlation. If that check doesn't lock, it plays one array rather than summing two misaligned streams. You can listen to what the system is following without mistaking audible output for proof of two-array localization.
+The listening engine can steer a host-side delay-and-sum beam at one array's bearing or at a fused target when one exists. It builds 20 ms chunks with fractional delays and checks inter-array alignment using cross-correlation. If that check doesn't lock, it plays one array rather than summing two misaligned streams. The deployed interface also has an auto-following fused soundscape mode: it chooses listening output from the hub's fused-target state, not from an independent acoustic truth source. Listening can help inspect what the system follows; it does not prove two-array localization.
+
+## A decoder test you can run without a tile
+
+This fixture is **synthetic**. It checks signed-24-bit decoding and packet layout only; its values were generated, not recorded from the array. It is useful for catching byte-order and sign-extension mistakes before using real captures.
+
+```python
+import struct
+
+header = bytes.fromhex("020000007b000001c8")  # marker, second=123, frame=456
+frame = bytes.fromhex(
+    "800000ffffff0000000000017fffff00002affffd6000011"
+)
+packet = header + frame * 16
+assert len(packet) == 393
+
+def signed24(b):
+    value = int.from_bytes(b, "big")
+    return value - (1 << 24) if value & (1 << 23) else value
+
+first_frame = [
+    signed24(packet[9 + 3*c : 12 + 3*c])
+    for c in range(8)
+]
+sample_index = 123 * 48000 + 456
+assert sample_index == 5904456
+assert first_frame == [-8388608, -1, 0, 1, 8388607, 42, -42, 17]
+```
+
+The bridge's discontinuity rule is also testable without the hardware. If 240 samples are buffered at index 1000 and a gap is detected before index 1256, the bridge emits the 240-sample partial block; the next 16-sample block begins at 1256 and carries `gap_before`. Neither block pretends to contain samples from the missing interval. Passing this fixture proves only that the host decoder and reblocker honor their format contract. It does not identify the Dante channels, test the physical stream, calibrate levels, or validate a bearing.
 
 ## Where to resume on the bench
 
-Start with the working Dante path as the control. Play a fixed source at a measured location. Save the two bridges' loss and gap counts, the per-array angles and sample times, the hub's clock and pose states, and any fused position. Compare each angle to the surveyed source before judging the position. Repeat with silence and with the source in a second location. That separates a good-looking plot from a repeatable bearing.
+Start with the working Dante path as the control. Play a fixed source at a physically measured location. Save both bridges' loss and gap counts, per-array angles and sample indices, hub clock-eligibility and pose states, and any fused position. Do not treat a registry `surveyed` flag as a physical measurement. Compare each angle to the source before judging a position. Repeat with silence and with the source in a second location. That separates a good-looking plot from a repeatable bearing.
 
-The custom path has a different first test: capture a real DSP payload at the Zynq receiver, then trace those same samples through the ring and into the host. The indexed-copy probe already matched the absolute read on DSP4 (`0/48` wrong after `42/48` differed on the first attempt); it didn't test the multi-frame delay ring or the separate levels hook. The Cyclone transmit/return block passed 12 synthetic RTL tests; that's not a wire capture. Before accepting that path, the transmitter's 17-cell lead-in and the receiver's non-nominal acquisition requirement of at least 20 idle edges need to be checked together, and the host needs a regression that rejects delayed samples left over from a previous stream epoch.
+The custom path has a different first test: capture a real DSP payload at the Zynq receiver, then trace those same samples through the ring and into the host. The indexed-copy probe matched the absolute read on DSP4 (`0/48` wrong after `42/48` differed on the first attempt); it didn't test the multi-frame delay ring. The dependent levels hook is corrected and merged, with 474 host tests passed (110 skipped) and a mutation check that failed 25 tests when the fix was removed, but it has not been loaded on a board. The Cyclone transmit/return block passed 12 synthetic RTL tests; that's not a wire capture. Before accepting that path, the transmitter's 17-cell lead-in and the receiver's non-nominal acquisition requirement of at least 20 idle edges need to be checked together, and the host needs a regression that rejects delayed samples left over from a previous stream epoch.

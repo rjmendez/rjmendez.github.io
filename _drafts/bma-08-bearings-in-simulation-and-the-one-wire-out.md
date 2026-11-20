@@ -95,7 +95,7 @@ UNRESOLVED (measured oddity, no settled cause):
   [?] 602-603 sample lag                                         (Part 7)
 
 HOST / RTL TESTS, NOT AN END-TO-END HARDWARE RESULT:
-  [~] levels-hook indexed caller                                  (host-tested, not board-validated)
+  [~] levels-hook indexed caller                                  (merged; host-tested, not board-loaded)
   [~] Zynq receive top + ring path                                (not loaded on the card)
   [~] Cyclone transmitter / SHARC return RTL                      (12 synthetic RTL tests; not built/loaded)
   [~] Zynq-PL egress source                                        (needs live PL ring data)
@@ -105,14 +105,14 @@ SIMULATION ONLY:
   [-] displayed DOA bearings from generated sources               (Part 8)
 ```
 
-These are not all hardware-verification-only tasks. The indexed-address unit now passes its id-39 silicon comparison, but the dependent levels-hook caller and multi-frame delay ring still need their own checks. R9 transmitter integration also remains open. A static review has raised a concern that delayed beam history may survive an epoch change in the egress path; that needs a code fix or a disproving test before hardware acceptance. It has not been confirmed on hardware. Only after these gates clear does a real-board run answer whether the combined path works.
+These are not all hardware-verification-only tasks. The indexed-address unit passes its id-39 silicon comparison. The dependent levels-hook caller is now corrected and merged; its full host suite passed 474 tests (110 skipped), and a mutation that removed the scale conversion failed 25 tests. The hook has still not been loaded on a board. The multi-frame delay ring still needs its own check. R9 transmitter integration also remains open. A static review has raised a concern that delayed beam history may survive an epoch change in the egress path; that needs a code fix or a disproving test before hardware acceptance. It has not been confirmed on hardware. Only after these gates clear does a real-board run answer whether the combined path works.
 
 What stands between here and an acoustic camera
 ======
 
 The concrete remaining work, in rough order:
 
-1. **Exercise multi-frame delay history and validate each dependent caller.** Probe v2 already matched the absolute copy 0/48 wrong at id-39; that validates the addressing rule there, not the levels hook or a table-driven delay ring.
+1. **Exercise multi-frame delay history and load-test the corrected levels hook.** Probe v2 matched the absolute copy 0/48 wrong at id-39; the levels caller has been corrected and host-tested, but not exercised on silicon, and neither result validates a table-driven delay ring.
 2. **Integrate and build the R9 transmitter with the W13 receiver.** Resolve the lead-in/acquisition and clock requirements, load the actual Cyclone and Zynq images, then prove frame alignment, CRC, and real payload across the wire.
 3. **Feed the PL ring reader and egress path real samples.** Run the real-audio checker and listen mode on captured output; generated tones do not count as acceptance.
 4. **Resolve the eight-channel identity** with a controlled capture (Part 7). The raw-mics-versus-gated-beams discrepancy still changes what a host-side estimator receives.
