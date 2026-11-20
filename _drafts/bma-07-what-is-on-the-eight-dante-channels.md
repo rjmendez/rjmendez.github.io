@@ -57,6 +57,15 @@ The test needs synchronized captures from all eight channels and a source whose 
 
 Neither correlated channels nor a lack of visible gating proves that a channel is raw. A match to the microphone-delay model would support that model under the tested conditions; identifying the exact routing still requires an independent channel-to-element check. A mismatch or gain pumping would be evidence of processing, not a complete reconstruction of it.
 
+What an ambient-event fit can—and cannot—say
+======
+
+There is an intermediate result between "no geometry" and "measured microphone map." I fit the relative delays among eight Dante channels for ambient-event slices. With a 48 kHz sample rate and sound speed assumed to be 343 m/s, the filter retained 86 of 1,033 events for one tile and 60 of 640 for the other. It required less than one sample RMS closure error across all 28 channel pairs and a minimum normalized pair peak above 0.08. The retained delay patterns fit a circle with RMS residuals of 0.705 and 0.537 samples.
+
+That supports a ring-like *relative* channel geometry under the model. It does not identify which physical microphone is slot 0, provide the circle's rotation or reflection, or verify Dante channel routing. The inferred radii—about 261 mm and 256 mm—come from treating the 99th-percentile delay amplitude as an in-plane arrival. They are conditional estimates, not measurements with a ruler; a source above or below the plane changes the in-plane component.
+
+The two-array fit makes the ambiguity concrete: the ordinary and mirrored layouts had the same cost (55.81), best offset (−10 samples), fraction of residuals within two samples (0.98), and model-fitted range (0.969 m), but different model-frame coordinates: `(0.135, −0.180, 0.942) m` versus `(0.942, −0.180, 0.135) m`. This is not a two-array localization result. It says this data and objective do not choose between those mirror hypotheses. No controlled source at a surveyed bearing has selected one. The event counts and fit statistics are reproducible from the recorded delay arrays, but those arrays are not included here, so this is not yet a self-contained reproduction package.
+
 The other loose ends on the wire
 ======
 
