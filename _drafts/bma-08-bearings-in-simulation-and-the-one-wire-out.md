@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "BMA360, Part 8: Bearings in Simulation, and the One Wire Out"
-excerpt: "The map of bird bearings on my screen is simulated. The one-wire transmitter and receiver have separate RTL results, but no frame has crossed the real board. This is the honest ledger: what runs on silicon, what runs only in a testbench, and everything still between here and an acoustic camera."
+excerpt: "The bearing map is simulated. The one-wire link from the Cyclone to the Zynq passes RTL simulation and has never carried a frame on a real board. Where every piece of the series stands, and what is left."
 tags:
   - Hardware
   - FPGA
@@ -10,51 +10,54 @@ tags:
   - BMA360
 ---
 
-The custom audio link and the bearing map are two separate experiments. The hub already receives live audio over Dante; neither experiment shows that the custom link can deliver that audio, or that two arrays can locate a real source.
+The hub already gets live audio from both tiles over Dante; that is Part 9. This part covers two things built beside that path: the bearing map, and a custom one-wire link to get audio off the Cyclone without going through the Dante card. Neither works on a real array yet.
 
-![The main board's SMSC LAN9500A Ethernet PHY beside the Power-over-Ethernet input section](/images/BMA360_LAN9500_ethernet.jpg) The pictures of bird bearings are simulated. What is real is a pile of mechanism results — a shell on each computer, my code on a DSP, a frame of microphone audio — and a clear-eyed list of the gap between those and a working instrument.
+![The main board's SMSC LAN9500A Ethernet PHY beside the Power-over-Ethernet input section](/images/BMA360_LAN9500_ethernet.jpg)
 
-Where the bearings come from today
+Where the bearings come from
 ======
 
-The bearing map shown here is **simulation only**: that DOA run uses generated input. There is also a separate host-side virtual-edge path that has been connected to live raw-microphone streams. Its tracks so far are short and at noise level; that is not a validated detection or bearing:
+The bearing map in this series comes from a DOA run on generated input. It is a simulation.
+
+A second, host-side virtual-edge path has been connected to live raw-microphone streams. Its tracks so far have a median length of about two seconds, sit at noise level, and had no stable source to follow. I don't count that as a detection.
 
 ```
 SIMULATION:
   generated signal --> DOA estimator --> hub display --> bearings on a map
-       ^ synthetic                                          ^ SIMULATED
 
-LIVE INPUT, NOT YET VALIDATED:
+LIVE INPUT, NOT VALIDATED:
   raw microphone stream --> virtual edge / track pipeline --> short, noise-level tracks
 
-STILL MISSING:
+MISSING:
   stable source at known bearing --> repeatable array bearing --> two-array crossing
 ```
 
-The virtual-edge path reports per-track sample and timing information, but timing fields are not accuracy evidence. The live tracks observed so far have a median duration of about two seconds, with no stable source. The generated-signal DOA harness remains useful for checking the estimator against known synthetic input; it cannot validate an acoustic direction.
+The virtual-edge records carry per-track sample and timing fields. Those say when something was computed, not whether the angle was right. The generated-signal harness is still worth keeping for checking the estimator against inputs where I know the answer.
 
-The geometry the finished instrument is meant to run is simple enough to draw; what is missing is a stable, known bearing from a real array:
+This is the geometry the finished instrument is supposed to run:
 
 ![Each tile sweeps its delay-and-sum beam to find a bearing; several tiles' bearings cross at a position, and successive fixes make a track. Labeled SIMULATED: today this runs on generated signals, not live array audio.](/images/BMA360_bearing_crossing.svg)
 
-The egress daemon: source code is not a live stream
+bma_egressd
 ======
 
-To get audio off the array I wrote an egress daemon, `bma_egressd`. The source interface now has both a synthetic source and a Zynq-PL ring reader. Those are different maturity levels: the synthetic source can exercise framing and transport in tests, while the Zynq source needs a PL ring writer and the Cyclone-to-Zynq wiring. Neither is an end-to-end result from the custom link on a real array. On the stock image, the PL packetizes audio where the processor cannot reach it:
+To get audio off the array I wrote an egress daemon, `bma_egressd`, with pluggable sources:
 
 ```
 bma_egressd sources:
-  synthetic   -> test source; never acceptance evidence
+  synthetic   -> framing/transport tests only
   zynq-pl     -> ring-reader code exists; needs a live PL ring
   omap-emif   -> not implemented
 ```
 
-The host-side real-audio checker and listen mode have been calibrated on vendor-path microphone audio. A synthetic egress pass is not acceptance: the custom source must carry real samples, with the received data checked and listened to.
+On the stock image the PL packetizes audio where the processor can't reach it, which is why the ring reader exists. It needs a PL ring writer and the Cyclone-to-Zynq wiring, and neither is on a board yet. The synthetic source only exercises framing and transport.
+
+The host-side real-audio checker and listen mode were calibrated on vendor-path microphone audio. When the custom source finally produces something, it has to be real samples that pass that checker and sound right through listen mode.
 
 The one wire out
 ======
 
-The nearest experimental egress path is a single serialized wire from the Cyclone's R9 pin to the Zynq's W13 pin. The LINK1W v1 frame design carries eight 24-bit words:
+The nearest experimental egress is a single serialized wire from the Cyclone's R9 pin to the Zynq's W13 pin. A LINK1W v1 frame carries eight 24-bit words:
 
 ```
 LINK1W v1 FRAME (one-wire transport)
@@ -66,12 +69,16 @@ LINK1W v1 FRAME (one-wire transport)
   512 cells per frame; a 17-cell idle lead-in starts transmission
 ```
 
-The receive logic and a Zynq image top have passed RTL/open-flow checks, but the image has not been loaded onto the card. An experimental Cyclone transmitter and SHARC return block now pass 12 Icarus RTL simulations using synthetic fixtures; they have not been built into a board image. The receiver's documented non-nominal-rate acquisition requirement is at least 20 idle edges, while the transmitter's current lead-in is 17 cells. Whether the configured clock makes that requirement relevant, and how the lead-in is counted at the receiver, still need to be resolved in the first physical test. The 24.576 MHz source and physical return mapping are not established. No frame has been verified crossing R9-to-W13 on a running array. A passing testbench means the logic is internally consistent against its model; it does not mean a single bit has crossed a real pin.
+Zynq side: the receive logic and a Zynq image top pass RTL and open-flow checks. The image has not been loaded on the card.
 
-The honest ledger
+Cyclone side: an experimental transmitter and SHARC return block pass 12 Icarus RTL simulations against synthetic fixtures. They have not been built into a board image.
+
+There is one mismatch I already know about. The receiver documents a non-nominal-rate acquisition requirement of at least 20 idle edges; the transmitter's lead-in is 17 cells. Whether the configured clock makes that matter, and how the receiver counts the lead-in, is the first thing to settle on hardware. Where the 24.576 MHz clock comes from, and the physical return mapping, aren't established either. No frame has crossed R9 to W13 on a running array.
+
+Where everything stands
 ======
 
-Everything this series covered, sorted by how much I actually trust it:
+Every result in the series, sorted by how much I trust it:
 
 ```
 RUNS ON REAL SILICON (measured, read-only or reversible):
@@ -87,14 +94,14 @@ RUNS ON REAL SILICON (measured, read-only or reversible):
 MECHANISM ONLY (real data, no directional/quality claim):
   [~] in-memory bit-exact beam on one DSP4 snapshot              (Part 6)
 
-MEASURED FAILURE / NOT A PASS:
+MEASURED FAILURE:
   [!] indexed-copy probe v1: 42 of 48 words differed             (Part 6)
 
 UNRESOLVED (measured oddity, no settled cause):
   [?] eight Dante channels: gated beams vs raw mics              (Part 7)
   [?] 602-603 sample lag                                         (Part 7)
 
-HOST / RTL TESTS, NOT AN END-TO-END HARDWARE RESULT:
+HOST / RTL TESTS ONLY:
   [~] levels-hook indexed caller                                  (merged; host-tested, not board-loaded)
   [~] Zynq receive top + ring path                                (not loaded on the card)
   [~] Cyclone transmitter / SHARC return RTL                      (12 synthetic RTL tests; not built/loaded)
@@ -105,18 +112,20 @@ SIMULATION ONLY:
   [-] displayed DOA bearings from generated sources               (Part 8)
 ```
 
-These are not all hardware-verification-only tasks. The indexed-address unit passes its id-39 silicon comparison. The dependent levels-hook caller is now corrected and merged; its full host suite passed 474 tests (110 skipped), and a mutation that removed the scale conversion failed 25 tests. The hook has still not been loaded on a board. The multi-frame delay ring still needs its own check. R9 transmitter integration also remains open. A static review has raised a concern that delayed beam history may survive an epoch change in the egress path; that needs a code fix or a disproving test before hardware acceptance. It has not been confirmed on hardware. Only after these gates clear does a real-board run answer whether the combined path works.
+The indexed-address unit passes its id-39 silicon comparison. The levels-hook caller that depends on it is fixed and merged: 474 host tests pass (110 skipped), and taking out the scale conversion fails 25 of them. It hasn't been loaded on a board. The multi-frame delay ring needs its own check, and the R9 transmitter still has to be integrated.
 
-What stands between here and an acoustic camera
+A static review flagged that delayed beam history might survive an epoch change in the egress path. Nobody has seen it on hardware. It still needs either a fix or a test that rules it out before the combined path gets a real-board run.
+
+What's left
 ======
 
-The concrete remaining work, in rough order:
+Roughly in order:
 
-1. **Exercise multi-frame delay history and load-test the corrected levels hook.** Probe v2 matched the absolute copy 0/48 wrong at id-39; the levels caller has been corrected and host-tested, but not exercised on silicon, and neither result validates a table-driven delay ring.
-2. **Integrate and build the R9 transmitter with the W13 receiver.** Resolve the lead-in/acquisition and clock requirements, load the actual Cyclone and Zynq images, then prove frame alignment, CRC, and real payload across the wire.
-3. **Feed the PL ring reader and egress path real samples.** Run the real-audio checker and listen mode on captured output; generated tones do not count as acceptance.
-4. **Resolve the eight-channel identity** with a controlled capture (Part 7). The raw-mics-versus-gated-beams discrepancy still changes what a host-side estimator receives.
-5. **Prove a bearing with a known source**, then repeat on two arrays with measured poses and verified slot-to-mic geometry.
-6. **Recover the 24 silent elements** (mics 97–120) as a separate fabric-rewrite problem. The Cyclone bitstream self-loads from its own flash and is not yet round-trippable (Part 4).
+1. **Multi-frame delay history, and a board load of the corrected levels hook.** Probe v2 matched the absolute copy at id-39; the levels caller is host-tested only. Neither says anything about a table-driven delay ring.
+2. **Build the R9 transmitter against the W13 receiver.** Sort out the lead-in and clock, load real Cyclone and Zynq images, then check frame alignment, CRC, and payload across the wire.
+3. **Real samples into the PL ring reader and egress path**, run through the real-audio checker and listen mode. Generated tones don't count.
+4. **Pin down the eight Dante channels** with a controlled capture (Part 7). Raw mics versus gated beams changes what any host-side estimator is looking at.
+5. **A bearing on a known source**, then the same on two arrays with measured poses and verified slot-to-mic geometry.
+6. **The 24 silent elements** (mics 97-120). That is a fabric rewrite, and the Cyclone bitstream self-loads from its own flash and can't be round-tripped yet (Part 4).
 
-The custom path still needs a continuous stream of real samples and a known-source bearing test. Part 9 starts at the other end: what the existing Dante stream lets the hub and dashboard do before the custom link is ready.
+Part 9 covers the path that does run: what the hub and dashboard do with the stock Dante stream.

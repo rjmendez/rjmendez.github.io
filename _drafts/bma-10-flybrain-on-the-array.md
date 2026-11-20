@@ -1,7 +1,7 @@
 ---
 layout: single
-title: "BMA360, Part 10: What FlyBrain Does—and Does Not—Run on the Array"
-excerpt: "FlyBrain has host-side training and reference models, FPGA prototypes, and a new 121-microphone feature-engine experiment. None is yet a FlyBrain classifier running in the BMA360 audio path."
+title: "BMA360, Part 10: FlyBrain and the Array"
+excerpt: "FlyBrain has host-side training and reference models, a couple of FPGA prototypes, and a new 121-microphone feature engine in RTL. None of it classifies BMA360 audio yet."
 tags:
   - Hardware
   - FPGA
@@ -9,19 +9,24 @@ tags:
   - BMA360
 ---
 
-FlyBrain is a parallel research track, not a feature already running in the Bird Microphone Array. The host-side work supplies training tools and a CPU reference for small models. FPGA work asks whether selected operations can become compact, predictable hardware. The connection to the BMA360 is still an experiment: there is no integrated FlyBrain bitstream classifying the array's audio.
+FlyBrain is a side research track that runs alongside the Bird Microphone Array. The host side has training tools and a CPU reference for small models. The FPGA side tries to turn some of those operations into small, predictable hardware. There is no FlyBrain bitstream classifying the array's audio, and this post covers how far each piece got.
 
-That distinction matters because there are two very different stories here. One is about learning and testing a small model. The other is about connecting a real 121-microphone signal path to that model on a specific board. The first has useful results. The second is not finished.
+## The model
 
-## What the model is
+It's loosely modeled on the insect mushroom body. An encoder expands a feature vector into a sparse set of Kenyon-cell (KC) activations, and a small readout maps those to class scores. The current FPGA core is all integer logic. One tested shape:
 
-The design is inspired by the insect mushroom-body circuit: an input encoder expands a feature vector into a sparse set of Kenyon-cell (KC) activations; a small readout maps those activations to class scores. The current FPGA core is integer logic, with no floating-point datapath. One tested shape uses 64 input bits, 256 KCs, fan-in 6, and 16 winners (`K=16`). Those are implementation parameters, not biological constants.
+```text
+input bits   64
+KCs          256
+fan-in       6
+winners      K=16
+```
 
-The host side is where the CPU reference models, tests, and training tools live. A separate SageMaker pipeline has trained encoders from ant-data Parquet files and exported model bundles with SHA-256 sidecars; that pipeline is not necessarily a CPU-only training run. It is FlyBrain training, not a trained BMA bird detector. The Python reference is valuable because it gives the hardware a target: for the same input and weights, the RTL should produce the same result and take the specified number of cycles.
+Those are numbers I picked for the implementation; they aren't biological constants.
 
-The learning goal is small-model design and biological inspiration, not a claim that a biologically inspired circuit must beat ordinary classifiers. The present FPGA core performs inference; that is a property of the prototype and its test path, not a rule that FlyBrain can never learn or adapt on chip.
+The host side holds the CPU reference models, tests, and training tools. A separate SageMaker pipeline trained encoders from ant-data Parquet files and exported model bundles with SHA-256 sidecars (that pipeline wasn't necessarily CPU-only). That's FlyBrain training on ant data, and there's no trained BMA bird detector. The Python reference gives the hardware a target: same input and weights, same result, in the specified number of cycles. The FPGA core currently only does inference. That's where the prototype stopped, and on-chip learning hasn't been ruled out.
 
-## CPU reference and FPGA are different jobs
+## CPU reference and FPGA
 
 ```text
 training data
@@ -36,39 +41,44 @@ Python tests                              FPGA RTL / testbench
                                                    `-- not yet in BMA audio path
 ```
 
-The host model is not just a slow substitute for hardware. It is the reference implementation used to define what the circuit should compute. A useful hardware comparison holds the inputs, weights, feature encoding, and decision rule constant. Otherwise, a faster FPGA number may describe a different model rather than an acceleration.
+The host model defines what the circuit should compute. Any speed comparison has to hold inputs, weights, feature encoding, and decision rule fixed, or the faster number is just a different model.
 
-There are several FPGA results, and they should not be collapsed into one BMA milestone. A small iCE40 HX1K prototype with 256 KCs matched 2,762 of 2,762 simulation vectors, then 3,386 of 3,387 hardware-in-the-loop vectors. The one HIL mismatch remains a mismatch; it is not an exact pass. A separate modern core measured 722 inferences per second on a VU47P. In that setup, training speed improved by at most about 1.2 times, so the FPGA result is more interesting as an edge-inference experiment than as a training accelerator. Neither result is a run on the BMA360's processors, and neither is an apples-to-apples CPU-versus-FPGA measurement for the array workload.
+There are two separate FPGA results, and neither ran on the BMA360:
 
-## What is actually in the BMA work
+```text
+iCE40 HX1K, 256 KCs     sim 2,762/2,762 vectors match
+                        HIL 3,386/3,387 vectors match (one mismatch, unexplained)
+VU47P, newer core       722 inferences/s
+                        training speedup at most ~1.2x
+```
 
-The BMA-specific FlyBrain RTL is on the mainboard Cyclone V side, not in the Brooklyn-3 card's Zynq programmable logic. The Zynq is the Dante interface; it is not the FPGA where ClearOne's mainboard audio processing lives.
+So the FPGA looks more useful for edge inference than for training. Neither number is a like-for-like CPU-versus-FPGA measurement on the array's workload.
 
-The Cyclone-side prototype includes two feature encoders: a thermometer-style v1 and a level-invariant v2. A `brain_slot` wrapper connects an encoder to the mushroom-body core, exposes a result register, and records a dropped start. In the source-tree inspection, no top-level design instantiated `brain_slot`, and the `mb_core` source was not included in that tree. The wrapper was therefore not part of a built BMA bitstream. A synthesis figure for the core alone—405 ALUTs, 361 registers, and four M10K blocks—is not the resource use of a complete, integrated array image.
+## What's in the BMA tree
 
-The newest BMA-facing experiment is a different block: a shared engine that reads 121 microphone channels and computes eight magnitude bands, with tagged windows, gap handling, and output hold under backpressure. Five focused RTL tests passed, and a deliberate gap-handling mutation failed the expected comparison. That establishes behavior against synthetic test vectors. It does not establish routed timing, FPGA resource use, operation on the board, or correct features from real microphones. There is not yet an adapter carrying those feature vectors into a trained FlyBrain model.
+The BMA-specific FlyBrain RTL targets the mainboard Cyclone V. The Brooklyn-3 card's Zynq only handles Dante; ClearOne's audio processing lives on the Cyclone and OMAP.
 
-The actual array path still runs through its existing hardware audio chain. Neither the host-side Python model nor the experimental feature engine has replaced that path. The evidence ladder is therefore:
+The Cyclone prototype has two feature encoders, a thermometer-style v1 and a level-invariant v2. A `brain_slot` wrapper connects an encoder to the mushroom-body core, exposes a result register, and records a dropped start. When I went through the source tree, no top-level design instantiated `brain_slot`, and the `mb_core` source wasn't in that tree at all, so it has never been in a built BMA bitstream. Synthesis of the core by itself came to 405 ALUTs, 361 registers, and 4 M10K blocks. A full array image would cost more.
+
+The newest piece is a shared engine that reads 121 microphone channels and computes eight magnitude bands, with tagged windows, gap handling, and output hold under backpressure. Five RTL tests pass, and a deliberate gap-handling mutation fails the expected comparison. All of that is against synthetic vectors. Routed timing, resource use, board operation, and features from real mics are all unchecked, and nothing yet carries those feature vectors into a trained FlyBrain model. The array's audio still goes through its existing hardware chain.
 
 | Claim | Evidence so far | Still missing |
 |---|---|---|
-| The reference model and RTL agree on selected vectors | Bit-exact tests and synthetic RTL simulations | Public, pinned source and a complete reader-runnable fixture |
-| A small FlyBrain prototype can run in hardware | A separate iCE40 HIL run, with one mismatch | Explain or resolve the mismatching vector |
-| The BMA can compute per-microphone features in RTL | 121-channel, eight-band block tests | Board load, routed timing/resources, real-audio comparison |
-| FlyBrain classifies BMA audio | No integrated result | Feature-to-model adapter, weights trained for array data, and an end-to-end board test |
+| Reference model and RTL agree on selected vectors | Bit-exact tests, synthetic RTL sims | Public pinned source and a runnable fixture |
+| A small FlyBrain prototype runs in hardware | iCE40 HIL run, one mismatch | Explain the mismatching vector |
+| The BMA can compute per-mic features in RTL | 121-channel eight-band block tests | Board load, routed timing/resources, real-audio comparison |
+| FlyBrain classifies BMA audio | Nothing integrated | Feature-to-model adapter, weights trained on array data, end-to-end board test |
 
-## The result that should not be advertised
+## A retracted result
 
-An older accuracy headline comparing the mushroom-body model with another readout has been retracted. On the documented 64-bit feature representation, the MB head did not beat a linear readout at any tested SNR; a 5-nearest-neighbor baseline over two raw integer features performed best in that comparison. That is a useful result about this encoding and evaluation—not a verdict on all mushroom-body models.
+I had an accuracy headline comparing the mushroom-body readout to another readout. It's retracted. On the documented 64-bit feature representation the MB head never beat a linear readout at any tested SNR, and a 5-nearest-neighbor baseline over two raw integer features did best. That's about this encoding and this evaluation; other mushroom-body models weren't tested.
 
-It also changes the engineering question. If a linear head performs as well or better on the same features, there is no reason to spend FPGA area reproducing the more complicated readout just because it is biologically inspired. The point of the experiment is to find out which parts are useful, not to protect a preferred answer.
+If a linear head does as well on the same features, spending FPGA area on the fancier readout because it's bio-inspired makes no sense. Whatever goes on the Cyclone has to earn its place against those baselines.
 
-## How to reproduce the next meaningful result
+## Next
 
-First freeze a small dataset and its split, feature encoding, model weights, and hash. Record the CPU reference outputs for boundary cases as well as ordinary inputs. Then run the same vectors through the RTL and compare every defined output and cycle count—not just the final accuracy. Keep the linear and nearest-neighbor baselines on exactly the same examples and features.
+On the model side: freeze a small dataset, split, encoding, weights, and hash; record CPU reference outputs including boundary cases; push the same vectors through the RTL and compare every output and cycle count; and keep the linear and 5-NN baselines on exactly the same examples.
 
-For the BMA feature engine, the next gate is a board capture: feed known microphone data through the Cyclone block, save its eight-band outputs and tags, and compare them with a host implementation of the same window and gap rules. Only after that should those features be adapted to a FlyBrain input shape and scored with weights trained for the array data. Report synthesis resources and routed timing separately from testbench correctness; report acoustic classification separately from both.
+On the array side: feed known microphone data through the Cyclone feature block on a board, save the eight-band outputs and tags, and compare them against a host implementation with the same window and gap rules. After that the features can be adapted to a FlyBrain input and scored with weights trained on array data. Synthesis resources, testbench correctness, and acoustic classification get reported separately.
 
-There is a publication limitation: the relevant FlyBrain, training, and firmware repositories are private at the time of writing. This post records the evidence and the reproduction gates, but it is not yet a public clone-and-run package. A reader-facing reproduction requires a source release or sanitized snapshot, pinned tool versions, model/data provenance, and the golden vectors.
-
-The honest conclusion is modest. The host work gives the FPGA experiments a reference and a training path. The FPGA work has produced testable model blocks and a new array-feature engine. The BMA360 has not yet run those pieces as an integrated acoustic classifier. That is a concrete next experiment—not a result to write as if it has already happened.
+The FlyBrain, training, and firmware repos are private right now, so none of this is clone-and-run yet. That needs a source release or sanitized snapshot, pinned tool versions, model and data provenance, and the golden vectors.
