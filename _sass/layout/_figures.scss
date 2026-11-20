@@ -6,6 +6,78 @@
   display: none !important;
 }
 
+.bma-av {
+  margin: 1em 0;
+
+  audio,
+  video {
+    display: block;
+    width: 100%;
+  }
+
+  img {
+    margin-top: 0.4em;
+  }
+
+  figcaption {
+    font-size: 0.85em;
+  }
+}
+
+html[data-theme="dark"] .bma-av audio {
+  color-scheme: dark;
+}
+
+.bma-index {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2em;
+  margin-top: 1.5em;
+}
+
+.bma-index__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  text-decoration: none;
+
+  img {
+    border: 1px solid var(--global-border-color);
+    border-radius: 4px;
+  }
+}
+
+.bma-index__title {
+  font-weight: bold;
+}
+
+.bma-index__excerpt {
+  color: var(--global-text-color-light);
+  font-size: 0.85em;
+}
+
+.bma-series {
+  margin: 2em 0 1em;
+  padding: 0.8em 1.2em;
+  border: 1px solid var(--global-border-color);
+  border-radius: 4px;
+  font-size: 0.9em;
+
+  h3 {
+    margin-top: 0;
+  }
+
+  ol {
+    margin-bottom: 0.5em;
+  }
+
+  .bma-series__pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+  }
+}
+
 html[data-theme="dark"] {
   .only-dark {
     display: inline !important;

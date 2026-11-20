@@ -1,6 +1,8 @@
 ---
 layout: single
 title: "BMA360, Part 8: Bearings in Simulation, and the One Wire Out"
+header:
+  og_image: bma/og/bma360-part-8.png
 excerpt: "A DOA estimator running on generated signals, an egress daemon, and a one-wire link from the Cyclone to the Zynq that passes RTL simulation. Plus a scorecard for the whole series."
 tags:
   - Hardware
@@ -39,6 +41,13 @@ bma_egressd sources:
   zynq-pl     -> PL ring reader; waiting on a PL ring writer + Cyclone wiring
   omap-emif   -> not written
 ```
+
+The synthetic source has run on a card. On November 11 I started `bma_egressd` from RAM on board A's card, under the vendor kernel, broadcasting eight synthetic streams to a receiver on my PC. The receiver saw the array announce itself with eight streams and logged 0.00% loss. That covers the framing and the transport on real hardware. It says nothing about microphone audio.
+
+It also showed where the card's CPU goes. With the vendor stack up, the CPU sits at 100%. `ipcore_manager` takes about three quarters of it, and the two UARTs each take about 12,200 interrupts a second: the vendor control link receives a constant stream of `0x00` bytes and logs each one as a lost sync, and that log had filled tmpfs at 119 MB. Under that load the daemon skipped 64,050 of 214,050 frames to stay on time. With `ipcore_manager` paused, the CPU was 69% idle and all eight streams ran with no skipped frames and no send errors. I resumed it afterwards.
+
+![Card CPU busy and frames skipped, with ipcore_manager running and paused.](/images/bma/p08-egress-cpu-light.svg){: .only-light}
+![Card CPU busy and frames skipped, with ipcore_manager running and paused.](/images/bma/p08-egress-cpu-dark.svg){: .only-dark}
 
 The host side already has a real-audio checker and a listen mode, both tuned on vendor-path mic audio, so whatever comes out of the custom source gets judged the same way.
 

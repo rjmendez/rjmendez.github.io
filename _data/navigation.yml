@@ -12,6 +12,9 @@ main:
 #  - title: "Portfolio"
 #    url: /portfolio/
         
+  - title: "BMA360"
+    url: /bma360/
+
   - title: "Blog Posts"
     url: /year-archive/
     
