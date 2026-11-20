@@ -1,0 +1,97 @@
+---
+layout: single
+title: "BMA360, Part 5: Our Own Code on a SHARC"
+excerpt: "The DSPs were fine. My loader was the broken thing. A vendor loader that segfaults on a board-ID string, a ready register that reads backwards, my own loader that brings up all nine DSPs in 52 seconds, and one 32-bit write that puts my code inside DSP4's interrupt."
+tags:
+  - Hardware
+  - SHARC
+  - DSP
+  - Reverse Engineering
+  - BMA360
+---
+
+The audio lives on the TDM buses, and the chips on those buses are the SHARC+ DSPs (ADSP-2156x). If I want samples, I have to run my own code on one. This part is how I got there, including a wrong belief I held for weeks.
+
+![One of the ADSP-2156x SHARC+ DSPs and the DSP power-rail test points beside it (1.0 V, 1.8Vdsp, 24.576 MHz)](/images/BMA360_SHARC_DSP.jpg)
+
+The DSPs were never dead
+======
+
+For a long time my notes said "most DSPs don't come up." That was wrong. When the stock application loads them, every fitted DSP loads, and DSP2 through DSP9 answer the identify exchange with their own index (`…0002…` through `…0009…`). DSP0 answers identify with all zeros, so for DSP0 the check is a version read instead.
+
+What was broken was my hand-driven loader, the one I was poking words with. I blamed the silicon for a bug in my own tooling.
+
+There are ten DSP sites on the board and nine SHARCs in them. Three different images go in:
+
+![Ten DSP sites in a row. DSP0 runs sharc1g v1.0.1.49 (63642 words) and is the control plane and SPI master to the FPGA. The DSP1 site is empty. DSP2 runs sharc3g v1.0.1.8 (14774 words). DSP3 to DSP9 run sharc2g v1.0.1.15 (16016 words each); DSP4 to DSP9 carry the 36 data channels.](/images/bma/p05-dsp-sites-light.svg){: .only-light}
+![Ten DSP sites in a row. DSP0 runs sharc1g v1.0.1.49 (63642 words) and is the control plane and SPI master to the FPGA. The DSP1 site is empty. DSP2 runs sharc3g v1.0.1.8 (14774 words). DSP3 to DSP9 run sharc2g v1.0.1.15 (16016 words each); DSP4 to DSP9 carry the 36 data channels.](/images/bma/p05-dsp-sites-dark.svg){: .only-dark}
+
+The loader that segfaulted on a string
+======
+
+The vendor loader is a Linux program that reads an `.ldr` image and clocks it into a DSP over SPI. The `.ldr` format is simple, a run of 16-byte block headers each followed by its payload:
+
+```
+LDR BLOCK HEADER (16 bytes)
+  +0  u32  block code (type in low byte: 0x04 final, others init/zero/data)
+  +4  u32  target address (DSP memory)
+  +8  u32  byte count
+  +12 u32  argument / next
+```
+
+Run standalone, the loader segfaulted, and the crash had nothing to do with the format. Before it touches a DSP it checks the board: `getPCBAssembly()` returns a board-info string and the loader `strncmp`s it against `"ASY-0514"`. The function reads that string through a pointer that `loadMFGInfo()` is supposed to fill in, and in this code path `loadMFGInfo()` is never called. The pointer stays NULL, `getPCBAssembly()` hands back `0x15e`, and `strncmp` faults on it. No DSP is ever clocked.
+
+The fix is twelve bytes. I replaced the body of `getPCBAssembly()` with "return a pointer to a string that already says ASY-0514":
+
+```
+getPCBAssembly @ vaddr 0xe1b8  (file offset 0x61b8)
+  ldr  r0, [pc, #0]
+  bx   lr
+  .word 0x0002699c        ; address of a matching string in the binary
+```
+
+The one trap is the mapping. The `PT_LOAD` header maps the file at `+0x8000`, so vaddr `0xe1b8` lives at file offset `0x61b8`. Preloading a shim library instead would have been cleaner, but the board's libc is older than `GLIBC_2.34` and the shim would not load.
+
+![The load pipeline in five stages: .ldr image, board-ID check, clock over SPI (mode 1, 750 kHz, 4-byte words), ready poll on the 0x10E bit for this DSP before every word, identify. Wall 1: MFG info is never loaded, getPCBAssembly returns 0x15e and strncmp faults; fixed with 12 bytes at vaddr 0xe1b8. Wall 2: the ready bits in 0x6400010E are read live from the DSP pads and are active-low; idle reads 0x0002 because the DSP1 site is empty. Result: nine DSPs from empty in 52 s with my own loader.](/images/bma/sharc-load-handshake-light.svg){: .only-light}
+![The load pipeline in five stages: .ldr image, board-ID check, clock over SPI (mode 1, 750 kHz, 4-byte words), ready poll on the 0x10E bit for this DSP before every word, identify. Wall 1: MFG info is never loaded, getPCBAssembly returns 0x15e and strncmp faults; fixed with 12 bytes at vaddr 0xe1b8. Wall 2: the ready bits in 0x6400010E are read live from the DSP pads and are active-low; idle reads 0x0002 because the DSP1 site is empty. Result: nine DSPs from empty in 52 s with my own loader.](/images/bma/sharc-load-handshake-dark.svg){: .only-dark}
+
+The register that reads backwards
+======
+
+With the gate patched the loader runs to the end, and running to the end is not the same as the DSP taking the image. My first instinct was to clock the image as fast as the bus allows. That gave me DSPs that loaded and then did not identify.
+
+Readiness is one bit per DSP in an FPGA register at CS4 offset `0x10E`, and the sense is inverted: the bit follows the DSP's ready pad, active-low, so **1 means not ready**. On this board it idles at `0x0002`: the one bit that stays high belongs to the empty DSP1 site. The vendor loader logs the register when it times out, and those logs show the bits stuck high:
+
+![A bit grid of register 0x6400010E, one column per DSP from DSP9 to DSP0. Idle reads 0x0002 (only the empty DSP1 site is high). The vendor loader's timeout logs show 0x007F, 0x00FF, 0x01FF and 0x03FF when it gave up on DSP6, 7, 8 and 9. After the vendor ResetDspSpiInterface every bit reads 1, 0x03FF.](/images/bma/p05-ready-bits-light.svg){: .only-light}
+![A bit grid of register 0x6400010E, one column per DSP from DSP9 to DSP0. Idle reads 0x0002 (only the empty DSP1 site is high). The vendor loader's timeout logs show 0x007F, 0x00FF, 0x01FF and 0x03FF when it gave up on DSP6, 7, 8 and 9. After the vendor ResetDspSpiInterface every bit reads 1, 0x03FF.](/images/bma/p05-ready-bits-dark.svg){: .only-dark}
+
+Its neighbour `0x104` is the edge-captured version of the same lines; after the vendor reset it went from `0000` to `03FD`. Once the loader polled the target DSP's bit in `0x10E` and waited for a 0 before every 4-byte word, loads identified every time.
+
+My own loader
+======
+
+At that point I dropped the patched vendor binary and wrote `sharcload`. It walks the `.ldr` blocks, polls the ready bit before each word, clocks at 750 kHz in SPI mode 1, then sends the identify frame `00 00 05 02` and checks byte 3 of the 12-byte reply against the DSP index.
+
+![Two panels. Left: a full load of all nine DSPs from empty took 52.4 s; a stacked bar splits it per DSP by word count, with DSP0's 63642-word image taking about a third (per-DSP split estimated from word counts, the loader only logs start and end). Below it, DSP4 loaded alone: 16016 words in 4 s. Right: identify checks, 9 at load and then DSP2, DSP5 and DSP9 every 15 s for 480 s, 41 of 41 ok.](/images/bma/p05-load-soak-light.svg){: .only-light}
+![Two panels. Left: a full load of all nine DSPs from empty took 52.4 s; a stacked bar splits it per DSP by word count, with DSP0's 63642-word image taking about a third (per-DSP split estimated from word counts, the loader only logs start and end). Below it, DSP4 loaded alone: 16016 words in 4 s. Right: identify checks, 9 at load and then DSP2, DSP5 and DSP9 every 15 s for 480 s, 41 of 41 ok.](/images/bma/p05-load-soak-dark.svg){: .only-dark}
+
+A full nine-DSP load from empty takes 52 seconds, about 3600 words a second. The soak after it ran identify on DSP2, DSP5 and DSP9 every 15 seconds for eight minutes, with no stock application running, and all 41 checks passed. Later, loading DSP4 on its own took 4 seconds for its 16016 words, which is the mode I use for the hook work below. On array B the all-nine call later started rebooting the main processor, so there I load the DSPs one at a time.
+
+My instructions, executing
+======
+
+Loading a vendor image proves the loader. To prove my own code runs I need to change one instruction in a running DSP and watch the result.
+
+DSP4's receive interrupt handler has a load at short-word address `0x1c5544`: `R2 = DM(0x256db8)`. SHARC+ instructions here are three 16-bit parcels, `1002 0025 6db8`, and the first two share one 32-bit memory word, `0x00251002` at `0x2838aa88`. Writing `0x0018063e` there turns the instruction into `JUMP 0x186db8`. The third parcel, `6db8`, stays as it was and becomes the low 16 bits of the jump target, which is why the routine lives at `0x186db8` in free RAM.
+
+![A diagram of the patch. Stock: parcels 1002 0025 6db8, R2 = DM(0x256db8). Patched: 063e 0018 6db8, JUMP sw 0x186db8; one 32-bit word at 0x2838aa88 changes from 00251002 to 0018063e and the third parcel is reused as the target's low 16 bits. The routine at 0x186db8 re-executes the displaced load, does its work using only R0, R2 and I4, and jumps back to 0x1c5547. Measured ISR rate on DSP4: 5999.6 per second stock, about 6000 per second over a 75 s soak with the first counter hook, 6145 to 6231 per one-second read on the lone-DSP4 runs.](/images/bma/p05-isr-patch-light.svg){: .only-light}
+![A diagram of the patch. Stock: parcels 1002 0025 6db8, R2 = DM(0x256db8). Patched: 063e 0018 6db8, JUMP sw 0x186db8; one 32-bit word at 0x2838aa88 changes from 00251002 to 0018063e and the third parcel is reused as the target's low 16 bits. The routine at 0x186db8 re-executes the displaced load, does its work using only R0, R2 and I4, and jumps back to 0x1c5547. Measured ISR rate on DSP4: 5999.6 per second stock, about 6000 per second over a 75 s soak with the first counter hook, 6145 to 6231 per one-second read on the lone-DSP4 runs.](/images/bma/p05-isr-patch-dark.svg){: .only-dark}
+
+The routine re-executes the load it displaced, does its own work with registers the vendor's interrupt wrapper already saved, and jumps back to `0x1c5547`, the next stock instruction. The first version just incremented a counter. It ran a 75-second soak with the interrupt rate steady at about 6000 per second, which is what the stock handler does, and writing `0x00251002` back restored the original word.
+
+Then I used the hook to change something I could check from outside. On array A it wrote SPORT0's channel-select word at `0x3100208C` from `00000001` to `001fffff`, read back `001fffff`, and was rolled back to `00000001`. A full nine-DSP reload also resets it to `00000001`.
+
+What I have now
+======
+
+I can load any of the DSPs with my own loader, check the load, and run my own instructions inside a live interrupt and take them out again. I do not have a microphone sample yet. Getting one frame of audio out of DSP4's receive ring, and the index register that gave me wrong numbers for a week while I did it, is Part 6.

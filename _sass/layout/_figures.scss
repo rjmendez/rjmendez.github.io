@@ -1,0 +1,17 @@
+/* ==========================================================================
+   Theme-matched figures: posts embed a light and a dark copy of each graphic.
+   ========================================================================== */
+
+.only-dark {
+  display: none !important;
+}
+
+html[data-theme="dark"] {
+  .only-dark {
+    display: inline !important;
+  }
+
+  .only-light {
+    display: none !important;
+  }
+}
