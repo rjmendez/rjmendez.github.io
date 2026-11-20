@@ -25,6 +25,21 @@ Selected live audio          -> listening engine   -> browser
 
 In the observed flow, one media packet has a 9-byte header and 16 frames of interleaved, big-endian, 24-bit PCM. At 48 kHz, that's `48,000 / 16 = 3,000` packets per second, or `3,000 × 16 × 8 × 3 = 1,152,000` PCM bytes per second per tile. The Windows bridge repacks selected channels into 256-sample blocks, about 5.33 ms each, using the card's sample clock. If a packet goes missing, the bridge emits any accumulated samples as a short block, then starts a new block marked `gap_before`. No block straddles the hole.
 
+For this captured 16-frame format, the bridge decodes the packet as follows; this is not a claim about every Dante flow:
+
+```text
+byte 0       0x02
+bytes 1..4   seconds, unsigned big-endian
+bytes 5..8   frame within second, unsigned big-endian (< 48000)
+bytes 9..    16 frames; within each frame, channel 0 through 7
+             each sample is signed 24-bit big-endian
+
+8-channel packet length = 9 + 16 * 8 * 3 = 393 bytes
+first sample index      = seconds * 48000 + frame
+```
+
+For sample `frame f`, `channel c`, read three bytes at `9 + 3 * (8*f + c)`. Interpret the 24-bit value as signed: subtract `2**24` if bit 23 is set. Compare the next packet's sample index with the preceding index plus 16; a jump is a discontinuity, not a reason to join the two blocks. Counter rollover and restart require their own handling.
+
 The supervisor runs a bridge for each tile and restarts failed workers. Separate status records matter here: an arriving packet, a nonzero audio block, and a calibrated level are different checks. In that November 19 capture the bridge reported zero packet loss but marked its input-gain check **unverified**. And eight channels arriving at the right rate doesn't settle what those channels carry in every routing mode (Part 7).
 
 On the WSL side, a mono branch feeds BirdNET; an analysis branch takes the multichannel stream for level and spectral measurements and multichannel classification. The classifier gates windows on activity and writes detections with their provenance. A label answers *what the model thinks it heard*. It doesn't supply a bearing, and it isn't a confirmed species record.
