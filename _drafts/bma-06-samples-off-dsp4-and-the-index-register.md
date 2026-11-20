@@ -72,23 +72,23 @@ SHARC address arithmetic -- the trap
   access is off by a factor of four -- which is what 42/48-wrong looks like.
 ```
 
-The measured pattern — frame 0, slot `s` returning ring word `4*s` — points to a factor-of-four address-unit error. The silicon reference manual describes indexed displacement in words, while ordinary `MODIFY` remains byte-scaled. That explains the mismatch; it does not make the corrected probe a hardware pass.
+The measured pattern — frame 0, slot `s` returning ring word `4*s` — pointed to a factor-of-four address-unit error. The follow-up silicon run confirmed the unit distinction: indexed displacement is word-scaled, while ordinary `MODIFY` remains byte-scaled.
 
 Fixing it
 ======
 
-The host emulator and the probe were changed to represent the word-scaled indexed displacement. That fixes the model of the instruction; it still has to be checked against the DSP. The measured result and the current state are:
+The host model and the probe were corrected to represent the word-scaled indexed displacement. The follow-up probe was then checked on DSP4 at the same id-39 patch point:
 
 | stage | what it was | result |
 |---|---|---|
 | probe v1, DSP4 id-39 | index-addressed copy compared with absolute copy | 42/48 words **different**; frame 0 slot `s` read word `4*s` |
 | emulator correction | indexed displacement modeled in words; ordinary `MODIFY` remains byte-scaled | host-tested |
-| probe v2 | compares index and absolute forms using the corrected model | **not yet run on the DSP** |
+| probe v2, B/bma1 DSP4 id-39 | armed pass `seq=2`, buffer `00256dc8`, `miss=0` | **0/48 wrong**; per-slot dBFS matched (`0:-68 1:-70 2:-85 3:-89 5:-80 6:-81`); sync 24/24; clean unpatch |
 | levels hook | one remaining indexed-load caller corrected to use the silicon unit | open change; host-tested, not loaded on a board |
 
-The corrected model has not yet been validated by probe v2 on silicon. The indexed-copy parity claim therefore remains open; it must not be used as evidence that the address form is fixed on the chip. The separate levels-hook change is also not a board result.
+Probe v2 confirms the address-unit rule at this patch point. It does not validate the separate levels-hook caller or prove a multi-frame delay ring; those are different code paths and need their own checks.
 
 Where this leaves the array
 ======
 
-I can read a frame of real microphone audio off DSP4, with alignment proven by the sync witnesses, using the absolute-address copy. I can form a bit-exact beam from the same snapshot in memory. I cannot claim indexed-copy parity: probe v1 failed, and v2 has not yet run on the chip. Nor does the in-memory beam establish direction or quality. What I still cannot say is *what actually leaves the tile* on the eight Dante channels — and the firmware itself contradicts itself about that. That contradiction is Part 7.
+I can read a frame of real microphone audio off DSP4, with alignment proven by the sync witnesses, using the absolute-address copy; the corrected indexed copy now matches it word for word at id-39. I can form a bit-exact beam from the same snapshot in memory. Neither result establishes direction or quality, and the separate levels-hook caller and multi-frame delay ring remain to be checked. What I still cannot say is *what actually leaves the tile* on the eight Dante channels — and the firmware itself contradicts itself about that. That contradiction is Part 7.
