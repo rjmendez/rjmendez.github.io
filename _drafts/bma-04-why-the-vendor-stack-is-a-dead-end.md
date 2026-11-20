@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "BMA360, Part 4: Why the Vendor Stack Is a Dead End"
-excerpt: "Three shells, no samples. The vendor app talks to the FPGA through a char device with a lie in its ioctl encoding; a 16,128-word sweep of the register space found sixteen mirrors and zero audio FIFOs; and the Cyclone configures itself from its own flash, so Linux never holds the bitstream. I did keep the vendor's meters, though."
+excerpt: "Three shells, no samples. The vendor app talks to the FPGA through a char device with a misleading ioctl encoding, a 16,128-word sweep of the register space found sixteen near-identical register banks and zero audio FIFOs, and the Cyclone configures itself from its own flash. I did keep the vendor's meters."
 tags:
   - Hardware
   - FPGA
@@ -9,22 +9,26 @@ tags:
   - BMA360
 ---
 
-By this point I had shells on both computers in the tile and still could not read a microphone. The remaining obvious route was the vendor's own application: let `heb_app.bin` run, and borrow its access to the FPGA and the DSPs. This part is why that route does not get you raw audio either, and how I proved each wall instead of assuming it.
+By this point I had shells on both computers in the tile and still could not read a microphone. The remaining obvious route was the vendor's own application: let `heb_app.bin` run, and borrow its access to the FPGA and the DSPs. This part covers why that route does not reach raw audio either.
 
-![The Altera Cyclone V on the main board — the only FPGA in the audio path, and the one that self-loads its bitstream](/images/BMA360_Cyclone_V.jpg)
+![The Altera Cyclone V on the main board, the only FPGA in the audio path](/images/BMA360_Cyclone_V.jpg)
 
 The front door: /dev/c1fpga
 ======
 
-The application reaches the Cyclone through a char device, `/dev/c1fpga` (major 200). The kernel module `c1fpga.ko` maps the FPGA's EMIF chip-select 4 window (physical `0x64000000`) and exposes four ioctls. The first thing I tried failed with `EFAULT`, which sent me into the disassembly, and the disassembly has two good lessons in it.
+The application reaches the Cyclone through a char device, `/dev/c1fpga` (major 200). The kernel module `c1fpga.ko` maps the FPGA's EMIF chip-select 4 window (physical `0x64000000`) and exposes four ioctls. My first call failed with `EFAULT`, which sent me into the disassembly.
 
-Lesson one: you will `grep` the binary for the ioctl numbers and find nothing, because the base is stored *negated* so a single add does the subtraction.
+![The 32-bit ioctl number 0xC0046B01 split into its _IOC fields: direction read-write, size 4, type 0x6B and number 1, with notes on what c1fpga.ko does: it adds 0x3FFB94FF to get an index, returns 0 for unknown commands, dereferences the argument as a pointer to a pointer, and maps indices 0 to 3 to read, log dump, write and bulk write](/images/bma/p04-ioctl-cmd-light.svg){: .only-light}
+![The 32-bit ioctl number 0xC0046B01 split into its _IOC fields: direction read-write, size 4, type 0x6B and number 1, with notes on what c1fpga.ko does: it adds 0x3FFB94FF to get an index, returns 0 for unknown commands, dereferences the argument as a pointer to a pointer, and maps indices 0 to 3 to read, log dump, write and bulk write](/images/bma/p04-ioctl-cmd-dark.svg){: .only-dark}
+*From the `c1fpga.ko` disassembly.*
+
+Grepping the binary for the ioctl numbers finds nothing, because the base is stored negated and a single add does the subtraction:
 
 ```c
 /* PSEUDOCODE, reconstructed from c1fpga.ko */
 long c1fpga_ioctl(struct file *f, unsigned cmd, unsigned long arg) {
-    unsigned idx = cmd + 0x3FFB94FF;        /* == cmd - 0xC0046B01; grep 'C0046B01' finds nothing */
-    if (idx > 3) return 0;                  /* unknown cmd: silent success (!) */
+    unsigned idx = cmd + 0x3FFB94FF;        /* == cmd - 0xC0046B01 */
+    if (idx > 3) return 0;                  /* unknown cmd: silent success */
 
     void *uptr;
     copy_from_user(&uptr, (void*)arg, 4);   /* arg is a POINTER TO A POINTER */
@@ -41,55 +45,68 @@ long c1fpga_ioctl(struct file *f, unsigned cmd, unsigned long arg) {
 }
 ```
 
-Lesson two is the `EFAULT`: the ioctl argument is a *pointer to a pointer*, and the struct is 12 bytes even though the `_IOC` size field encodes 4. Once I matched both, my reads lined up with the vendor's own `fpgar` tool:
+The `EFAULT` came from the argument: it is a pointer to a pointer, and the struct is 12 bytes even though the `_IOC` size field says 4. Once I matched both, my reads lined up with the vendor's own `fpgar` tool:
 
 | path | what you pass | address it hits | `0x22` reaches |
 |---|---|---|---|
 | my fixed ioctl | 12-byte struct, byte offset | `base + offset` | `0x64000022` yes |
 | vendor `fpgar` | full 8-digit address | validated, even-only | `0x64000022` yes |
 
-Reading `0x64000022` returns `0x0117` — the FPGA version. That is also the single best integrity check on the whole board: it is static, so if it ever reads something else, your access path has desynced, not the hardware.
+Reading `0x64000022` returns `0x0117`, the FPGA version. The value is static, so it doubles as an integrity check: if it ever reads anything else, the access path has desynced.
 
 The sweep that found nothing
 ======
 
-With working reads I did the obvious thing and swept the entire CS4 window — 16,128 words — looking for the audio sample FIFOs the app must be reading. There are none. What is actually there is sixteen 2 KB copies of one register file:
+With working reads I swept the CS4 window, 16,128 words read-only from `0x64000200` to `0x64007FFF`, looking for the audio sample FIFOs the app must be reading. There are none. The window holds sixteen 2 KB banks with nearly identical contents:
 
 ```
-0x64000000  bank 0   real registers (version, matrix, meters, DSP control...)
-0x64000800  bank 1   MIRROR, except word +0x002 = 0x0010
-0x64001000  bank 2   MIRROR, except word +0x002 = 0x0020
-   ...      16 banks of 2 KB, identical register file
-0x64007800  bank 15  MIRROR, word +0x002 = 0x00f0
+0x64000000  bank 0   registers (version, matrix, meters, DSP control...)
+0x64000800  bank 1   same contents, word +0x002 = 0x0010
+0x64001000  bank 2   same contents, word +0x002 = 0x0020
+   ...      16 banks of 2 KB
+0x64007800  bank 15  same register file, word +0x002 = 0x00f0
 0x64008000  reads segfault the driver
 0x64010000  wraps: read(0x10004) == read(0x004)
 ```
 
-The only thing that changes bank to bank is one word that echoes the address: `word[+0x002] = (addr >> 11) << 4`. That killed a standing assumption — there were notes claiming "per-channel routing blocks at `0x64000800 + N*0x800`", and those blocks are simply the same registers seen sixteen times. The negative result is the useful one: **the audio does not pass through a register the OMAP can read.** It stays on the TDM buses between the Cyclone, the SHARCs and the Dante card. There is nothing here to tap.
+![A heatmap of banks 1 to 15 against word offsets +0x000 to +0x11E. Almost every cell is grey, meaning identical in all fifteen banks. Three columns differ: +0x002, which echoes the bank number shifted left by four; +0x07E, which differs in every bank; and +0x088, +0x08C and +0x08E, which read 0000/0005/0000 in bank 1 and 00FF/FF05/00FF in banks 2 to 15](/images/bma/p04-cs4-sweep-light.svg){: .only-light}
+![A heatmap of banks 1 to 15 against word offsets +0x000 to +0x11E. Almost every cell is grey, meaning identical in all fifteen banks. Three columns differ: +0x002, which echoes the bank number shifted left by four; +0x07E, which differs in every bank; and +0x088, +0x08C and +0x08E, which read 0000/0005/0000 in bank 1 and 00FF/FF05/00FF in banks 2 to 15](/images/bma/p04-cs4-sweep-dark.svg){: .only-dark}
+*Measured: read-only sweep, 2026-10-05.*
 
-![A map of the audio datapath across the top — 121 MEMS into the Cyclone V, out over TDM to the SHARC+ DSPs, then over TDM to the Brooklyn-3 Dante card — with a band marking that the samples live on those TDM buses, never in a memory-mapped register. Below it, the OMAP-L138 reaches only the CS4 register window through /dev/c1fpga: sixteen 2 KB mirror banks and zero audio FIFOs. The level meters are readable through two registers (levels only, no waveform), and the Cyclone self-loads an opaque bitstream from its own SPI flash with Linux never in the path.](/images/BMA360_tdm_vs_registers.svg)
+Across banks 1 to 15, 139 of the 144 register words match exactly. Word `+0x002` echoes the address, `(addr >> 11) << 4`. Word `+0x07E` differs in every bank and looks like a live value. The trio at `+0x088/+0x08C/+0x08E` reads one way in bank 1 and another in banks 2 to 15. Beyond `+0x120` every bank reads `0x0002` fill. My earlier notes described "per-channel routing blocks at `0x64000800 + N*0x800`". A read-only sweep cannot tell sixteen copies of one register file from sixteen identical per-channel blocks; a write to one bank, read back from another, would. What the sweep does settle is the question I came with: there are no audio FIFOs anywhere in the window.
+
+The audio does not pass through any register the OMAP can read. It stays on the TDM buses between the Cyclone, the SHARCs and the Dante card.
+
+![The audio path across the top: 121 MEMS microphones into the Cyclone V, over TDM to the SHARC+ DSPs, then over TDM to the Brooklyn-3 card. Below, the OMAP-L138 reaches only the CS4 register window through /dev/c1fpga: sixteen near-identical 2 KB register banks, version 0x0117 at 0x64000022, and zero audio FIFOs. A side box shows the level meters, read by writing a meter id to 0x90 and reading 0x92, levels only. At the bottom, the Cyclone configures itself from its own SPI NOR flash in Active Serial mode, with Linux outside the configuration path.](/images/bma/tdm-vs-registers-light.svg){: .only-light}
+![The audio path across the top: 121 MEMS microphones into the Cyclone V, over TDM to the SHARC+ DSPs, then over TDM to the Brooklyn-3 card. Below, the OMAP-L138 reaches only the CS4 register window through /dev/c1fpga: sixteen near-identical 2 KB register banks, version 0x0117 at 0x64000022, and zero audio FIFOs. A side box shows the level meters, read by writing a meter id to 0x90 and reading 0x92, levels only. At the bottom, the Cyclone configures itself from its own SPI NOR flash in Active Serial mode, with Linux outside the configuration path.](/images/bma/tdm-vs-registers-dark.svg){: .only-dark}
 
 Borrowing the vendor's ears
 ======
 
-Not everything in the app was a dead end. It has a metering path — level meters it latches out of the FPGA and reports — and meters I *can* read, because they go through a register. The read is two writes and a read:
+The app also has a metering path: level meters it latches out of the FPGA. Those go through a register, so I can read them too. The read is a write and a read:
 
 ```c
-/* PSEUDOCODE -- the app's own meter read, reusable from a shell tool */
+/* PSEUDOCODE: the app's own meter read, reusable from a shell tool */
 FpgaWrite(0x90, meter->FpgaAddress & 0xFFFF);  /* latch which meter */
 FpgaRead (0x92, &word);                         /* read the pair */
 u8 raw = (meter->BytePosition == 0) ? (word & 0xFF) : (word >> 8);
 int dB  = 20 - (raw >> 1);                       /* -> dBFS, floored at -99 */
 ```
 
-Playing a known sound at the tile and watching those levels move was the first hard proof the array actually hears — obtained with no audio path at all, just the vendor's own instrument borrowed through two registers. Levels only, no waveform. But it meant the microphones and the front end were alive, and the problem really was egress, not a dead sensor. I reused this borrow-the-instrument trick later.
+I played a known sound at the tile and polled the meters:
+
+![Meter 0x76 over 108 seconds, high and low bytes in dB. For the first 35 seconds all meters read zero because the DSPs are not loaded. Meter 0x76 comes alive at 44.8 seconds and sits around minus 35 to minus 40 dB, with bursts of peaks up to about plus 14 dB while the stimulus plays](/images/bma/p04-meter-trace-light.svg){: .only-light}
+![Meter 0x76 over 108 seconds, high and low bytes in dB. For the first 35 seconds all meters read zero because the DSPs are not loaded. Meter 0x76 comes alive at 44.8 seconds and sits around minus 35 to minus 40 dB, with bursts of peaks up to about plus 14 dB while the stimulus plays](/images/bma/p04-meter-trace-dark.svg){: .only-dark}
+*Measured 2026-10-04, about 20 reads per second.*
+
+The levels move with the sound. That was the first evidence that the microphones and the front end work, gathered with no audio path at all. It gives levels and no waveform, but it put the problem on egress rather than a dead sensor. I reused the trick later.
 
 The bitstream you cannot hold
 ======
 
-The last vendor route is the Cyclone bitstream itself — if I could rewrite the FPGA I could add my own egress. Two findings closed that door for now.
+The last vendor route is the Cyclone bitstream itself. Rewriting the FPGA would let me add my own egress. Two findings closed that route for now.
 
-First, the Cyclone configures itself. On power-up it loads its own bitstream from a dedicated SPI flash in Active Serial mode. Linux is not in the loop:
+First, the Cyclone configures itself. On power-up it loads its own bitstream from a dedicated SPI flash in Active Serial mode, and Linux is not involved:
 
 ```
 POWER ON:  Cyclone V --Active Serial--> its own SPI NOR (mt25ql256) --> configured. Linux absent.
@@ -97,29 +114,21 @@ POWER ON:  Cyclone V --Active Serial--> its own SPI NOR (mt25ql256) --> configur
 UPDATE:    fpgaupdate -> /dev/mt25ql256 (major 155) -> erase/program -> read back (ioctl 0xC0046B0C)
              -> GPIO bit-bang: 127=DCLK, 123=ASDO, 124=DATA0   (3-wire shifter, NO TMS -> not a JTAG TAP)
 
-VERIFY (read-only, free):  fpgar 0x64000022 -> which bitstream is RUNNING (not what's in flash)
+VERIFY (read-only):  fpgar 0x64000022 -> which bitstream is RUNNING (not what's in flash)
 ```
 
-Second, the one time the vendor update path ran on a long-uptime board, its driver asked the kernel for an order-10 allocation — 4 MiB of *physically contiguous* memory — and failed, leaving the process wedged in uninterruptible `D` state until a power cycle. That is a vendor-driver bug, reproducible, and a good reason not to lean on the update path casually.
+Second, the one time the vendor update path ran on a long-uptime board, its driver asked the kernel for an order-10 allocation (4 MiB of physically contiguous memory) and failed. The process stayed in uninterruptible `D` state until a power cycle. The bug is reproducible and a good reason to keep away from the update path.
 
-And the bitstream is opaque. It is wrapped in the vendor's ASCII container with a CRC-16/ARC over the payload (which does check out), but the payload is not a Xilinx or stock Quartus image — no sync word, entropy around 6.6 so not encrypted, just not a format I can round-trip yet. Rewriting the fabric is a future problem, not this project's path.
+The bitstream is also opaque. It sits in the vendor's ASCII container with a CRC-16/ARC over the payload, and the CRC checks out. The payload is neither a Xilinx nor a stock Quartus image: there is no sync word, and its entropy of about 6.6 bits per byte rules out encryption. I cannot round-trip the format yet, so rewriting the fabric is out of scope for this project.
 
 The aperture they turned off
 ======
 
-One more thing the vendor stack showed me, by sweeping the echo-canceller groups and watching which microphones produced signal:
+Sweeping the echo-canceller groups and watching which microphones produced signal showed one more thing:
 
-| element group | mics | result |
-|---|---|---|
-| 0-11 | 1-96 | live |
-| 12-14 | **97-120** | **silent** |
-| 15 | 121 | live |
+![All 121 array elements in 16 groups. Groups 0 to 11, microphones 1 to 96, are live. Groups 12 to 14, microphones 97 to 120, are silent. Group 15, microphone 121, is live](/images/bma/p04-aperture-light.svg){: .only-light}
+![All 121 array elements in 16 groups. Groups 0 to 11, microphones 1 to 96, are live. Groups 12 to 14, microphones 97 to 120, are silent. Group 15, microphone 121, is live](/images/bma/p04-aperture-dark.svg){: .only-dark}
 
-Twenty-four of the 121 elements carry nothing in the shipped bitstream. For a conference phone that is fine. For an acoustic camera it is 24 elements of aperture switched off in firmware I cannot yet rewrite — a hard ceiling on what the stock fabric can ever give me.
+Twenty-four of the 121 elements carry nothing on the shipped bitstream. A conference phone does not need them. For an acoustic camera they are 24 elements of aperture switched off in firmware I cannot rewrite yet.
 
-Scorecard
-======
-
-So the vendor stack gives me: register access, level meters, and control of the DSP-load and matrix hardware. It does **not** give me a sample, and the one stage I would need to change — the bitstream — is self-loaded, opaque, and backed by a flaky updater. The audio lives on the TDM bus into the SHARC+ DSPs.
-
-Which means the only place left to stand is on the DSPs themselves. Part 5 is getting my own code to run on one.
+So the vendor stack gives register access, level meters, and control of the DSP-load and matrix hardware. It gives no samples, and the bitstream is self-loaded, opaque and behind an unreliable updater. The audio lives on the TDM bus into the SHARC+ DSPs, and Part 5 is getting my own code to run on one of them.

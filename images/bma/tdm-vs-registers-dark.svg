@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#b6b6b6"/>
+    </marker>
+    <marker id="ahr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#e7928a"/>
+    </marker>
+    <marker id="ahg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#b3e5b5"/>
+    </marker>
+    <style>
+      .ttl{font-size:18px;font-weight:600;fill:#e2e2e2}
+      .hd{font-size:12px;font-weight:600;fill:#9d9d9d;letter-spacing:.5px}
+      .lbl{font-size:13.5px;fill:#e2e2e2}
+      .sm{font-size:11.5px;fill:#b6b6b6}
+      .mono{font-family:Consolas,monospace;font-size:11.5px;fill:#e2e2e2}
+      .monr{font-family:Consolas,monospace;font-size:11.5px;fill:#e7928a}
+      .box{fill:#383838;stroke:#848484;stroke-width:1.3}
+      .audio{fill:#2e3f52;stroke:#93bce7;stroke-width:1.5}
+      .omap{fill:#512e2a;stroke:#e7928a;stroke-width:1.5}
+      .meter{fill:#374c37;stroke:#b3e5b5;stroke-width:1.4}
+      .flash{fill:#564729;stroke:#fbdb8e;stroke-width:1.4}
+      .flow{stroke:#93bce7;stroke-width:2.2;fill:none}
+      .red{stroke:#e7928a;stroke-width:1.6;fill:none}
+      .grn{stroke:#b3e5b5;stroke-width:1.8;fill:none}
+    </style>
+  </defs>
+
+  <text x="24" y="30" class="ttl">Where the audio goes, and what the OMAP can reach</text>
+
+  <!-- AUDIO DATAPATH -->
+  <text x="24" y="60" class="hd">AUDIO PATH (FPGA FABRIC AND TDM BUSES)</text>
+
+  <rect x="24" y="72" width="120" height="58" rx="5" class="audio"/>
+  <text x="84" y="96" text-anchor="middle" class="lbl">121 MEMS</text>
+  <text x="84" y="113" text-anchor="middle" class="sm">PDM mics</text>
+
+  <rect x="196" y="72" width="168" height="58" rx="5" class="audio"/>
+  <text x="280" y="93" text-anchor="middle" class="lbl">Cyclone V FPGA</text>
+  <text x="280" y="109" text-anchor="middle" class="sm">PDM&#8594;PCM, FIR, delays,</text>
+  <text x="280" y="123" text-anchor="middle" class="sm">matrix</text>
+
+  <rect x="416" y="72" width="150" height="58" rx="5" class="audio"/>
+  <text x="491" y="93" text-anchor="middle" class="lbl">SHARC+ DSPs</text>
+  <text x="491" y="109" text-anchor="middle" class="sm">beamform, AEC,</text>
+  <text x="491" y="123" text-anchor="middle" class="sm">gating, 48 kHz</text>
+
+  <rect x="618" y="72" width="150" height="58" rx="5" class="audio"/>
+  <text x="693" y="93" text-anchor="middle" class="lbl">Brooklyn-3 Zynq</text>
+  <text x="693" y="109" text-anchor="middle" class="sm">Dante card</text>
+  <text x="693" y="123" text-anchor="middle" class="sm">8 Tx channels</text>
+
+  <line x1="144" y1="101" x2="192" y2="101" class="flow" marker-end="url(#ah)"/>
+  <line x1="364" y1="101" x2="412" y2="101" class="flow" marker-end="url(#ah)"/>
+  <text x="390" y="92" text-anchor="middle" class="sm">TDM</text>
+  <line x1="566" y1="101" x2="614" y2="101" class="flow" marker-end="url(#ah)"/>
+  <text x="592" y="92" text-anchor="middle" class="sm">TDM</text>
+
+  <!-- OMAP SIDE -->
+  <text x="24" y="178" class="hd">OMAP-L138 SIDE</text>
+
+  <rect x="24" y="192" width="168" height="70" rx="5" class="omap"/>
+  <text x="108" y="217" text-anchor="middle" class="lbl">OMAP-L138</text>
+  <text x="108" y="234" text-anchor="middle" class="sm">heb_app.bin</text>
+  <text x="108" y="250" text-anchor="middle" class="mono">/dev/c1fpga (maj 200)</text>
+
+  <line x1="192" y1="227" x2="300" y2="227" class="red" marker-end="url(#ahr)"/>
+  <text x="246" y="219" text-anchor="middle" class="sm" fill="#e7928a">EMIFA CS4</text>
+
+  <rect x="300" y="186" width="300" height="112" rx="6" class="box"/>
+  <text x="450" y="207" text-anchor="middle" class="lbl">CS4 window @ 0x64000000</text>
+  <text x="316" y="230" class="mono">16 near-identical 2 KB banks</text>
+  <text x="316" y="248" class="mono">0x64000022 = 0x0117 (FPGA version)</text>
+  <text x="316" y="276" class="monr">audio FIFOs: 0</text>
+
+  <rect x="632" y="186" width="244" height="80" rx="6" class="meter"/>
+  <text x="754" y="207" text-anchor="middle" class="lbl">Level meters</text>
+  <text x="644" y="228" class="mono">write 0x90 = meter id</text>
+  <text x="644" y="245" class="mono">read  0x92 &#8594; dB = 20 - (raw&gt;&gt;1)</text>
+  <text x="754" y="261" text-anchor="middle" class="sm" fill="#b3e5b5">levels, no waveform</text>
+  <line x1="600" y1="232" x2="628" y2="228" class="grn" marker-end="url(#ahg)"/>
+
+  <!-- BITSTREAM -->
+  <text x="24" y="340" class="hd">CYCLONE CONFIGURATION</text>
+
+  <rect x="24" y="354" width="168" height="58" rx="5" class="flash"/>
+  <text x="108" y="378" text-anchor="middle" class="lbl">SPI NOR (mt25ql256)</text>
+  <text x="108" y="396" text-anchor="middle" class="sm">the FPGA's own flash</text>
+
+  <line x1="192" y1="383" x2="268" y2="383" class="flow" marker-end="url(#ah)"/>
+  <text x="230" y="402" text-anchor="middle" class="sm">AS mode</text>
+
+  <rect x="268" y="354" width="180" height="58" rx="5" class="audio"/>
+  <text x="358" y="378" text-anchor="middle" class="lbl">Cyclone V configures</text>
+  <text x="358" y="396" text-anchor="middle" class="sm">itself at power-up</text>
+
+  <rect x="468" y="354" width="408" height="58" rx="5" fill="#512e2a" stroke="#e7928a" stroke-width="1.4"/>
+  <text x="672" y="376" text-anchor="middle" class="sm" fill="#e7928a" font-weight="600">Linux is not in the config path</text>
+  <text x="672" y="395" text-anchor="middle" class="sm">payload: CRC-16/ARC ok, entropy ~6.6, no sync word</text>
+
+  <text x="24" y="446" class="sm">Update path (vendor): fpgaupdate &#8594; /dev/mt25ql256 &#8594; GPIO bit-bang (DCLK 127, ASDO 123, DATA0 124).</text>
+</svg>

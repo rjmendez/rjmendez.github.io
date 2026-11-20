@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <style>
+    .lbl{fill:#1a1a1a;font-size:14px}
+    .sm{fill:#555;font-size:12px}
+    .mono{font-family:Consolas, Menlo, monospace}
+    .ttl{fill:#1a1a1a;font-size:18px;font-weight:600}
+    .sig{stroke:#1a1a1a;stroke-width:1.5;fill:none}
+    .ring{stroke:#1a1a1a;stroke-width:1.5;fill:none}
+    .ptrbox{fill:#f4f4f4;stroke:#1a1a1a;stroke-width:1.4}
+    .buf{fill:#f4f4f4;stroke:#1a1a1a;stroke-width:1.2}
+    .bufA{fill:#fdecea;stroke:#c0392b;stroke-width:1.6}
+    .mic{fill:#fdecea;stroke:#c0392b;stroke-width:1.2}
+    .nonmic{fill:#efefef;stroke:#999;stroke-width:1.1}
+    .zero{fill:#f7f7f7;stroke:#cccccc;stroke-width:1.1}
+    .wit{fill:#eaf5ea;stroke:#2e7d32;stroke-width:1.4}
+  </style>
+
+  <text class="ttl" x="30" y="34">DSP4&#8217;s receive ring: one pointer names the buffer the ISR just filled</text>
+
+  <!-- ===== left panel: pointer + 3-buffer ring ===== -->
+  <text class="sm" x="40" y="66">DATA MEMORY</text>
+
+  <rect class="ptrbox" x="40" y="78" width="210" height="52" rx="4"/>
+  <text class="lbl mono" x="54" y="102">0x256dc4</text>
+  <text class="sm" x="54" y="120">current-buffer pointer</text>
+
+  <!-- arrow from pointer to buffer A -->
+  <line x1="145" y1="130" x2="145" y2="178" class="sig" marker-end="url(#arr)"/>
+  <text class="sm" x="152" y="160">always one of the three</text>
+
+  <!-- three buffers -->
+  <rect class="bufA" x="40" y="180" width="210" height="46" rx="4"/>
+  <text class="lbl mono" x="54" y="203">0x256dc8</text><text class="sm" x="150" y="203">buffer A</text>
+  <rect class="buf"  x="40" y="250" width="210" height="46" rx="4"/>
+  <text class="lbl mono" x="54" y="273">0x257068</text><text class="sm" x="150" y="273">buffer B</text>
+  <rect class="buf"  x="40" y="320" width="210" height="46" rx="4"/>
+  <text class="lbl mono" x="54" y="343">0x257308</text><text class="sm" x="150" y="343">buffer C</text>
+
+  <!-- ring arrows A->B->C->A on the right edge -->
+  <path d="M258 203 q40 35 0 70" class="ring" marker-end="url(#arr)"/>
+  <path d="M258 273 q40 35 0 70" class="ring" marker-end="url(#arr)"/>
+  <path d="M262 343 q78 -82 0 -162" class="ring" marker-end="url(#arr)"/>
+
+  <text class="sm" x="40" y="398">The ISR runs about 6000 times/s; each pass fills one buffer</text>
+  <text class="sm" x="40" y="416">of 8 frames &#215; 21 words, so 8 &#215; 6000 = 48 kHz per slot.</text>
+
+  <!-- ===== right panel: one frame = 21 words ===== -->
+  <text class="sm" x="470" y="66">ONE FRAME = 21 words (0x54 bytes), other DSPs loaded too</text>
+
+  <!-- rows -->
+  <g class="mono" font-size="12.5">
+    <rect class="mic"    x="470" y="78"  width="300" height="24" rx="2"/><text class="lbl" x="482" y="94">slot 0</text><text class="sm" x="560" y="94">mic audio</text>
+    <rect class="mic"    x="470" y="104" width="300" height="24" rx="2"/><text class="lbl" x="482" y="120">slot 1</text><text class="sm" x="560" y="120">mic audio</text>
+    <rect class="mic"    x="470" y="130" width="300" height="24" rx="2"/><text class="lbl" x="482" y="146">slot 2</text><text class="sm" x="560" y="146">mic audio</text>
+    <rect class="mic"    x="470" y="156" width="300" height="24" rx="2"/><text class="lbl" x="482" y="172">slot 3</text><text class="sm" x="560" y="172">mic audio</text>
+    <rect class="nonmic" x="470" y="182" width="300" height="24" rx="2"/><text class="lbl" x="482" y="198">slot 4</text><text class="sm" x="560" y="198">not a mic: sparse spikes</text>
+    <rect class="mic"    x="470" y="208" width="300" height="24" rx="2"/><text class="lbl" x="482" y="224">slot 5</text><text class="sm" x="560" y="224">mic audio</text>
+    <rect class="mic"    x="470" y="234" width="300" height="24" rx="2"/><text class="lbl" x="482" y="250">slot 6</text><text class="sm" x="560" y="250">mic audio</text>
+    <rect class="zero"   x="470" y="260" width="300" height="30" rx="2"/><text class="lbl" x="482" y="279">slots 7&#8211;18</text><text class="sm" x="590" y="279">zero</text>
+    <rect class="wit"    x="470" y="296" width="300" height="24" rx="2"/><text class="lbl" x="482" y="312">slot 19</text><text class="sm" x="560" y="312">sync  0x0000ff00</text>
+    <rect class="wit"    x="470" y="322" width="300" height="24" rx="2"/><text class="lbl" x="482" y="338">slot 20</text><text class="sm" x="560" y="338">sync  0x00123456</text>
+  </g>
+
+  <!-- witness bracket -->
+  <path d="M778 296 q10 0 10 12 q0 12 10 12" class="ring"/>
+  <text class="sm" x="792" y="314">constant in</text>
+  <text class="sm" x="792" y="330">every frame</text>
+
+  <rect x="30" y="440" width="840" height="70" rx="4" fill="#f7f7f7" stroke="#cccccc"/>
+  <text class="sm" x="42" y="462">Slots 19 and 20 hold the same two constants in every frame. A copy that does not find them at words 19 and 20</text>
+  <text class="sm" x="42" y="480">started in the wrong place. With only DSP4 loaded, the same layout carries zeros in slots 0&#8211;3, 5, 6; slot 4 and</text>
+  <text class="sm" x="42" y="498">the sync words are still there. Measured on one array, read-only.</text>
+
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#1a1a1a"/></marker>
+  </defs>
+</svg>

@@ -1,0 +1,91 @@
+{
+ "provenance": "Board A OMAP NAND, read through the MTD char devices from the vendor Linux (dd|nc, ECC applied), 2026 golden backup; partition table from the stock 2.6.37 kernel boot log. One character per 128 KiB erase block: '.' erased (all 0xFF), 'k' starts with uImage magic 27051956, 'u' starts with UBL boot header magic 0x55424CBB (U-Boot copy), 'j' starts with JFFS2 node magic 0x1985, 't' starts with the TI AIS magic 'TIPA' (UBL), '#' other data. mtd8 (Rsvd2) was not dumped.",
+ "erase_block": 131072,
+ "uboot_header": {
+  "magic": "0x55424CBB",
+  "entry": "0xC1080000",
+  "num_pages": 182,
+  "start_blocks": [
+   6,
+   9,
+   12
+  ],
+  "source": "UBL console: 'Valid magicnum, 0x55424CBB, found in block 0x00000006'"
+ },
+ "kernel_normal_bytes": 12867592,
+ "kernel_safe_bytes": 10471468,
+ "partitions": [
+  {
+   "mtd": 0,
+   "name": "u-boot env",
+   "start": "0x0",
+   "end": "0x20000",
+   "blocks": 1,
+   "map": "#"
+  },
+  {
+   "mtd": 1,
+   "name": "UBL",
+   "start": "0x20000",
+   "end": "0x40000",
+   "blocks": 1,
+   "map": "t"
+  },
+  {
+   "mtd": 2,
+   "name": "u-boot",
+   "start": "0x40000",
+   "end": "0xc0000",
+   "blocks": 4,
+   "map": "...."
+  },
+  {
+   "mtd": 3,
+   "name": "u-boot env2",
+   "start": "0xc0000",
+   "end": "0x1e0000",
+   "blocks": 9,
+   "map": "u##u##u##"
+  },
+  {
+   "mtd": 4,
+   "name": "kernel-normal",
+   "start": "0x200000",
+   "end": "0x2200000",
+   "blocks": 256,
+   "map": "k###############################################################################################################################################################################################################################################################"
+  },
+  {
+   "mtd": 5,
+   "name": "Rsvd1",
+   "start": "0x2200000",
+   "end": "0x4200000",
+   "blocks": 256,
+   "map": "................................................................................................................................................................................................................................................................"
+  },
+  {
+   "mtd": 6,
+   "name": "kernel-safe",
+   "start": "0x4220000",
+   "end": "0x6220000",
+   "blocks": 256,
+   "map": "k###############################################################################................................................................................................................................................................................"
+  },
+  {
+   "mtd": 7,
+   "name": "FileSystem",
+   "start": "0x6220000",
+   "end": "0x8220000",
+   "blocks": 256,
+   "map": ".........................................................jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj..........................................jjj........................................................jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj."
+  },
+  {
+   "mtd": 8,
+   "name": "Rsvd2",
+   "start": "0x8220000",
+   "end": "0x20000000",
+   "blocks": 3055,
+   "map": null
+  }
+ ]
+}

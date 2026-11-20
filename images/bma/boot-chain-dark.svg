@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <style>
+    .lbl{fill:#e2e2e2;font-size:13.5px;font-weight:600}
+    .sm{fill:#b6b6b6;font-size:12px}
+    .mono{font-family:Consolas, Menlo, monospace}
+    .ttl{fill:#e2e2e2;font-size:17px;font-weight:600}
+    .hd{fill:#9d9d9d;font-size:11px;letter-spacing:0.06em}
+    .node{fill:#404040;stroke:#e2e2e2;stroke-width:1.2}
+    .hot{fill:#625225;stroke:#fbdb8e;stroke-width:1.6}
+    .norm{fill:#2d4055;stroke:#93bce7;stroke-width:1.5}
+    .safe{fill:#5d4529;stroke:#f0c186;stroke-width:1.5}
+    .flow{stroke:#e2e2e2;stroke-width:1.5;fill:none}
+    .lead{stroke:#6a6a6a;stroke-width:1;stroke-dasharray:3 3}
+  </style>
+
+  <text class="ttl" x="30" y="32">OMAP-L138 boot chain, as the stock console prints it</text>
+  <text class="hd" x="30" y="60">STAGE</text>
+  <text class="hd" x="440" y="60">READ FROM NAND</text>
+  <text class="hd" x="660" y="60">RUNS AT</text>
+
+  <rect class="node" x="30" y="70" width="360" height="36" rx="4"/>
+  <text class="lbl" x="44" y="93">ROM boot loader (on-chip)</text>
+  <line class="lead" x1="390" y1="88" x2="436" y2="88"/>
+  <text class="sm mono" x="440" y="92">mtd1 UBL @0x20000</text>
+  <text class="sm mono" x="660" y="92">-</text>
+
+  <line x1="210" y1="106" x2="210" y2="120" class="flow" marker-end="url(#a)"/>
+  <rect class="node" x="30" y="122" width="360" height="48" rx="4"/>
+  <text class="lbl" x="44" y="142">UBL 1.65_3_c1 (TI AIS image "TIPA")</text>
+  <text class="sm" x="44" y="160">"Valid magicnum, 0x55424CBB, found in block 0x00000006"</text>
+  <line class="lead" x1="390" y1="146" x2="436" y2="146"/>
+  <text class="sm mono" x="440" y="142">mtd3 "u-boot env2"</text>
+  <text class="sm mono" x="440" y="158">blocks 6, 9, 12 (3 copies)</text>
+  <text class="sm mono" x="660" y="150">on-chip RAM, AIS 0x80000000</text>
+
+  <line x1="210" y1="170" x2="210" y2="184" class="flow" marker-end="url(#a)"/>
+  <rect class="hot" x="30" y="186" width="360" height="48" rx="4"/>
+  <text class="lbl" x="44" y="206">U-Boot 2010.12 (Jul 2016)</text>
+  <text class="sm" x="44" y="224" fill="#fedd9a">3-second autoboot countdown: press a key here</text>
+  <line class="lead" x1="390" y1="210" x2="436" y2="210"/>
+  <text class="sm mono" x="440" y="206">mtd0 env @0x0</text>
+  <text class="sm" x="440" y="224">(mtd2 "u-boot" is erased)</text>
+  <text class="sm mono" x="660" y="214">0xC1080000</text>
+
+  <line x1="210" y1="234" x2="210" y2="248" class="flow" marker-end="url(#a)"/>
+  <rect class="node" x="30" y="250" width="360" height="36" rx="4"/>
+  <text class="lbl mono" x="44" y="273">bootcmd: run nandimage</text>
+
+  <line x1="120" y1="286" x2="120" y2="306" class="flow" marker-end="url(#a)"/>
+  <line x1="300" y1="286" x2="300" y2="306" class="flow" marker-end="url(#a)"/>
+  <text class="sm" x="196" y="301">then</text>
+  <rect class="norm" x="30" y="308" width="175" height="50" rx="4"/>
+  <text class="lbl" x="42" y="328">1. nandimage1</text>
+  <text class="sm" x="42" y="347">kernel-normal</text>
+  <rect class="safe" x="215" y="308" width="175" height="50" rx="4"/>
+  <text class="lbl" x="227" y="328">2. nandimage2</text>
+  <text class="sm" x="227" y="347">kernel-safe</text>
+  <line class="lead" x1="390" y1="333" x2="436" y2="333"/>
+  <text class="sm mono" x="440" y="326">mtd4 @0x200000</text>
+  <text class="sm mono" x="440" y="344">mtd6 @0x4220000</text>
+  <text class="sm mono" x="660" y="334">load to 0xC0700000</text>
+
+  <line x1="120" y1="358" x2="120" y2="386" class="flow" marker-end="url(#a)"/>
+  <path d="M300 358 L300 372 L130 372" class="flow"/>
+  <rect class="node" x="30" y="388" width="360" height="62" rx="4"/>
+  <text class="lbl" x="44" y="408">Linux 2.6.37</text>
+  <text class="sm" x="44" y="425">self-extracting zImage in a legacy uImage</text>
+  <text class="sm mono" x="44" y="441">initramfs /sbin/init, then heb_app.bin</text>
+  <line class="lead" x1="390" y1="419" x2="436" y2="419"/>
+  <text class="sm" x="440" y="423">root is in the image</text>
+  <text class="sm mono" x="660" y="423">0xC0008000</text>
+
+  <text class="sm" x="440" y="290">nandimage2 only runs if bootm on the</text>
+  <text class="sm" x="440" y="306">first image returns (bad header or CRC).</text>
+
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#e2e2e2"/></marker>
+  </defs>
+</svg>

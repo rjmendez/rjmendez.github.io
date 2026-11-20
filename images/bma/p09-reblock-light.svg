@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="210" viewBox="0 0 960 210" font-family="Segoe UI, DejaVu Sans, Arial, sans-serif" font-size="13" fill="#1a1a1a">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555555"/></marker></defs>
+<text x="20" y="22" font-weight="600" font-size="14">Bridge reblocking across a lost packet</text>
+<text x="20" y="40" font-size="12" fill="#555555">    worked example of the documented rule, sample indices on the card clock</text>
+<text x="20" y="60" font-size="12" fill="#555555">packets in (16 samples each)</text>
+<rect x="58.14705882352941" y="66" width="16.647058823529413" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="75.79411764705883" y="66" width="16.647058823529406" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="93.44117647058823" y="66" width="16.64705882352942" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="111.08823529411765" y="66" width="16.64705882352942" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="128.73529411764707" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="146.38235294117646" y="66" width="16.64705882352942" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="164.02941176470588" y="66" width="16.64705882352942" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="181.6764705882353" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="199.3235294117647" y="66" width="16.64705882352942" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="216.97058823529412" y="66" width="16.64705882352942" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="234.61764705882354" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="252.26470588235293" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="269.9117647058823" y="66" width="16.64705882352945" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="287.55882352941177" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="305.20588235294116" y="66" width="16.64705882352945" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="322.8529411764706" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="340.5" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="358.1470588235294" y="66" width="16.64705882352945" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="375.79411764705884" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="393.44117647058823" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="411.0882352941176" y="66" width="16.64705882352945" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="428.7352941176471" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="446.38235294117646" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="464.02941176470586" y="66" width="16.64705882352945" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="481.6764705882353" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="499.3235294117647" y="66" width="16.64705882352945" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="516.9705882352941" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="534.6176470588235" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="552.2647058823529" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="569.9117647058823" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="587.5588235294117" y="66" width="16.647058823529505" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="605.2058823529412" y="66" width="16.64705882352939" height="16" fill="none" stroke="#c0392b" stroke-width="1" stroke-dasharray="2 2"/>
+<rect x="622.8529411764706" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="640.5" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="658.1470588235294" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="675.7941176470588" y="66" width="16.647058823529505" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="693.4411764705883" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="711.0882352941177" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="728.7352941176471" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="746.3823529411765" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="764.0294117647059" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="781.6764705882352" y="66" width="16.647058823529505" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="799.3235294117648" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="816.9705882352941" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="834.6176470588235" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="852.2647058823529" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="869.9117647058823" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="887.5588235294117" y="66" width="16.647058823529505" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<rect x="905.2058823529412" y="66" width="16.64705882352939" height="16" fill="#f7f9fc" stroke="#9a9a9a" stroke-width="1"/>
+<text x="613.5294117647059" y="100" text-anchor="middle" font-size="12" fill="#c0392b">lost packet</text>
+<text x="20" y="114" font-size="12" fill="#555555">blocks out</text>
+<rect x="57.64705882352941" y="120" width="282.3529411764706" height="38" rx="4" fill="#f7f9fc" stroke="#2c6cb0" stroke-width="1.8"/>
+<text x="198.8235294117647" y="144" text-anchor="middle" font-size="12.5" font-weight="600">256 samples</text>
+<rect x="340.0" y="120" width="264.7058823529412" height="38" rx="4" fill="#fdf8ee" stroke="#b8860b" stroke-width="1.8"/>
+<text x="472.3529411764706" y="144" text-anchor="middle" font-size="12.5" font-weight="600">240 samples, flushed short</text>
+<rect x="622.3529411764706" y="120" width="282.3529411764706" height="38" rx="4" fill="#f7f9fc" stroke="#2e7d32" stroke-width="1.8"/>
+<text x="763.5294117647059" y="144" text-anchor="middle" font-size="12.5" font-weight="600">next block, gap_before = 1</text>
+<rect x="604.7058823529412" y="120" width="17.64705882352939" height="38" fill="none" stroke="#c0392b" stroke-dasharray="3 3"/>
+<line x1="40.0" y1="182" x2="940.0" y2="182" stroke="#9a9a9a"/>
+<line x1="57.64705882352941" y1="178" x2="57.64705882352941" y2="186" stroke="#9a9a9a"/>
+<text x="57.64705882352941" y="201" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace" font-size="11.5" fill="#555555">744</text>
+<line x1="340.0" y1="178" x2="340.0" y2="186" stroke="#9a9a9a"/>
+<text x="340.0" y="201" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace" font-size="11.5" fill="#555555">1000</text>
+<line x1="604.7058823529412" y1="178" x2="604.7058823529412" y2="186" stroke="#9a9a9a"/>
+<text x="604.7058823529412" y="201" text-anchor="end" font-family="Consolas, DejaVu Sans Mono, monospace" font-size="11.5" fill="#555555">1240</text>
+<line x1="622.3529411764706" y1="178" x2="622.3529411764706" y2="186" stroke="#9a9a9a"/>
+<text x="622.3529411764706" y="201" text-anchor="start" font-family="Consolas, DejaVu Sans Mono, monospace" font-size="11.5" fill="#555555">1256</text>
+<line x1="904.7058823529412" y1="178" x2="904.7058823529412" y2="186" stroke="#9a9a9a"/>
+<text x="904.7058823529412" y="201" text-anchor="middle" font-family="Consolas, DejaVu Sans Mono, monospace" font-size="11.5" fill="#555555">1512</text>
+</svg>

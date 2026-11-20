@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" font-family="Segoe UI, Arial, sans-serif">
+<defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#c9c9c9"/></marker>
+<marker id="g" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#86d98f"/></marker></defs>
+<style>.t{font-size:17px;font-weight:600;fill:#f2f2f2} .h{font-size:12px;font-weight:600;fill:#c9c9c9;letter-spacing:.5px}
+.m{font-family:Consolas,monospace;font-size:14px;fill:#f2f2f2} .mb{font-family:Consolas,monospace;font-size:14px;font-weight:700}
+.s{font-size:11.5px;fill:#c9c9c9} .l{font-size:13px;fill:#f2f2f2}</style>
+<text x="20" y="30" class="t">One 32-bit write turns a load into a jump</text>
+<text x="20" y="50" class="s">DSP4 receive ISR, sw 0x1c5544. The instruction is three 16-bit parcels; the patch rewrites the first two.</text>
+
+<text x="20" y="84" class="h">STOCK</text>
+<rect x="110" y="66" width="90" height="28" rx="3" fill="#3b3f45" stroke="#8a8a8a"/><text x="155" y="85" class="m" text-anchor="middle">1002</text>
+<rect x="204" y="66" width="90" height="28" rx="3" fill="#3b3f45" stroke="#8a8a8a"/><text x="249" y="85" class="m" text-anchor="middle">0025</text>
+<rect x="298" y="66" width="90" height="28" rx="3" fill="#3b3f45" stroke="#8a8a8a"/><text x="343" y="85" class="m" text-anchor="middle">6db8</text>
+<text x="410" y="85" class="m">R2 = DM(0x256db8)</text>
+
+<text x="20" y="130" class="h">PATCHED</text>
+<rect x="110" y="112" width="90" height="28" rx="3" fill="#45403a" stroke="#ff8a7a" stroke-width="1.6"/><text x="155" y="131" class="mb" text-anchor="middle" fill="#ff8a7a">063e</text>
+<rect x="204" y="112" width="90" height="28" rx="3" fill="#45403a" stroke="#ff8a7a" stroke-width="1.6"/><text x="249" y="131" class="mb" text-anchor="middle" fill="#ff8a7a">0018</text>
+<rect x="298" y="112" width="90" height="28" rx="3" fill="#3b3f45" stroke="#8a8a8a"/><text x="343" y="131" class="m" text-anchor="middle">6db8</text>
+<text x="410" y="131" class="m">JUMP sw 0x186db8</text>
+<path d="M110 146 v6 h184 v-6" fill="none" stroke="#ff8a7a" stroke-width="1.2"/>
+<text x="110" y="170" class="s">one 32-bit word at 0x2838aa88: 00251002 becomes 0018063e</text>
+<path d="M298 146 v6 h90 v-6" fill="none" stroke="#c9c9c9" stroke-width="1.2"/><line x1="343" y1="152" x2="343" y2="176" stroke="#c9c9c9" stroke-width="1"/>
+<text x="298" y="188" class="s">third parcel kept: the target's low 16 bits</text>
+
+<rect x="582" y="64" width="300" height="168" rx="6" fill="#3b3f45" stroke="#86d98f" stroke-width="1.4"/>
+<text x="596" y="86" class="h">MY ROUTINE, sw 0x186db8 (free RAM)</text>
+<text x="596" y="112" class="m">R2 = DM(0x256db8)</text><text x="770" y="112" class="s">displaced load</text>
+<text x="596" y="138" class="m">... counter / copy ...</text>
+<text x="596" y="158" class="s">uses only R0, R2, I4</text>
+<text x="596" y="184" class="m">JUMP sw 0x1c5547</text><text x="770" y="184" class="s">next stock instr</text>
+<text x="596" y="216" class="s">the ISR carries on as if nothing happened</text>
+<path d="M552 126 C566 126 566 108 580 108" fill="none" stroke="#86d98f" stroke-width="2" marker-end="url(#g)"/>
+
+<text x="20" y="222" class="h">ISR RATE ON DSP4, MEASURED</text>
+<text x="20" y="246" class="l">stock ISR rate: 5999.6 /s</text>
+<text x="20" y="268" class="l">first counter hook, 2026-11-01: ~6000 /s over a 75 s soak</text>
+<text x="20" y="290" class="l">lone DSP4, 2026-11-16, patched and unpatched: 6145 to 6231 per ~1 s read</text>
+<text x="20" y="314" class="s">Unpatch writes 00251002 back; the readback matched every time. The rate staying put is how I know the routine returns.</text>
+</svg>

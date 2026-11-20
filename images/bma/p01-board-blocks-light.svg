@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#c0392b"/></marker>
+    <marker id="ac" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#2c6cb0"/></marker>
+  </defs>
+  <style>
+    .t{fill:#1a1a1a;font-size:14px;font-weight:600}
+    .s{fill:#555555;font-size:12px}
+    .m{fill:#555555;font-size:11.5px;font-family:Consolas, Menlo, monospace}
+    .board{fill:none;stroke:#9a9a9a;stroke-width:1.4;stroke-dasharray:6 4}
+    .chip{fill:#f7f9fc;stroke:#9a9a9a;stroke-width:1.2}
+    .audio{stroke:#c0392b;stroke-width:3.2;fill:none}
+    .ctl{stroke:#2c6cb0;stroke-width:1.6;fill:none;stroke-dasharray:5 4}
+  </style>
+
+  <rect class="board" x="20" y="20" width="860" height="330" rx="8"/>
+  <text class="s" x="34" y="40">MAIN BOARD (ClearOne)</text>
+  <rect class="board" x="20" y="390" width="860" height="110" rx="8"/>
+  <text class="s" x="866" y="410" text-anchor="end">BROOKLYN-3 DANTE CARD (Audinate), on a card-edge socket</text>
+
+  <!-- mics -->
+  <rect class="chip" x="40" y="60" width="160" height="70" rx="5"/>
+  <text class="t" x="52" y="84">121 MEMS mics</text>
+  <text class="s" x="52" y="102">disc, radial 12-spoke</text>
+  <text class="s" x="52" y="118">TDM, 24-bit, 48 kHz</text>
+
+  <!-- Cyclone -->
+  <rect class="chip" x="270" y="60" width="230" height="88" rx="5"/>
+  <text class="t" x="282" y="84">Cyclone V FPGA</text>
+  <text class="m" x="282" y="102">5CEBA9F23C8N</text>
+  <text class="s" x="282" y="120">mic front end, 121&#8594;36 fold,</text>
+  <text class="s" x="282" y="136">routing matrix</text>
+
+  <!-- SHARC -->
+  <rect class="chip" x="600" y="60" width="260" height="88" rx="5"/>
+  <text class="t" x="612" y="84">9&#215; SHARC+ DSP</text>
+  <text class="m" x="612" y="102">ADSP-2156x</text>
+  <text class="s" x="612" y="120">beamforming, echo cancel</text>
+
+  <!-- OMAP -->
+  <rect class="chip" x="270" y="220" width="300" height="110" rx="5"/>
+  <text class="t" x="282" y="244">OMAP-L138E module</text>
+  <text class="s" x="282" y="262">ARM926 + C674x, 372 MHz, Linux 2.6.37</text>
+  <text class="s" x="282" y="280">NAND 512 MB, eMMC 8 GB</text>
+  <text class="s" x="282" y="298">UART J8 "Linux 115200"</text>
+  <text class="s" x="282" y="316" fill="#2c6cb0">control plane: no audio passes here</text>
+
+  <!-- switch -->
+  <rect class="chip" x="620" y="232" width="240" height="70" rx="5"/>
+  <text class="t" x="632" y="256">Marvell 88E6352</text>
+  <text class="s" x="632" y="274">6-port GbE switch</text>
+  <text class="s" x="632" y="292">(PoE powered device input nearby)</text>
+
+  <!-- Zynq -->
+  <rect class="chip" x="270" y="425" width="300" height="62" rx="5"/>
+  <text class="t" x="282" y="449">Zynq-7000 XC7Z015</text>
+  <text class="s" x="282" y="467">own QSPI flash, own Linux, 8&#215; SDI TDM in</text>
+
+  <rect class="chip" x="640" y="425" width="200" height="62" rx="5"/>
+  <text class="t" x="652" y="449">Dante network</text>
+  <text class="s" x="652" y="467">finished audio only</text>
+
+  <!-- audio path -->
+  <line class="audio" x1="200" y1="95" x2="266" y2="95" marker-end="url(#ar)"/>
+  <line class="audio" x1="500" y1="92" x2="596" y2="92" marker-end="url(#ar)"/>
+  <line class="audio" x1="600" y1="122" x2="504" y2="122" marker-end="url(#ar)"/>
+  <text class="s" x="522" y="86">TDM</text>
+  <path class="audio" d="M290 148 L290 190 L110 190 L110 456 L266 456" marker-end="url(#ar)"/>
+  <text class="s" x="122" y="300">TDM, 8 lanes</text>
+  <text class="s" x="122" y="316">over the card edge</text>
+  <line class="audio" x1="570" y1="456" x2="636" y2="456" marker-end="url(#ar)"/>
+
+  <!-- control -->
+  <path class="ctl" d="M520 220 L520 170 L700 170 L700 152" marker-end="url(#ac)"/>
+  <text class="m" x="530" y="188" fill="#2c6cb0">SPI 750 kHz: load DSP code</text>
+  <line class="ctl" x1="420" y1="220" x2="420" y2="152" marker-end="url(#ac)"/>
+  <text class="m" x="412" y="200" text-anchor="end" fill="#2c6cb0">EMIF CS4 0x64000000</text>
+  <line class="ctl" x1="570" y1="267" x2="616" y2="267" marker-end="url(#ac)"/>
+
+  <!-- legend -->
+  <line class="audio" x1="620" y1="330" x2="660" y2="330"/><text class="s" x="668" y="334">audio</text>
+  <line class="ctl" x1="730" y1="330" x2="770" y2="330"/><text class="s" x="778" y="334">control</text>
+</svg>

@@ -10,42 +10,35 @@ tags:
   - Reverse Engineering
 ---
 
-Part 1 ended with a problem: the audio never enters Linux, so there is nothing to record from userspace. Before I can do anything about that I need a way in — a shell on the OMAP that I control, and eventually a kernel of my own choosing. This is that part: serial console, the boot chain, a network-booted root that changes nothing on the device, and finally a kernel written into flash with the factory's own recovery image kept intact as a fallback.
+At the end of Part 1 the audio never entered Linux, so there was nothing to record from userspace. Before I can change that I need a shell on the OMAP that I control, and then a kernel I built. This part covers the serial console, the boot chain, an NFS root that changes nothing on the device, and a kernel written into flash with the factory recovery image left alone.
 
 The header
 ======
 
-The main board has a 4-pin 0.1" header silkscreened `J8` and, next to it in the vendor's own board notes, the string `Linux 115200`. That is the giveaway. A 3.3 V USB-UART dongle on `J8`, 115200 8N1, and the board talks on power-up. (There is a second header `J6` at 57600; that one is the RS-232 management port, not the Linux console.)
+The OMAP module has a 4-pin 0.1" header labelled `J8`, and the vendor's board notes call it `Linux 115200`. I put a 3.3 V USB-UART dongle on `J8` at 115200 8N1 and the board talks on power-up. The other header, `J6` at 57600, is the RS-232 control port, not the Linux console.
 
-What comes out is a TI boot chain, three stages deep before Linux even starts.
-
-![The TI OMAP-L138 (OMAPL138E) and, to its lower right, the SanDisk NAND that holds the boot stages](/images/BMA360_OMAP-L138.jpg)
+![The TI OMAP-L138 (OMAPL138E) module. The NAND is a Micron 29F4G08ABADA; the SanDisk part is the 8 GB eMMC.](/images/BMA360_OMAP-L138.jpg)
 
 The boot chain
 ======
 
-```
-ROM boot ROM
-  -> UBL 1.65_3_c1       TI AIS loader, "TIPA", loads to 0x80000000     [NAND @0x20000]
-     -> U-Boot 2010.12   (Jul 2016), entry/load 0xC1080000             [NAND @0x40000, kept in triplicate]
-        -> bootcmd: run nandimage
-           -> kernel-normal (uImage, gzip)                             [NAND @0x200000]
-              -> initramfs = cpio LINKED INTO the kernel  (noinitrd, no root=)
-                 -> /sbin/init -> rc5.d startup -> heb_app.bin
-```
+The console shows a standard TI boot chain: ROM, then TI's UBL, then U-Boot, then Linux.
 
-The first-stage UBL identifies itself on the wire:
+![OMAP boot chain: ROM loads the UBL from NAND 0x20000; the UBL finds U-Boot at NAND block 6 (copies at 6, 9, 12) and jumps to 0xC1080000; U-Boot runs nandimage1 (kernel-normal) then nandimage2 (kernel-safe), loading to 0xC0700000; Linux 2.6.37 runs at 0xC0008000](/images/bma/boot-chain-light.svg){: .only-light}
+![OMAP boot chain: ROM loads the UBL from NAND 0x20000; the UBL finds U-Boot at NAND block 6 (copies at 6, 9, 12) and jumps to 0xC1080000; U-Boot runs nandimage1 (kernel-normal) then nandimage2 (kernel-safe), loading to 0xC0700000; Linux 2.6.37 runs at 0xC0008000](/images/bma/boot-chain-dark.svg){: .only-dark}
+
+The UBL prints this:
 
 ```
 Booting TI User Boot Loader
 UBL Version: 1.65_3_c1
-Valid magicnum, ... found in block
+Valid magicnum, 0x55424CBB, found in block 0x00000006.
 Valid boot image found!
 Starting NAND Copy...
-Jumping to entry point
+Jumping to entry point at 0xC1080000.
 ```
 
-Then U-Boot, and this is the stage that matters, because U-Boot has a prompt and a three-second window to grab it. Dumping its environment is the single most useful thing you can do on this board:
+U-Boot comes next. It has a prompt and a three-second autoboot countdown, so it's the stage you interrupt. The first thing I did there was dump the environment:
 
 ```
 bootcmd    = run nandimage
@@ -63,29 +56,26 @@ flags: KERNELBOOT=1  MFG_MODE=FALSE  SKIP_APP=1
 ver = U-Boot 2010.12-00000-gadf5366 (Jul 20 2016 - 16:29:05)
 ```
 
-Read `bootcmd` closely. `nandimage` runs `nandimage1` and then `nandimage2`. The first boots the normal kernel at `0x200000`; the second boots a *safe* recovery kernel at `0x4220000`. The fallback is **sequential, not conditional**: `nandimage2` only runs if `bootm` of the first image *returns*. A kernel with a bad header falls through to the safe one. A kernel that boots and then hangs does not — `bootm` never returns, and you are stuck. Worth knowing before you write anything into the primary slot.
+`nandimage` runs `nandimage1`, then `nandimage2`. The first boots the normal kernel at `0x200000` and the second boots a recovery kernel at `0x4220000`. The second one only runs if `bootm` on the first image returns. A kernel with a bad header or CRC falls through to the safe one. A kernel that starts and then hangs doesn't, because `bootm` never returns. Remember that before you write anything into the primary slot.
 
-Two more quirks from that env. `console=ttyS2`/`ttys2` — the lowercase form is what every working vendor script uses, and it is not a bug. And `emmc=` with an *empty value* is mandatory: that empty argument is what makes the kernel register the MMC controller. Leave it off and the eMMC never appears.
+Two more things from the env. The vendor scripts write the console as `ttys2` in lowercase, and it works. And `emmc=` with an empty value has to be there: that argument makes the kernel register the MMC controller. Leave it off and the eMMC never shows up.
 
-The map before you touch anything
+The `mem=` pair splits DDR in two and leaves a 36 MiB hole that Linux never sees:
+
+![OMAP DDR from 0xC0000000: mem=32M for Linux, a 36 MiB gap not given to Linux, then mem=188M at 0xC4400000. The kernel runs at 0xC0008000, the uImage is loaded at 0xC0700000 and U-Boot runs at 0xC1080000.](/images/bma/p02-ram-map-light.svg){: .only-light}
+![OMAP DDR from 0xC0000000: mem=32M for Linux, a 36 MiB gap not given to Linux, then mem=188M at 0xC4400000. The kernel runs at 0xC0008000, the uImage is loaded at 0xC0700000 and U-Boot runs at 0xC1080000.](/images/bma/p02-ram-map-dark.svg){: .only-dark}
+
+The flash, before touching anything
 ======
 
-Before writing to flash I pulled the partition tables. NAND is 512 MB:
+The NAND is a 512 MiB Micron part. The stock kernel prints nine MTD partitions. Before I wrote anything I backed up every partition through the MTD driver, then went through the dumps one 128 KiB erase block at a time:
 
-```
-mtd  name           offset      size   content
- 0   u-boot env     0x0         128K   env vars, bootargs
- 1   UBL            0x20000     128K   first-stage loader
- 2   u-boot         0x40000     512K   U-Boot 2010.12
- 3   u-boot env2    0xC0000     1.1M   backup env
- 4   kernel-normal  0x200000    32M    primary kernel (imagesize 0xC45808)
- 5   Rsvd1          0x2200000   32M
- 6   kernel-safe    0x4220000   32M    recovery kernel (imagesafesize 0x9fc82c)
- 7   FileSystem     0x6220000   32M    all 0xFF (empty)
- 8   Rsvd2          0x8220000  ~382M
-```
+![Measured NAND block map for board A: U-Boot partition erased, three U-Boot copies in u-boot env2 at blocks 6, 9 and 12, the stock kernel in the first 99 blocks of kernel-normal, an 80-block safe kernel, Rsvd1 erased, JFFS2 in 100 of 256 FileSystem blocks](/images/bma/p02-nand-map-light.svg){: .only-light}
+![Measured NAND block map for board A: U-Boot partition erased, three U-Boot copies in u-boot env2 at blocks 6, 9 and 12, the stock kernel in the first 99 blocks of kernel-normal, an 80-block safe kernel, Rsvd1 erased, JFFS2 in 100 of 256 FileSystem blocks](/images/bma/p02-nand-map-dark.svg){: .only-dark}
 
-The rootfs is not here. It is a `cpio` archive linked straight into the kernel image — `noinitrd`, no `root=` on the command line, `rdinit=/sbin/init`. The 8 GB eMMC holds the application, config and logs, not the init root:
+The partition names don't match what's in them. The partition called `u-boot` at `0x40000` is blank. The U-Boot that actually runs is in `u-boot env2`, three copies at blocks 6, 9 and 12, and that's the "block 0x00000006" in the UBL output. `FileSystem` isn't empty either: 100 of its 256 blocks have JFFS2 nodes. Past the 99 blocks of the stock image, `kernel-normal` still holds old data that was never erased.
+
+Linux doesn't mount its root from NAND. The root is a `cpio` archive built into the kernel image, a self-extracting zImage wrapped in a legacy uImage. That's why the command line has `noinitrd`, `rdinit=/sbin/init` and no `root=`. The 8 GB eMMC holds the application, config and logs:
 
 ```
 mmcblk0  partitions
@@ -96,12 +86,12 @@ mmcblk0  partitions
  p7 /fwsync  1G   staging for over-the-air updates
 ```
 
-`/fwsys` was a small surprise worth repeating: its flags are *file presence*, not file contents. A file named `MASTER` or `updateflag.fpga` existing is the signal; what is inside it is irrelevant.
+The flags in `/fwsys` work by file presence. If a file named `MASTER` or `updateflag.fpga` exists, the flag is set. The contents don't matter.
 
 Booting a root that changes nothing
 ======
 
-The first real foothold does not write to the device at all. Interrupt U-Boot, point the kernel at an NFS root exported from the bench machine, and boot. The device flash is untouched and the whole thing is reversible with a power cycle:
+The first foothold doesn't write to the device at all. I interrupt U-Boot, point the kernel at an NFS root exported from the bench machine and boot. The flash isn't touched, and a power cycle puts the board back to stock:
 
 ```
 setenv serverip <bench-ip>
@@ -115,32 +105,33 @@ nand read 0xc0700000 0x200000 0xc45808
 bootm 0xc0700000
 ```
 
-Export a root that is the stock userland plus the `c1*` kernel modules plus my own tools, and the board boots into it over the network. One trap cost me an afternoon: copy the factory `lib/` across too (glibc 2.9, the `ld-linux.so.3` symlinks), or every vendor binary dies with `ENOENT` at exec — not because the binary is missing, but because its loader is.
+The exported root is the stock userland, the `c1*` kernel modules and my own tools. One thing cost me an afternoon: you have to copy the factory `lib/` too (glibc 2.9 and the `ld-linux.so.3` symlinks). Without it every vendor binary fails with `ENOENT` at exec. The binary is there; its loader isn't.
 
-With an NFS root I have a shell, my own tools on `PATH`, and the device's own flash exactly as the factory left it. This is the point where it stops being an appliance.
+With the NFS root I get a shell, my tools on `PATH`, and the device's flash exactly as the factory left it.
 
 A kernel that persists
 ======
 
-NFS root is a bench setup. To carry a modified kernel on the tile itself I write it into the primary NAND slot and leave the safe slot as a parachute. The order matters:
+NFS root only works on the bench. To keep a modified kernel on the tile I write it into the primary NAND slot and leave the safe slot alone. Do it in this order:
 
 ```
-# 1. Save a known-good stock kernel FIRST, through the MTD driver so ECC is applied --
-#    NOT a raw nanddump, which copies uncorrected bytes.
+# 1. Save the stock kernel first, through the MTD char device so ECC is applied.
+#    A raw nanddump copies uncorrected bytes; /dev/mtdblock4 reads fail.
+board$ ls -l /dev/mtd4          # must be char 90, 8: the read/write node is minor 2*N
 board$ dd if=/dev/mtd4 of=/fwsync/uImage.stock bs=131072
 
 # 2. At U-Boot: erase the primary slot and write the new kernel.
 nand erase 0x200000 0x2000000
 nand write 0xc0700000 0x200000 <filesize>
 
-# 3. If the image size changed, fix U-Boot's recorded length or bootm reads the wrong count.
+# 3. If the image size changed, update U-Boot's length or bootm reads the wrong count.
 fw_setenv imagesize <hex-filesize>
 ```
 
-The safe kernel at `0x4220000` is never touched, so `bootcmd` still tries normal, then safe. Reverting is re-writing `uImage.stock` the same way. Always prove the new kernel over TFTP first — `tftp 0xc0700000 uImage.new; bootm` — because of the sequential-fallback trap above: a kernel that hangs after a successful `bootm` will not fall through to the parachute.
+Check the minor number before you trust a dump. The MTD char nodes use minor 2N for partition N. A `/dev/mtd4` made with minor 4 opens `mtd2`, the blank U-Boot partition, and `dd` copies 512 KiB of 0xFF without an error.
 
-![The OMAP boot chain from ROM through UBL and U-Boot to the normal/safe kernels, beside the 512 MB NAND partition map. The fallback is sequential, not conditional; the two recovery postures are an NFS root that changes nothing and a persistent kernel written only into the primary slot, leaving the factory safe kernel at 0x4220000 intact.](/images/BMA360_boot_chain.svg)
+The safe kernel at `0x4220000` is never touched, so `bootcmd` still tries normal and then safe. To revert, write `uImage.stock` back the same way. Test every new kernel over TFTP first (`tftp 0xc0700000 uImage.new; bootm`), because a kernel that hangs after a successful `bootm` won't fall through to the safe one.
 
-That is the whole recovery posture. One NFS path that touches nothing, one flash path that keeps the factory's own recovery image intact, and a serial console to watch both. On a board I own, that is just ordinary bring-up — but on an appliance that expects to only ever run `heb_app.bin`, it is the difference between a research platform and a paperweight.
+So there are two ways in: an NFS root that touches nothing, and a flash kernel that leaves the factory recovery image in place, both watched from the serial console.
 
-There is a second computer in the tile, though, and it boots its own Linux over a connector I had written off as dark. That is Part 3.
+There's a second computer in the tile, and it boots its own Linux over a connector I had written off as dead. That's Part 3.
