@@ -54,9 +54,9 @@ The Python web service reads analysis logs and the hub's fleet feed. It reads th
 |---|---|---|
 | **Live / analysis** | Spectrum, levels, detections and history | Packet and signal health do not validate a direction; model scores do not confirm a species |
 | **Targets** | Per-array polar plots in the tile's own frame; fused tracks listed separately when available | A local angle is not a compass bearing without the tile's orientation |
-| **Fleet** | Surveyed tiles, bearing rays and angular uncertainty, plus positions reported by the hub; a separate relative-calibration view | The browser does not intersect rays and turn the crossing into a fix. Relative calibration is not a geographic position |
+| **Fleet** | Registered tile poses marked surveyed, bearing rays and angular uncertainty, plus positions reported by the hub; a separate relative-calibration view | The registry label is not proof of a physical survey. The browser does not intersect rays and turn the crossing into a fix. Relative calibration is not a geographic position |
 
-Fleet and Targets distinguish stale or missing data from a fresh feed with no tracks. That's why a dashboard with two healthy audio inputs and an empty fused-track list can be working correctly. The hub still needs compatible timing and poses, consistent microphone geometry, and bearings that agree on the same source.
+Fleet and Targets distinguish stale or missing data from a fresh feed with no tracks. That's why a dashboard with two healthy audio inputs and an empty fused-track list can be working correctly. The poses entered for this installation began as estimates, not measured positions; the registry's `surveyed` label alone doesn't establish their accuracy. The hub still needs compatible timing and verified poses, consistent microphone geometry, and bearings that agree on the same source.
 
 ## Listening is a separate output
 

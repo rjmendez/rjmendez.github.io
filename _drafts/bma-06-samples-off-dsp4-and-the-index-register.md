@@ -84,11 +84,11 @@ The host model and the probe were corrected to represent the word-scaled indexed
 | probe v1, DSP4 id-39 | index-addressed copy compared with absolute copy | 42/48 words **different**; frame 0 slot `s` read word `4*s` |
 | emulator correction | indexed displacement modeled in words; ordinary `MODIFY` remains byte-scaled | host-tested |
 | probe v2, B/bma1 DSP4 id-39 | armed pass `seq=2`, buffer `00256dc8`, `miss=0` | **0/48 wrong**; per-slot dBFS matched (`0:-68 1:-70 2:-85 3:-89 5:-80 6:-81`); sync 24/24; clean unpatch |
-| levels hook | one remaining indexed-load caller corrected to use the silicon unit | open change; host-tested, not loaded on a board |
+| levels hook | one remaining indexed-load caller corrected to use the silicon unit | correction merged and host-tested; not loaded on a board |
 
 Probe v2 confirms the address-unit rule at this patch point. It does not validate the separate levels-hook caller or prove a multi-frame delay ring; those are different code paths and need their own checks.
 
 Where this leaves the array
 ======
 
-I can read a frame of real microphone audio off DSP4, with alignment proven by the sync witnesses, using the absolute-address copy; the corrected indexed copy now matches it word for word at id-39. I can form a bit-exact beam from the same snapshot in memory. Neither result establishes direction or quality, and the separate levels-hook caller and multi-frame delay ring remain to be checked. What I still cannot say is *what actually leaves the tile* on the eight Dante channels — and the firmware itself contradicts itself about that. That contradiction is Part 7.
+I can read a frame of real microphone audio off DSP4, with alignment proven by the sync witnesses, using the absolute-address copy; the corrected indexed copy now matches it word for word at id-39. I can form a bit-exact beam from the same snapshot in memory. Neither result establishes direction or quality, and the separate levels-hook caller and multi-frame delay ring remain to be checked. What I still cannot say is *what actually leaves the tile* on the eight Dante channels. That question is Part 7.
