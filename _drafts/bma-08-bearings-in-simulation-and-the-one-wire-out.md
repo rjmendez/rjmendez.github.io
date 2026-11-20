@@ -10,7 +10,7 @@ tags:
   - BMA360
 ---
 
-This was the last post in the original eight-part series, and the one most likely to be misread. So, up front: **the acoustic camera does not work yet.**
+The custom audio link and the bearing map are two separate experiments. The hub already receives live audio over Dante; neither experiment shows that the custom link can deliver that audio, or that two arrays can locate a real source.
 
 ![The main board's SMSC LAN9500A Ethernet PHY beside the Power-over-Ethernet input section](/images/BMA360_LAN9500_ethernet.jpg) The pictures of bird bearings are simulated. What is real is a pile of mechanism results — a shell on each computer, my code on a DSP, a frame of microphone audio — and a clear-eyed list of the gap between those and a working instrument.
 
@@ -119,4 +119,4 @@ The concrete remaining work, in rough order:
 5. **Prove a bearing with a known source**, then repeat on two arrays with measured poses and verified slot-to-mic geometry.
 6. **Recover the 24 silent elements** (mics 97–120) as a separate fabric-rewrite problem. The Cyclone bitstream self-loads from its own flash and is not yet round-trippable (Part 4).
 
-The foundations are real, but they do not add up to a working acoustic camera yet. There is real microphone audio in the DSP ring, a memory-only beam calculation, host/RTL implementations of several next stages, and a synthetic bearing display. The missing result is a continuous, measured path from a real source through the array and onto a validated bearing—not another green simulation.
+The custom path still needs a continuous stream of real samples and a known-source bearing test. Part 9 starts at the other end: what the existing Dante stream lets the hub and dashboard do before the custom link is ready.
