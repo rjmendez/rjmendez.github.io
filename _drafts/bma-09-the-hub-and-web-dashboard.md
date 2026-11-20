@@ -56,7 +56,7 @@ A Python web service tails the analysis logs and the fleet feed, handles rotatio
 ![Live view: 60-second waterfall, spectrum with peak hold, per-beam level rose and beam list, and latest detections.](/images/bma/p09-live-light.png){: .only-light}
 ![Live view: 60-second waterfall, spectrum with peak hold, per-beam level rose and beam list, and latest detections.](/images/bma/p09-live-dark.png){: .only-dark}
 
-The live view. The per-beam strip under the waterfall was still loading when I grabbed this.
+The live view, with the last 60 seconds in the waterfall and one small waterfall per beam under it. Ignore the 100% on the detection: the dashboard runs the classifier's raw score through a sigmoid, and the top score is always big enough to round to 100. It ranks detections; it isn't a confidence.
 
 <video class="bma-av" controls muted loop playsinline preload="none" poster="/images/bma/p09-waterfall-poster.png">
   <source src="/files/bma/p09-waterfall.webm" type="video/webm">
