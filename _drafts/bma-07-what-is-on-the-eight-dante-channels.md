@@ -89,4 +89,4 @@ To be explicit:
 
 > I have **not** shown that the eight Dante channels are raw microphones. I have **not** produced a validated direction-of-arrival from live array audio. I have **not** tracked a bird. What I have is eight channels of unknown-but-knowable content, a concrete experiment to identify them, and two unexplained measurements I am refusing to paper over.
 
-Part 8 is the last one: where the bearings actually come from today (simulation), the one real transport I built to get a single wire of data out of the array, and a plain list of everything between here and a working acoustic camera.
+Part 8 follows the experimental one-wire link and explains what the simulated bearing map can test. Part 9 follows the audio that already leaves the tiles over Dante, through the hub and into the web dashboard.
