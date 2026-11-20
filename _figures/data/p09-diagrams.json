@@ -1,0 +1,7 @@
+{
+  "_provenance": "doc: _drafts/bma-09-the-hub-and-web-dashboard.md (packet layout, bridge gap rule, estimator windows) and the hub fleet feed snapshot 2026-11-20 03:20:47 UTC quoted there. Reblock and window figures are worked examples of the documented rules, not captures.",
+  "packet": {"length": 393, "header_bytes": 9, "frames": 16, "channels": 8, "bytes_per_sample": 3, "pps": 3000, "pcm_bytes_per_s": 1152000},
+  "reblock": {"block": 256, "buffered_start": 1000, "short_block": 240, "gap_start": 1240, "gap_before": 1256},
+  "doa": {"window": 4800, "hop": 2400, "rate": 48000},
+  "fleet_snapshot": {"utc": "2026-11-20 03:20:47", "rays": 2, "bearing_tracks": 2, "fused": 0, "reason": "clock_local", "clock_rebooted": 2, "guard_s": 60}
+}

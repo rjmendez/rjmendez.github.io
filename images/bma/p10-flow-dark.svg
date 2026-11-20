@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="870" height="196" viewBox="0 0 870 196" font-family="Segoe UI, DejaVu Sans, Arial, sans-serif" font-size="13" fill="#f2f2f2">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c9c9c9"/></marker></defs>
+<rect x="20" y="20" width="140" height="56" rx="6" fill="#3b3f45" stroke="#8a8a8a" stroke-width="1.5"/><text x="90.0" y="44.0" text-anchor="middle" font-size="13" font-weight="600">Training data</text><text x="90.0" y="61.0" text-anchor="middle" font-size="11.5" fill="#c9c9c9">ant-data Parquet</text>
+<line x1="160" y1="48" x2="196" y2="48" stroke="#c9c9c9" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="198" y="20" width="220" height="56" rx="6" fill="#3b3f45" stroke="#7cb6ff" stroke-width="1.5"/><text x="308.0" y="44.0" text-anchor="middle" font-size="13" font-weight="600">Host trainer + reference</text><text x="308.0" y="61.0" text-anchor="middle" font-size="11.5" fill="#c9c9c9">Python, SageMaker</text>
+<line x1="418" y1="48" x2="454" y2="48" stroke="#c9c9c9" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="456" y="20" width="200" height="56" rx="6" fill="#3b3f45" stroke="#7cb6ff" stroke-width="1.5"/><text x="556.0" y="44.0" text-anchor="middle" font-size="13" font-weight="600">Exported weights</text><text x="556.0" y="61.0" text-anchor="middle" font-size="11.5" fill="#c9c9c9">+ SHA-256 sidecar</text>
+<line x1="308" y1="76" x2="308" y2="112" stroke="#c9c9c9" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="316" y="98" font-size="11.5" fill="#c9c9c9">golden vectors</text>
+<rect x="198" y="114" width="220" height="50" rx="6" fill="#45403a" stroke="#86d98f" stroke-width="1.5"/><text x="308.0" y="144.0" text-anchor="middle" font-size="13" font-weight="600">Python tests</text>
+<line x1="556" y1="76" x2="556" y2="112" stroke="#c9c9c9" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="564" y="98" font-size="11.5" fill="#c9c9c9">load / test</text>
+<rect x="456" y="114" width="200" height="50" rx="6" fill="#45403a" stroke="#86d98f" stroke-width="1.5"/><text x="556.0" y="144.0" text-anchor="middle" font-size="13" font-weight="600">FPGA RTL + testbench</text>
+<path d="M418,139 L454,139" stroke="#c9c9c9" stroke-width="1.5" stroke-dasharray="3 3"/>
+<text x="436" y="186" text-anchor="middle" font-size="11.5" fill="#c9c9c9">same inputs and weights, same outputs, fixed cycle count</text>
+<line x1="656" y1="139" x2="692" y2="139" stroke="#c9c9c9" stroke-width="1.5" marker-end="url(#ar)" stroke-dasharray="5 4"/>
+<rect x="694" y="114" width="160" height="50" rx="6" fill="#45403a" stroke="#9a9a9a" stroke-width="1.5" stroke-dasharray="5 4"/><text x="774.0" y="135.0" text-anchor="middle" font-size="13" font-weight="600">BMA audio path</text><text x="774.0" y="152.0" text-anchor="middle" font-size="11.5" fill="#c9c9c9">next</text>
+</svg>

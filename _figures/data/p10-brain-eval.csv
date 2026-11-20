@@ -1,0 +1,6 @@
+# provenance: o-fpga-bitstream/ANT_BRAIN_SLOT.md accuracy table (status 2026-11-13: host simulation, synthetic audio, 3 classes, chance 0.333); reproduced digit for digit by the FlyBrain honesty audit 2026-11-15. These are the numbers behind the retracted MB headline. n=100 runs for a/b/b2, n=10 for c/e/e2; std given where the doc gives it.
+snr_db,a_v1_mb,b_v2_mb,b2_v2_mb_conv,c_linear,e_knn4,e2_knn_d_zc,b_std,c_std,e2_std
+12,0.696,0.853,0.846,0.862,0.887,0.890,0.020,0.022,0.021
+6,0.630,0.822,0.816,0.848,0.858,0.866,0.024,0.018,0.023
+0,0.499,0.740,0.731,0.782,0.793,0.798,0.025,0.020,0.016
+-6,0.383,0.539,0.526,0.601,0.604,0.657,0.032,0.031,0.022

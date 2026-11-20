@@ -1,0 +1,107 @@
+{
+ "provenance": "Per-slot dBFS of the DSP4 SPORT0 receive ring, read on silicon by our hooks, array B. Values copied from Loci findings; the raw words of these passes are not kept.",
+ "full_stack_window4": {
+  "finding": "626c8743",
+  "date": "2026-11-18",
+  "dbfs": {
+   "0": -67,
+   "1": -65,
+   "2": -71,
+   "3": -72,
+   "4": -10,
+   "5": -78,
+   "6": -79,
+   "19": -42,
+   "20": -17
+  },
+  "zero_slots": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18
+  ],
+  "notes": {
+   "4": "not a mic",
+   "19": "sync 0x0000ff00",
+   "20": "sync 0x00123456"
+  }
+ },
+ "idxprobe_v1": {
+  "finding": "6026a0ab",
+  "date": "2026-11-18",
+  "wrong_words": 42,
+  "of": 48,
+  "index_A": {
+   "0": -70,
+   "1": -10,
+   "2": null,
+   "3": null,
+   "5": -17,
+   "6": -89
+  },
+  "absolute_B": {
+   "0": -69,
+   "1": -72,
+   "2": -71,
+   "3": -86,
+   "5": -67,
+   "6": -73
+  }
+ },
+ "idxprobe_v2": {
+  "finding": "aacb2142",
+  "date": "2026-11-19",
+  "wrong_words": 0,
+  "of": 48,
+  "index_A": {
+   "0": -68,
+   "1": -70,
+   "2": -85,
+   "3": -89,
+   "5": -80,
+   "6": -81
+  },
+  "absolute_B": {
+   "0": -68,
+   "1": -70,
+   "2": -85,
+   "3": -89,
+   "5": -80,
+   "6": -81
+  }
+ },
+ "sport0_mmr": {
+  "finding": "acf48788",
+  "date": "2026-11-16",
+  "config": "lone DSP4",
+  "regs": {
+   "SPORT0_CTL_A": "c2000171",
+   "SPORT0_CTL_B": "00000171",
+   "SPORT0_DIV_A": "00170020",
+   "SPORT0_DIV_B": "00170020",
+   "SPORT0_MCTL_A": "00001401",
+   "SPORT0_MCTL_B": "00001401",
+   "SPORT0_CS0_A": "00000001",
+   "SPORT0_CS0_B": "00000001",
+   "SPORT0_CS1..3": "00000000",
+   "DMA0_ADDRSTART": "28256dc8",
+   "DMA0_CFG": "00114221",
+   "DMA0_XCNT": "000000a8",
+   "DMA0_XMOD": "00000004",
+   "DMA0_DSCPTR_NXT": "282575d0",
+   "DMA1_ADDRSTART": "28257308",
+   "DMA1_CFG": "00114223",
+   "DMA1_XCNT": "000000a8",
+   "DMA1_XMOD": "00000004",
+   "DMA1_DSCPTR_NXT": "282575b8"
+  }
+ }
+}

@@ -1,0 +1,23 @@
+# provenance: /proc/mtd read on a running Brooklyn-3 card (Zynq XC7Z015), 2026-11-15 baseline. Offsets: partitions are contiguous in listing order from 0;
+# cross-checked against the vendor U-Boot writer offset table (safefpga@0x80000, safeboot@0x480000, fpga@0x590000, boot@0x990000, kernel@0xaa0000).
+# flashall, image and safeall are overlay partitions spanning other ones.
+name,size_hex
+skd,0x00040000
+fsbl,0x00040000
+safefpga,0x00400000
+safeboot,0x00100000
+safebootenv,0x00010000
+fpga,0x00400000
+boot,0x00100000
+bootenv,0x00010000
+kernel,0x00610000
+rootfs,0x02000000
+userarea,0x00400000
+brdinfo,0x00010000
+license,0x00010000
+safelicense,0x00010000
+capability,0x00010000
+config,0x00020000
+flashall,0x04000000
+image,0x02610000
+safeall,0x00580000
