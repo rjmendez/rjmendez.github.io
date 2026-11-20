@@ -1,6 +1,8 @@
 ---
 layout: single
 title: "BMA360, Part 10: FlyBrain and the Array"
+header:
+  og_image: bma/og/bma360-part-10.png
 excerpt: "FlyBrain's host-side reference models, two FPGA prototypes, a Cyclone wrapper, and a 121-microphone feature engine in RTL, plus an accuracy headline I retracted."
 tags:
   - Hardware

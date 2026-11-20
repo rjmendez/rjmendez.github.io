@@ -166,6 +166,7 @@ RESULTS = [
     ("host", 8, "levels-hook indexed caller: 474 pass, 110 skip"),
     ("host", 8, "Zynq receive top + ring path"),
     ("host", 8, "Cyclone TX / SHARC return: 12 synthetic RTL tests"),
+    ("si", 8, "own egress on a card: 8 synthetic streams, 0.00% loss"),
     ("host", 8, "Zynq-PL egress source: needs a live PL ring"),
     ("host", 8, "virtual-edge tracks on live input: noise level"),
     ("sim", 8, "DOA bearings from generated sources"),
@@ -213,5 +214,35 @@ def scorecard():
     return save_mpl("p08-scorecard", draw, figsize=(10, 7.2))
 
 
+# 2026-11-11, board A's card, vendor stack up; 5 s /proc deltas and bma-egressd status.
+EGRESS = [  # (label, cpu busy %, frames skipped %)
+    ("ipcore_manager running", 100.0, 64050 / 214050 * 100),
+    ("ipcore_manager paused", 30.0, 0.0),
+]
+
+
+def egress_cpu():
+    def draw(fig, p, theme):
+        axes = fig.subplots(1, 2)
+        labels = [e[0] for e in EGRESS]
+        cols = [p["red"], p["green"]]
+        for ax, k, title in ((axes[0], 1, "card CPU busy (%)"), (axes[1], 2, "8-stream egress: frames skipped (%)")):
+            vals = [e[k] for e in EGRESS]
+            ax.set_axisbelow(True)
+            ax.barh(labels, vals, color=cols, height=0.55)
+            ax.set_xlim(0, 110)
+            ax.invert_yaxis()
+            ax.set_title(title, fontsize=11.5)
+            ax.grid(axis="y", visible=False)
+            for y, v in enumerate(vals):
+                ax.text(v + 2, y, f"{v:.0f}%" if k == 1 else f"{v:.1f}%", va="center", color=p["fg"], fontsize=10.5)
+        axes[1].set_yticklabels([])
+        fig.text(0.01, -0.06, "Synthetic payload; this measures the card's transport, not microphone audio. "
+                 "Running: 64,050 of 214,050 frames skipped.", color=p["muted"], fontsize=9.5)
+        fig.tight_layout()
+
+    return save_mpl("p08-egress-cpu", draw, figsize=(10, 2.8))
+
+
 def build():
-    return frame() + wave() + scorecard()
+    return frame() + wave() + scorecard() + egress_cpu()

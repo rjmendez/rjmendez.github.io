@@ -1,6 +1,8 @@
 ---
 layout: single
 title: "BMA360, Part 9: From Dante Packets to the Web Dashboard"
+header:
+  og_image: bma/og/bma360-part-9.png
 excerpt: "Two tiles feed a Windows hub over the stock Dante output. Packet decoding, gap handling, classification, bearings, the dashboard, and a decoder test you can run without the hardware."
 tags:
   - Hardware
@@ -56,6 +58,13 @@ A Python web service tails the analysis logs and the fleet feed, handles rotatio
 
 The live view. The per-beam strip under the waterfall was still loading when I grabbed this.
 
+<video class="bma-av" controls muted loop playsinline preload="none" poster="/images/bma/p09-waterfall-poster.png">
+  <source src="/files/bma/p09-waterfall.webm" type="video/webm">
+  <source src="/files/bma/p09-waterfall.mp4" type="video/mp4">
+</video>
+
+Fifteen seconds of the waterfall, array 1, the mean of its eight Dante channels, on the evening of November 20. The dots near 4 kHz and the vertical streaks below 8 kHz are birds; the band near 16 kHz is there all the time.
+
 ![Detections list: 24-hour histogram by class, filter chips, and rows of BirdNET detections with beam and score.](/images/bma/p09-det-light.png){: .only-light}
 ![Detections list: 24-hour histogram by class, filter chips, and rows of BirdNET detections with beam and score.](/images/bma/p09-det-dark.png){: .only-dark}
 
@@ -79,6 +88,40 @@ The system view lists every producer. Three of eighteen needed attention, includ
 ## Listening
 
 The listening engine steers a host-side delay-and-sum beam at one array's bearing, or at a fused target when there is one. It builds 20 ms chunks with fractional delays and aligns arrays by cross-correlation; if that doesn't lock, it plays one array. There's also an auto-follow mode that picks its target from the hub's fused-target state.
+
+## What it hears
+
+These are detection clips the hub saved from array 1, one Dante channel each, through the stock vendor path. I high-passed them at 1 kHz and turned them up a lot (33 to 52 dB) so they're audible on a laptop; nothing here is beamformed. The species names are BirdNET's labels, not mine.
+
+<figure class="bma-av">
+  <audio controls preload="none">
+    <source src="/files/bma/p09-clip-carolina-wren.opus" type="audio/ogg; codecs=opus">
+    <source src="/files/bma/p09-clip-carolina-wren.mp3" type="audio/mpeg">
+  </audio>
+  <img class="only-light" src="/images/bma/p09-clip-carolina-wren-spec-light.png" alt="Spectrogram of the Carolina Wren clip: three repeated phrases between 2 and 5 kHz.">
+  <img class="only-dark" src="/images/bma/p09-clip-carolina-wren-spec-dark.png" alt="Spectrogram of the Carolina Wren clip: three repeated phrases between 2 and 5 kHz.">
+  <figcaption>Carolina Wren, November 20, 14:25 UTC, channel 7. Three phrases of the song between 2 and 5 kHz.</figcaption>
+</figure>
+
+<figure class="bma-av">
+  <audio controls preload="none">
+    <source src="/files/bma/p09-clip-hairy-woodpecker.opus" type="audio/ogg; codecs=opus">
+    <source src="/files/bma/p09-clip-hairy-woodpecker.mp3" type="audio/mpeg">
+  </audio>
+  <img class="only-light" src="/images/bma/p09-clip-hairy-woodpecker-spec-light.png" alt="Spectrogram of the Hairy Woodpecker clip: short broadband calls near 5-6 kHz.">
+  <img class="only-dark" src="/images/bma/p09-clip-hairy-woodpecker-spec-dark.png" alt="Spectrogram of the Hairy Woodpecker clip: short broadband calls near 5-6 kHz.">
+  <figcaption>Hairy Woodpecker, November 20, 15:53 UTC, channel 6. Sharp single calls near 5 to 6 kHz. This one was quiet, so the noise floor is loud.</figcaption>
+</figure>
+
+<figure class="bma-av">
+  <audio controls preload="none">
+    <source src="/files/bma/p09-clip-white-throated-sparrow.opus" type="audio/ogg; codecs=opus">
+    <source src="/files/bma/p09-clip-white-throated-sparrow.mp3" type="audio/mpeg">
+  </audio>
+  <img class="only-light" src="/images/bma/p09-clip-white-throated-sparrow-spec-light.png" alt="Spectrogram of the clip BirdNET labelled White-throated Sparrow: short sharp calls, no whistled song.">
+  <img class="only-dark" src="/images/bma/p09-clip-white-throated-sparrow-spec-dark.png" alt="Spectrogram of the clip BirdNET labelled White-throated Sparrow: short sharp calls, no whistled song.">
+  <figcaption>BirdNET called this a White-throated Sparrow at 0.99, November 19, 22:00 UTC, channel 7. The spectrogram shows sharp single calls like the woodpecker's above and none of the sparrow's whistles, so I don't believe the label. Uncalibrated scores do this.</figcaption>
+</figure>
 
 ## A decoder test you can run without a tile
 

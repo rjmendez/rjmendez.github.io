@@ -47,6 +47,8 @@ layout: default
       <section class="page__content" itemprop="text">
         {{ content }}
 
+        {% if page.tags contains "BMA360" %}{% include bma-series.html %}{% endif %}
+
         {% if page.citation and page.paperurl and page.slidesurl and page.bibtexurl %}
           <p style="font-size: smaller">Recommended citation: {{ page.citation }}<br /><a href="{{ page.paperurl }}">Download Paper</a> | <a href="{{ page.slidesurl }}">Download Slides</a> | <a href="{{ page.bibtexurl }}">Download Bibtex</a></p>
         {% elsif page.citation and page.paperurl and page.slidesurl %}

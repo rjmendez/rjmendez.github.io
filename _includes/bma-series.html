@@ -1,0 +1,19 @@
+{% include base_path %}
+{% assign series = site.tags.BMA360 | sort: "date" %}
+{% assign i = -1 %}
+{% if series.size > 1 %}
+<nav class="bma-series" aria-label="BMA360 series">
+  <h3><a href="{{ base_path }}/bma360/">BMA360 series</a></h3>
+  <ol>
+  {% for p in series %}
+    {% if p.url == page.url %}{% assign i = forloop.index0 %}<li><strong>{{ p.title | remove_first: "BMA360, " }}</strong></li>
+    {% else %}<li><a href="{{ base_path }}{{ p.url }}">{{ p.title | remove_first: "BMA360, " }}</a></li>{% endif %}
+  {% endfor %}
+  </ol>
+  <div class="bma-series__pager">
+    {% assign pi = i | minus: 1 %}{% assign j = i | plus: 1 %}
+    {% if i > 0 %}{% assign prev = series[pi] %}<a href="{{ base_path }}{{ prev.url }}">&larr; {{ prev.title | remove_first: "BMA360, " }}</a>{% else %}<span></span>{% endif %}
+    {% if i >= 0 and j < series.size %}{% assign nxt = series[j] %}<a href="{{ base_path }}{{ nxt.url }}">{{ nxt.title | remove_first: "BMA360, " }} &rarr;</a>{% endif %}
+  </div>
+</nav>
+{% endif %}
