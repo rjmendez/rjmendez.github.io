@@ -82,6 +82,7 @@ RUNS ON REAL SILICON (measured, read-only or reversible):
   [+] our loader loads + identifies the DSPs (52s, 41/41)        (Part 5)
   [+] our one-word ISR hook executes, reversibly                 (Part 5)
   [+] one frame of real mic audio copied off DSP4's ring         (Part 6)
+  [+] indexed-copy probe v2 matches absolute copy: 0/48 wrong    (Part 6)
 
 MECHANISM ONLY (real data, no directional/quality claim):
   [~] in-memory bit-exact beam on one DSP4 snapshot              (Part 6)
@@ -94,7 +95,7 @@ UNRESOLVED (measured oddity, no settled cause):
   [?] 602-603 sample lag                                         (Part 7)
 
 HOST / RTL TESTS, NOT AN END-TO-END HARDWARE RESULT:
-  [~] index-unit correction and probe v2                          (not yet run on the DSP)
+  [~] levels-hook indexed caller                                  (host-tested, not board-validated)
   [~] Zynq receive top + ring path                                (not loaded on the card)
   [~] Cyclone transmitter / SHARC return RTL                      (12 synthetic RTL tests; not built/loaded)
   [~] Zynq-PL egress source                                        (needs live PL ring data)
@@ -104,14 +105,14 @@ SIMULATION ONLY:
   [-] displayed DOA bearings from generated sources               (Part 8)
 ```
 
-These are not all hardware-verification-only tasks. The index-addressing follow-up and R9 transmitter integration still have software work open. A static review has also raised a concern that delayed beam history may survive an epoch change in the egress path; that needs a code fix or a disproving test before hardware acceptance. It has not been confirmed on hardware. Only after these gates clear does a real-board run answer whether the combined path works.
+These are not all hardware-verification-only tasks. The indexed-address unit now passes its id-39 silicon comparison, but the dependent levels-hook caller and multi-frame delay ring still need their own checks. R9 transmitter integration also remains open. A static review has raised a concern that delayed beam history may survive an epoch change in the egress path; that needs a code fix or a disproving test before hardware acceptance. It has not been confirmed on hardware. Only after these gates clear does a real-board run answer whether the combined path works.
 
 What stands between here and an acoustic camera
 ======
 
 The concrete remaining work, in rough order:
 
-1. **Re-run the corrected indexed probe on the DSP.** The previous silicon run failed; the host-model correction is not a hardware result. The dependent levels hook also needs its software change and board check.
+1. **Exercise multi-frame delay history and validate each dependent caller.** Probe v2 already matched the absolute copy 0/48 wrong at id-39; that validates the addressing rule there, not the levels hook or a table-driven delay ring.
 2. **Integrate and build the R9 transmitter with the W13 receiver.** Resolve the lead-in/acquisition and clock requirements, load the actual Cyclone and Zynq images, then prove frame alignment, CRC, and real payload across the wire.
 3. **Feed the PL ring reader and egress path real samples.** Run the real-audio checker and listen mode on captured output; generated tones do not count as acceptance.
 4. **Resolve the eight-channel identity** with a controlled capture (Part 7). The raw-mics-versus-gated-beams discrepancy still changes what a host-side estimator receives.

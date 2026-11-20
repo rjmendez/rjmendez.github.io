@@ -36,11 +36,11 @@
 
   <line x1="368" y1="116" x2="398" y2="116" stroke="#777" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
 
-  <rect x="404" y="74" width="154" height="84" rx="6" class="box failed"/>
-  <text x="481" y="97" text-anchor="middle" class="label">Indexed history</text>
-  <text x="481" y="117" text-anchor="middle" class="small">v1: 42 of 48 differed</text>
-  <text x="481" y="134" text-anchor="middle" class="small">model corrected</text>
-  <text x="481" y="150" text-anchor="middle" class="small" fill="#c0392b">v2 NOT on silicon</text>
+  <rect x="404" y="74" width="154" height="84" rx="6" class="box measured"/>
+  <text x="481" y="97" text-anchor="middle" class="label">Index addressing</text>
+  <text x="481" y="117" text-anchor="middle" class="small">v1: 42/48 wrong</text>
+  <text x="481" y="134" text-anchor="middle" class="small">v2: 0/48 wrong</text>
+  <text x="481" y="150" text-anchor="middle" class="small" fill="#2e7d32">id-39 model measured</text>
 
   <line x1="558" y1="116" x2="588" y2="116" stroke="#777" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
 
@@ -78,7 +78,7 @@
   <text x="24" y="399" class="section">WHAT COUNTS AS THE NEXT RESULT</text>
   <rect x="24" y="413" width="852" height="145" rx="8" fill="#fff" stroke="#bbb" stroke-width="1.2"/>
   <circle cx="48" cy="440" r="13" fill="#2e7d32"/><text x="48" y="444" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">1</text>
-  <text x="72" y="444" class="small">On DSP4, v2 indexed copy matches the absolute copy word-for-word, with both sync witnesses in place.</text>
+  <text x="72" y="444" class="small">Exercise the multi-frame delay ring on DSP4; validate the levels-hook caller separately.</text>
   <circle cx="48" cy="470" r="13" fill="#b8860b"/><text x="48" y="474" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">2</text>
   <text x="72" y="474" class="small">A real sample crosses R9 → W13; frame alignment, CRC, and sequence are checked at the PL ring.</text>
   <circle cx="48" cy="500" r="13" fill="#b8860b"/><text x="48" y="504" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">3</text>

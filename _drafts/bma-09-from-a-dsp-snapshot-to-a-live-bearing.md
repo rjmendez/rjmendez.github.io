@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "BMA360, Part 9: From a DSP Snapshot to a Live Bearing"
-excerpt: "A real frame and a same-snapshot beam are measured on one DSP. The indexed read failed, the one-wire path has not crossed a pin, and live host tracks are not yet bearings. These are separate experiments, not one working pipeline."
+excerpt: "A real frame and same-snapshot beam are measured on one DSP; indexed-copy v2 now matches the absolute copy on silicon. The one-wire path has not crossed a pin, and live host tracks are not yet bearings."
 tags:
   - Hardware
   - Audio
@@ -12,7 +12,7 @@ tags:
 
 Parts 1–8 follow the route from the ceiling tile to the first samples. The next question is whether the new pieces form a live path from the DSP to a bearing on a map. They do not yet. Several pieces exist and have useful test results; those results stop at different boundaries.
 
-![Evidence status along the experimental path from the DSP ring to a bearing: the real sample and memory-only beam are measured; indexed-copy v1 failed and v2 is unverified; the R9-to-W13 link and Zynq ring have no hardware run; the host bearing display is simulated and live tracks are not validated.](/images/BMA360_experimental_pipeline_status.svg)
+![Evidence status along the experimental path from the DSP ring to a bearing: the real sample and memory-only beam are measured; indexed-copy v1 failed and v2 matched on DSP4 at id-39; the R9-to-W13 link and Zynq ring have no hardware run; the host bearing display is simulated and live tracks are not validated.](/images/BMA360_experimental_pipeline_status.svg)
 
 The distinction matters. “The code is written,” “the host test passes,” “the logic passes RTL simulation,” and “the array produced this result” are four different claims.
 
@@ -30,9 +30,9 @@ The indexed read that failed
 
 The first indexed-copy probe compared 48 words from an index-register load with the absolute-address copy in the same pass on DSP4. **42 of 48 differed.** In frame 0, slot `s` returned the word at `4*s`; six words happened to match because both copies read zero.
 
-That mismatch led to a correction in the host model: indexed displacement is word-scaled on this DSP, while ordinary `MODIFY` remains byte-scaled. The corrected probe has not yet been rerun on the DSP. A separate levels-hook change also remains host-tested only. So the useful result is not “indexed reads are fixed”; it is “the old probe was wrong, the failure pattern is measured, and the corrected form still needs its silicon check.”
+That mismatch led to a correction in the host model: indexed displacement is word-scaled on this DSP, while ordinary `MODIFY` remains byte-scaled. Probe v2 then ran on array B, DSP4 at the same id-39 patch point: armed pass `seq=2`, buffer `00256dc8`, `miss=0`; **0 wrong words of 48**. Both forms had the same per-slot levels (`0:-68 1:-70 2:-85 3:-89 5:-80 6:-81` dBFS), the sync witnesses were present 24/24 times, and the probe was cleanly unpatched. The silicon result proves this address-unit rule at that patch point. It does not validate the separate levels-hook caller or a multi-frame delay ring.
 
-Why care about one addressing mode? A delay line needs to walk through several frames of history. An absolute copy can prove that a frame exists; it does not by itself prove that the DSP can traverse a history ring with the intended delay. Until the indexed form passes on the chip, a delay-ring result cannot be trusted.
+Why care about one addressing mode? A delay line needs to walk through several frames of history. Probe v2 now proves the indexed copy against an absolute copy at one patch point, but it does not test table-driven delays across frames or certify every caller. The levels hook and the actual delay-ring implementation still need their own validation.
 
 The proposed R9-to-W13 wire
 ======
@@ -64,7 +64,7 @@ The test that would change the claim
 |---|---|---|
 | DSP receive ring | Real frames read from DSP4; sync words align in 24/24 frames | A sustained, verified stream from the experimental path |
 | In-memory beam | Bit-exact arithmetic on one same-instant snapshot | A valid indexed delay history, then a known-source beam-direction test |
-| Index addressing | Probe v1 failed 42/48; the host model was corrected | Probe v2 passes against the absolute copy on the DSP |
+| Index addressing | Probe v1 failed 42/48; probe v2 passed 0/48 wrong on DSP4 id-39 | Validate the separate levels-hook caller and multi-frame delay ring |
 | R9-to-W13 link | Receiver checks; transmitter/return RTL passes 12 synthetic tests | Reconcile lead-in/acquisition requirements; establish clock and return mapping; build/load images; capture real frame at W13 |
 | Wider raw-mic map | Proposed 18 slots per lane across DSP4–9 | Load only after DSP0 bridge image; verify lane and microphone identities on real audio |
 | Zynq egress | Ring-reader and host-side acceptance components exist | Real samples through the PL ring, with frame, sequence, and audio checks |
