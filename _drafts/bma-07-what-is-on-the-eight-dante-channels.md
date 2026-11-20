@@ -1,6 +1,8 @@
 ---
 layout: single
 title: "BMA360, Part 7: What's Actually on the Eight Dante Channels"
+header:
+  og_image: bma/og/bma360-part-7.png
 excerpt: "The tile emits eight audio channels. For an acoustic camera the whole question is whether they are eight raw microphones or eight already-formed beams. The firmware says both, in two files. Here is what the packets show."
 tags:
   - Hardware
