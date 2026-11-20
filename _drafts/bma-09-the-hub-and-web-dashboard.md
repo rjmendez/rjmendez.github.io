@@ -1,16 +1,16 @@
 ---
 layout: single
 title: "BMA360, Part 9: From Dante Packets to the Web Dashboard"
-excerpt: "Two tiles feed a Windows hub. Here is how it handles gaps, classifies sound, and shows bearings without inventing a position."
+excerpt: "Two tiles feed a Windows hub over the stock Dante output. How the hub decodes packets, handles gaps, classifies sound, and shows bearings, and why the fused-track list is still empty."
 tags:
   - Hardware
   - Audio
   - BMA360
 ---
 
-On November 19, both tiles were sending eight channels at 3,000 packets per second, with no gaps reported in the sampled intervals. The hub's fleet feed showed **two arrays, 42 bearing rays, and zero fused tracks** in one snapshot. The audio was coming in. The rays were estimates from individual arrays, not 42 birds, and the hub had no position to plot.
+On November 19 both tiles were sending eight channels at 3,000 packets per second, with no gaps in the sampled intervals. One snapshot of the hub's fleet feed showed **two arrays, 42 bearing rays, and zero fused tracks**. The 42 rays are per-array estimates, not 42 birds, and with nothing fused the hub had no position to plot.
 
-This is the system that runs today. It uses the Brooklyn-3 cards' existing Dante output, not the experimental wire from Part 8.
+This is the part that runs today. It uses the Brooklyn-3 cards' existing Dante output, not the experimental wire from Part 8.
 
 ## What the hub does with a packet
 
@@ -23,9 +23,9 @@ Analysis records + fleet feed -> Python HTTP server -> web dashboard
 Selected live audio          -> listening engine   -> browser
 ```
 
-In the observed flow, one media packet has a 9-byte header and 16 frames of interleaved, big-endian, 24-bit PCM. At 48 kHz, that's `48,000 / 16 = 3,000` packets per second, or `3,000 × 16 × 8 × 3 = 1,152,000` PCM bytes per second per tile. The Windows bridge repacks selected channels into 256-sample blocks, about 5.33 ms each, using the card's sample clock. If a packet goes missing, the bridge emits any accumulated samples as a short block, then starts a new block marked `gap_before`. No block straddles the hole.
+In the flow I captured, a media packet is a 9-byte header plus 16 frames of interleaved big-endian 24-bit PCM. At 48 kHz that's `48,000 / 16 = 3,000` packets per second, or `3,000 × 16 × 8 × 3 = 1,152,000` PCM bytes per second per tile. The Windows bridge repacks selected channels into 256-sample blocks (about 5.33 ms) on the card's sample clock. When a packet goes missing, the bridge flushes whatever it has as a short block and starts the next one marked `gap_before`, so no block spans the hole.
 
-For this captured 16-frame format, the bridge decodes the packet as follows; this is not a claim about every Dante flow:
+The layout of this one 16-frame format (I haven't checked other Dante flows):
 
 ```text
 byte 0       0x02
@@ -38,39 +38,47 @@ bytes 9..    16 frames; within each frame, channel 0 through 7
 first sample index      = seconds * 48000 + frame
 ```
 
-For sample `frame f`, `channel c`, read three bytes at `9 + 3 * (8*f + c)`. Interpret the 24-bit value as signed: subtract `2**24` if bit 23 is set. Compare the next packet's sample index with the preceding index plus 16; a jump is a discontinuity, not a reason to join the two blocks. Counter rollover and restart require their own handling.
+Sample for frame `f`, channel `c` is the three bytes at `9 + 3 * (8*f + c)`; subtract `2**24` if bit 23 is set. Each packet's first index should be the previous one plus 16. Anything else is a discontinuity and the two blocks stay separate. Counter rollover and restarts need their own handling.
 
-The supervisor runs a bridge for each tile and restarts failed workers. Separate status records matter here: an arriving packet, a nonzero audio block, and a calibrated level are different checks. In that November 19 capture the bridge reported zero packet loss but marked its input-gain check **unverified**. And eight channels arriving at the right rate doesn't settle what those channels carry in every routing mode (Part 7).
+A supervisor runs one bridge per tile and restarts any that die. It tracks packet arrival, nonzero audio, and calibrated level as three separate status checks. In the November 19 capture the bridge reported zero packet loss and also marked its input-gain check **unverified**. Eight channels at the right rate also says nothing about what those channels carry in each routing mode (Part 7).
 
-On the WSL side, a mono branch feeds BirdNET; an analysis branch takes the multichannel stream for level and spectral measurements and multichannel classification. The classifier gates windows on activity and writes detections with their provenance. A label answers *what the model thinks it heard*. It doesn't supply a bearing, and it isn't a confirmed species record.
+On the WSL side a mono branch feeds BirdNET, and an analysis branch takes the multichannel stream for levels, spectra, and multichannel classification. The classifier gates windows on activity and writes each detection with its provenance. The label is the model's guess at what it heard; it has no bearing attached and isn't a confirmed species record.
 
-Direction runs on a separate branch. With direction estimation enabled and a complete microphone map configured, each tile's worker takes the multichannel audio and reports angle estimates to the fleet hub. The hub, not the classifier or browser, decides whether reports from different tiles support a single position. A configured microphone map is enough to start the worker; it is not evidence that the physical channel ordering has been checked.
+Direction is its own branch. With direction estimation on and a full microphone map configured, each tile's worker reports angle estimates to the fleet hub, and the hub decides whether reports from different tiles agree on a position. The worker will start with any complete map. Nobody has checked the physical channel ordering against it yet.
 
-The host direction estimator processes **4,800-sample windows (100 ms) every 2,400 samples (50 ms)**. A missing sample masks its window: the estimator does not bridge the hole with made-up continuity. A confirmed sample-index jump starts a new epoch and discards local tracks. The detection record carries the sample index, epoch, registry clock domain, measurement and quality flags. It does **not** carry an absolute timestamp: BMAA has no PTP timestamp, so `t_ns` and `epoch_ns` are null. A host-derived wall time is available for class hints, not proof of cross-array synchronization.
+The estimator works on **4,800-sample windows (100 ms) every 2,400 samples (50 ms)**. A missing sample masks its whole window. A confirmed sample-index jump starts a new epoch and drops local tracks. Each detection record carries sample index, epoch, registry clock domain, and measurement/quality flags, but no absolute time: BMAA has no PTP timestamp, so `t_ns` and `epoch_ns` are null. There's a host-derived wall time for class hints, and it can't be used to line two arrays up.
 
-That distinction showed up in the live hub. In one fleet-feed snapshot at **2026-11-20 03:20:47 UTC**, the two units were configured as PTP-locked and shared the same reference, yet both reported `not_fused_reason=clock_local`. The feed had two rays, two per-array bearing tracks and zero fused tracks; the adjacent hub log reported `clock_rebooted=2`. This is a timed operational snapshot, not evidence that PTP itself failed or a diagnosis of why each unit was excluded. The code has a restart guard that can mark a unit clock-local when its sample index after restart is more than 60 seconds from the shared timeline. That is a plausible explanation to test, not a confirmed cause. A clock label in the registry and a ray on screen do not prove that the hub can compare two arrays in time.
+That showed up in a fleet-feed snapshot at **2026-11-20 03:20:47 UTC**. Both units were configured as PTP-locked on the same reference, and both reported `not_fused_reason=clock_local`:
+
+```text
+rays: 2   per-array bearing tracks: 2   fused tracks: 0
+not_fused_reason=clock_local   (both units)
+hub log: clock_rebooted=2
+```
+
+I don't know yet why each unit got excluded, and this snapshot doesn't show that PTP failed. The code has a restart guard that marks a unit clock-local if its post-restart sample index lands more than 60 seconds off the shared timeline. That fits, and I haven't tested it.
 
 ## What the browser knows
 
-The Python web service reads analysis logs and the hub's fleet feed. It reads the logs incrementally, handles rotation, and stores hourly summaries so a restart doesn't wipe out the charts. It does not derive positions from audio in the browser. The Fleet and Targets views use the same hub feed:
+The Python web service reads the analysis logs and the hub's fleet feed. It tails the logs, handles rotation, and keeps hourly summaries so a restart doesn't blank the charts. Nothing in the browser derives a position from audio. Fleet and Targets both read the same hub feed:
 
-| View | What it shows | What it doesn't tell you |
+| View | What it shows | Caveat |
 |---|---|---|
-| **Live / analysis** | Spectrum, levels, detections and history | Packet and signal health do not validate a direction; model scores do not confirm a species |
-| **Targets** | Per-array polar plots in the tile's own frame; fused tracks listed separately when available | A local angle is not a compass bearing without the tile's orientation |
-| **Fleet** | Registered tile poses, bearing rays and angular uncertainty, plus positions reported by the hub | The registry label is not proof of a physical survey. The browser does not intersect rays and turn the crossing into a fix |
+| **Live / analysis** | Spectrum, levels, detections, history | Healthy packets don't validate a direction; scores don't confirm a species |
+| **Targets** | Per-array polar plots in the tile's own frame; fused tracks listed separately when there are any | A local angle needs the tile's orientation to become a compass bearing |
+| **Fleet** | Registered tile poses, bearing rays with angular uncertainty, hub-reported positions | The pose labels weren't physically surveyed; the browser never intersects rays itself |
 
-Targets reads the fleet feed; the legacy `/api/v2/targets` payload has no producer and the current view no longer reads it. The view distinguishes loading, unavailable, live and stale from a live feed with no tracks. That's why a dashboard with two healthy audio inputs and an empty fused-track list can be working correctly. The poses entered for this installation began as estimates, not measured positions; the registry's `surveyed` label alone doesn't establish their accuracy. The hub still needs compatible timing and verified poses, consistent microphone geometry, and bearings that agree on the same source.
+The legacy `/api/v2/targets` payload has no producer anymore and Targets doesn't read it. The view tells loading, unavailable, live, and stale apart from a live feed with no tracks, so two healthy inputs and an empty fused list is a valid display. The poses for this install started as estimates, and the registry's `surveyed` label doesn't change that. Fusion still needs compatible timing, verified poses, consistent mic geometry, and bearings that agree on one source.
 
-Freshness is a separate signal too. In the current interface implementation, spectrum becomes stale after 3 seconds and the fleet feed after 5. Those timers say when a file or sample stopped updating; they do not grade its contents. A fresh feed with zero fused tracks is a real state, not a browser failure and not a localization. Relative-calibration support was included in the November 15 deployment, but its opt-in was absent in that snapshot, so it was not active fleet output.
+Staleness: spectrum goes stale after 3 seconds and the fleet feed after 5. The timers only track updates, not content. Relative-calibration support went out in the November 15 deployment, but its opt-in wasn't set in that snapshot, so it wasn't producing fleet output.
 
-## Listening is a separate output
+## Listening
 
-The listening engine can steer a host-side delay-and-sum beam at one array's bearing or at a fused target when one exists. It builds 20 ms chunks with fractional delays and checks inter-array alignment using cross-correlation. If that check doesn't lock, it plays one array rather than summing two misaligned streams. The deployed interface also has an auto-following fused soundscape mode: it chooses listening output from the hub's fused-target state, not from an independent acoustic truth source. Listening can help inspect what the system follows; it does not prove two-array localization.
+The listening engine can steer a host-side delay-and-sum beam at one array's bearing, or at a fused target if one exists. It builds 20 ms chunks with fractional delays and checks inter-array alignment by cross-correlation. If alignment doesn't lock it plays a single array instead of summing two misaligned streams. There's also an auto-following fused soundscape mode, which picks its output from the hub's fused-target state. It's handy for hearing what the system is following and says nothing about whether two-array localization works.
 
 ## A decoder test you can run without a tile
 
-This fixture is **synthetic**. It checks signed-24-bit decoding and packet layout only; its values were generated, not recorded from the array. It is useful for catching byte-order and sign-extension mistakes before using real captures.
+The fixture below is **synthetic**; I generated the values. It catches byte-order and sign-extension mistakes in the packet layout and nothing else.
 
 ```python
 import struct
@@ -95,10 +103,10 @@ assert sample_index == 5904456
 assert first_frame == [-8388608, -1, 0, 1, 8388607, 42, -42, 17]
 ```
 
-The bridge's discontinuity rule is also testable without the hardware. If 240 samples are buffered at index 1000 and a gap is detected before index 1256, the bridge emits the 240-sample partial block; the next 16-sample block begins at 1256 and carries `gap_before`. Neither block pretends to contain samples from the missing interval. Passing this fixture proves only that the host decoder and reblocker honor their format contract. It does not identify the Dante channels, test the physical stream, calibrate levels, or validate a bearing.
+The gap rule can be tested the same way. With 240 samples buffered at index 1000 and a gap detected before 1256, the bridge emits the 240-sample partial block, and the next 16-sample block starts at 1256 with `gap_before` set. Passing this means the host decoder and reblocker follow their format. Channel identity, the physical stream, levels, and bearings are all untested by it.
 
 ## Where to resume on the bench
 
-Start with the working Dante path as the control. Play a fixed source at a physically measured location. Save both bridges' loss and gap counts, per-array angles and sample indices, hub clock-eligibility and pose states, and any fused position. Do not treat a registry `surveyed` flag as a physical measurement. Compare each angle to the source before judging a position. Repeat with silence and with the source in a second location. That separates a good-looking plot from a repeatable bearing.
+The working Dante path is the control. Put a fixed source at a measured spot and record both bridges' loss and gap counts, per-array angles and sample indices, hub clock-eligibility and pose states, and any fused position. Ignore the registry's `surveyed` flag. Check each angle against the source before looking at positions, then repeat with silence and with the source moved.
 
-The custom path has a different first test: capture a real DSP payload at the Zynq receiver, then trace those same samples through the ring and into the host. The indexed-copy probe matched the absolute read on DSP4 (`0/48` wrong after `42/48` differed on the first attempt); it didn't test the multi-frame delay ring. The dependent levels hook is corrected and merged, with 474 host tests passed (110 skipped) and a mutation check that failed 25 tests when the fix was removed, but it has not been loaded on a board. The Cyclone transmit/return block passed 12 synthetic RTL tests; that's not a wire capture. Before accepting that path, the transmitter's 17-cell lead-in and the receiver's non-nominal acquisition requirement of at least 20 idle edges need to be checked together, and the host needs a regression that rejects delayed samples left over from a previous stream epoch.
+The custom path starts somewhere else: capture a real DSP payload at the Zynq receiver and follow the same samples through the ring into the host. The indexed-copy probe matched the absolute read on DSP4 (`0/48` wrong, after `42/48` differed on the first try) but didn't touch the multi-frame delay ring. The levels hook is fixed and merged, with 474 host tests passing (110 skipped) and 25 failing when the fix is mutated out; it hasn't been on a board. The Cyclone transmit/return block passed 12 synthetic RTL tests, with no wire capture. Before that path gets trusted, the transmitter's 17-cell lead-in has to be checked against the receiver's 20-idle-edge acquisition requirement, and the host needs a regression test that rejects delayed samples left over from a previous epoch.
