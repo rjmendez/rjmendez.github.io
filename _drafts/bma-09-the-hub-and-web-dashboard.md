@@ -87,7 +87,8 @@ The system view lists every producer. Three of eighteen needed attention, includ
 
 ## Listening
 
-The listening engine steers a host-side delay-and-sum beam at one array's bearing, or at a fused target when there is one. It builds 20 ms chunks with fractional delays and aligns arrays by cross-correlation; if that doesn't lock, it plays one array. There's also an auto-follow mode that picks its target from the hub's fused-target state.
+![Listening flow: a target, either one array's bearing or the fused target (auto-follow picks it from the hub's fused-target state), goes into a 20 ms delay-and-sum beam with fractional delays, then arrays are aligned by cross-correlation. If they lock it plays both arrays; if not, one.](/images/bma/p09-listening-light.svg){: .only-light}
+![Listening flow: a target, either one array's bearing or the fused target (auto-follow picks it from the hub's fused-target state), goes into a 20 ms delay-and-sum beam with fractional delays, then arrays are aligned by cross-correlation. If they lock it plays both arrays; if not, one.](/images/bma/p09-listening-dark.svg){: .only-dark}
 
 ## What it hears
 

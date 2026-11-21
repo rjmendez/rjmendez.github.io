@@ -17,16 +17,8 @@ FlyBrain is my side project for learning small-model design from insect brains: 
 
 FlyBrain isn't a claim that grown brains beat engineered ones. It's how I learn small-model design from biology: read how an insect circuit is wired, rebuild the idea in code, and see what survives on real data. The tools that fall out of it are useful alone. The cloud training pipeline and the Rust simulator both work without an insect in the loop.
 
-The ants come from a separate project of mine that isn't released. In it, each ant is a small model watching a raw data stream, and you watch the colony in an ant-farm view. No ant is clever. The useful behaviour comes from many of them running together and reacting to each other, which gives patterns that none of them was written to produce. There they do two jobs: anomaly detection, and fast reflex responses to things that change.
-
-On the array the ants are meant to do five jobs. All of it is design, and only the first small piece exists, in simulation:
-- **Anomaly detection.** Keep a running baseline for each feature and raise an alarm when a window leaves it, with a cap on the alarm rate.
-- **Fast reflex.** Respond to a fast impulse, like a chirp or an insect, without waiting for a full classification or a trip to the hub. The response can be an urgent event, or a request to steer beams toward the impulse in anticipation of more sound. The delay target isn't set. One 21.3 ms tick is the placeholder upper bound, and it's unvalidated.
-- **Target acquisition.** Notice that something just appeared in a beam, and keep the evidence that supports it.
-- **Tracking.** Keep following it across beams and windows, and let the candidate expire when the input stops being usable.
-- **Data enrichment.** Attach what the ants saw to the event, so the hub gets a labelled event and not just audio.
-
-The array needs this because raw audio from 121 microphones can't all go to the hub. All 121 are used at the edge, and the heavy work, such as time-difference-of-arrival, happens before the hub. Each array has to decide locally what is worth sending, and quickly. The big models (Perch, BirdNET) stay on the hub, where the GPU is.
+![Left: a separate unreleased project where each ant is a small model on one raw data stream, shown as an ant farm, with behaviour from many reacting together; its jobs are anomaly detection and fast reflex. Right: the five jobs on the array, anomaly detection, fast reflex, target acquisition, tracking and data enrichment. Only a gate piece of anomaly detection exists, in RTL simulation; the rest is design. Raw audio from 121 microphones cannot all go to the hub.](/images/bma/p10-why-ants-light.svg){: .only-light}
+![Left: a separate unreleased project where each ant is a small model on one raw data stream, shown as an ant farm, with behaviour from many reacting together; its jobs are anomaly detection and fast reflex. Right: the five jobs on the array, anomaly detection, fast reflex, target acquisition, tracking and data enrichment. Only a gate piece of anomaly detection exists, in RTL simulation; the rest is design. Raw audio from 121 microphones cannot all go to the hub.](/images/bma/p10-why-ants-dark.svg){: .only-dark}
 
 What I've built so far is the first small piece: the feature encoder and a tiny classifier head, run in simulation on synthetic audio. The parts of the list that exist are small. A per-channel activity gate is in the audio core's RTL: it keeps a running baseline and deviation for each of 128 channels and flags a channel after two consecutive windows well off its baseline, once a 4.1 s warm-up is done. It matches its Python reference window by window in simulation. That gate is one piece of anomaly detection. It isn't the full ant pipeline, and with a 4.1 s warm-up and two flagged windows it can't by itself meet a one-tick reflex deadline. The reflex path, acquisition, tracking, enrichment and the ant-to-ant signalling don't exist yet, and no ant output has come from a live array. The ants in that project are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
 
@@ -174,10 +166,7 @@ No FlyBrain logic has been loaded onto a BMA board.
 
 ## Next
 
-1. Freeze the Cyclone→Zynq contract and the exact bit mapping, and get it reviewed against the source.
-2. Replay recorded event streams offline, including resets, gaps, reordering and model changes, and check the Zynq stage joins only what it should.
-3. Compare features and heads on real array recordings with clean train/test splits, calibrated scores and per-class numbers, with the linear and nearest-neighbour baselines on the same examples.
-4. Synthesis, timing and an independent RTL review.
-5. Only after that, a bench load on one array, with its own review and sign-off. Our Cyclone images already go through that gate. The latest one, a link probe with no FlyBrain logic in it, got a NO-GO review on 2026-11-20. A later probe load on one array passed its register checks and the array went back to stock. No FlyBrain logic has been loaded on any array.
+![Five gates before a FlyBrain bench load, none passed: freeze the Cyclone to Zynq contract, replay recorded events offline, compare on real recordings with baselines, synthesis and independent RTL review, then a bench load on one array with its own sign-off.](/images/bma/p10-next-gates-light.svg){: .only-light}
+![Five gates before a FlyBrain bench load, none passed: freeze the Cyclone to Zynq contract, replay recorded events offline, compare on real recordings with baselines, synthesis and independent RTL review, then a bench load on one array with its own sign-off.](/images/bma/p10-next-gates-dark.svg){: .only-dark}
 
 The FlyBrain, training, and firmware repos are private for now. A public version needs a sanitized snapshot, pinned tool versions, data provenance, and the golden vectors.
