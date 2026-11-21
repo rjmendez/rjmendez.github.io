@@ -128,7 +128,7 @@ def listening(p):
 
 def why_ants(p):
     s = [_title("Where the ants come from, and the five jobs they have on the array")]
-    s.append(_dbox(20, 44, 330, 250, p["faint"], "A separate project, unreleased", p))
+    s.append(_dbox(20, 44, 330, 250, p["faint"], "Ant farm: swarm learning experiment", p))
     s.append(_lines(185, 86, ["each ant: a small model", "watching one raw data stream", "", "shown as an ant farm", "", "no ant is clever", "the behaviour comes from many",
                               "reacting together", "", "jobs there: anomaly detection,", "fast reflex"], p, size=11.5, step=16))
     s.append(_arrow(350, 170, 410, 170, p))
