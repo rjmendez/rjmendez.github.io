@@ -51,6 +51,15 @@ html[data-theme="dark"] .bma-av audio {
   font-weight: bold;
 }
 
+.page__content a.bma-index__item,
+.page__content a.bma-index__item:hover {
+  text-decoration: none;
+}
+
+.page__content a.bma-index__item:hover .bma-index__title {
+  text-decoration: underline;
+}
+
 .bma-index__excerpt {
   color: var(--global-text-color-light);
   font-size: 0.85em;
