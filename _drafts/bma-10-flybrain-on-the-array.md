@@ -19,14 +19,16 @@ FlyBrain isn't a claim that grown brains beat engineered ones. It's how I learn 
 
 The ants come from a separate project of mine that isn't released. In it, each ant is a small model watching a raw data stream, and you watch the colony in an ant-farm view. No ant is clever. The useful behaviour comes from many of them running together and reacting to each other, which gives patterns that none of them was written to produce. There they do two jobs: anomaly detection, and fast reflex responses to things that change.
 
-On the array I want the same pieces doing three jobs:
+On the array the ants are meant to do five jobs. All of it is design, and only the first small piece exists, in simulation:
+- **Anomaly detection.** Keep a running baseline for each feature and raise an alarm when a window leaves it, with a cap on the alarm rate.
+- **Fast reflex.** Turn an alarm into an outgoing event within a fixed, short delay. The target isn't set yet. One 21.3 ms tick is the placeholder upper bound, and it's unvalidated.
 - **Target acquisition.** Notice that something just appeared in a beam.
 - **Tracking.** Keep following it across beams and windows.
 - **Data enrichment.** Attach what the ants saw to the event, so the hub gets a labelled event and not just audio.
 
 The array needs this because raw audio from 121 microphones can't all go to the hub. Each array has to decide locally what is worth sending, and quickly. The big models (Perch, BirdNET) stay on the hub, where the GPU is.
 
-What I've built so far is the first small piece: the feature encoder and a tiny classifier head, in simulation. Acquisition, tracking and enrichment across many ants don't exist yet. The ants in that project are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
+What I've built so far is the first small piece: the feature encoder and a tiny classifier head, run in simulation on synthetic audio. The baseline alarm, the reflex path, acquisition, tracking and enrichment across many ants don't exist yet, and no ant output has come from a live array. The ants in that project are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
 
 ## Where it fits
 
@@ -150,6 +152,6 @@ No FlyBrain logic has been loaded onto a BMA board.
 2. Replay recorded event streams offline, including resets, gaps, reordering and model changes, and check the Zynq stage joins only what it should.
 3. Compare features and heads on real array recordings with clean train/test splits, calibrated scores and per-class numbers, with the linear and nearest-neighbour baselines on the same examples.
 4. Synthesis, timing and an independent RTL review.
-5. Only after that, a bench load on one array, with its own review and sign-off. Our Cyclone images already go through that gate. The latest one, a link probe with no FlyBrain logic in it, was reviewed on 2026-11-20 and got a NO-GO, so it hasn't been loaded.
+5. Only after that, a bench load on one array, with its own review and sign-off. Our Cyclone images already go through that gate. The latest one, a link probe with no FlyBrain logic in it, got a NO-GO review on 2026-11-20. A later probe load on one array passed its register checks and the array went back to stock. No FlyBrain logic has been loaded on any array.
 
 The FlyBrain, training, and firmware repos are private for now. A public version needs a sanitized snapshot, pinned tool versions, data provenance, and the golden vectors.
