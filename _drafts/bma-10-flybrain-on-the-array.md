@@ -3,7 +3,7 @@ layout: single
 title: "BMA360, Part 10: FlyBrain and the Array"
 header:
   og_image: bma/og/bma360-part-10.png
-excerpt: "Small insect-inspired classifiers (ants) at the mics, a coordinator on the Zynq, the big models on the hub. What an ant computes, what it looks like running, and which parts exist."
+excerpt: "Small insect-inspired classifiers (ants) at the mics, a second FlyBrain stage on the Zynq, the big models on the hub. What an ant computes, what it looks like running, and which parts exist."
 tags:
   - Hardware
   - FPGA
@@ -17,16 +17,18 @@ FlyBrain is my side project for learning small-model design from insect brains. 
 
 Each array has three places a model could run, and each gets a different job:
 
-![Block diagram of one array: SHARC DSPs do beamforming; the Cyclone V runs the ants, one small classifier per beam or channel; the Zynq coordinator joins ant results and beams; the hub runs Perch and BirdNET and matches across arrays. Today only the stock audio path over Dante to the hub runs. The results link into the Cyclone has no receive RTL, and the sideband to the Zynq is a draft with nothing on the wire.](/images/bma/p10-system-split-light.svg){: .only-light}
-![Block diagram of one array: SHARC DSPs do beamforming; the Cyclone V runs the ants, one small classifier per beam or channel; the Zynq coordinator joins ant results and beams; the hub runs Perch and BirdNET and matches across arrays. Today only the stock audio path over Dante to the hub runs. The results link into the Cyclone has no receive RTL, and the sideband to the Zynq is a draft with nothing on the wire.](/images/bma/p10-system-split-dark.svg){: .only-dark}
+![Block diagram of one array: SHARC DSPs do beamforming; the Cyclone V runs the ants, one small classifier per beam or channel; the Zynq runs a second FlyBrain stage over ant results, beams and metadata; the hub runs Perch and BirdNET and matches across arrays. Today only the stock audio path over Dante to the hub runs. The results link into the Cyclone has no receive RTL, and the sideband to the Zynq is a draft with nothing on the wire. The OMAP-to-Zynq metadata path and the hub's command path are proposals.](/images/bma/p10-system-split-light.svg){: .only-light}
+![Block diagram of one array: SHARC DSPs do beamforming; the Cyclone V runs the ants, one small classifier per beam or channel; the Zynq runs a second FlyBrain stage over ant results, beams and metadata; the hub runs Perch and BirdNET and matches across arrays. Today only the stock audio path over Dante to the hub runs. The results link into the Cyclone has no receive RTL, and the sideband to the Zynq is a draft with nothing on the wire. The OMAP-to-Zynq metadata path and the hub's command path are proposals.](/images/bma/p10-system-split-dark.svg){: .only-dark}
 
-- **Ants on the Cyclone.** The mainboard Cyclone V already sits on every mic and beam. An ant is a tiny integer classifier attached to one beam or channel. It answers one narrow question per window, like "noise, bird-like, or drone-like?".
-- **A coordinator on the Zynq.** The Zynq on the Brooklyn-3 card takes what the ants and beams already produced. It lines them up over short windows, picks the beams worth sending, drops anything stale or full of gaps, and tags what goes out over Ethernet. It doesn't rerun the ants on raw TDM words. An earlier branch did exactly that, and I'm rebuilding it.
+- **Ants on the Cyclone.** FlyBrain runs on both FPGAs, with different jobs. The mainboard Cyclone V is where the mic and beam signals are, so that is where the ants go (design and RTL simulation only). An ant is a tiny integer classifier attached to one beam or channel. It answers one narrow question per window, like "noise, bird-like, or drone-like?".
+- **A second stage on the Zynq.** The Zynq on the Brooklyn-3 card runs FlyBrain over what the ants and beams already produced, plus metadata. It lines results up over short windows, fuses across ants, beams and time, picks the beams worth sending, drops anything stale or full of gaps, and tags what goes out. It also handles the broader telemetry and network work. It must not rerun the ants on raw TDM words; an earlier branch did exactly that, and I'm rebuilding it.
 - **The fleet brain on the hub.** Perch, BirdNET, cross-array matching and review stay on the hub's GPU, where they already run on the Dante audio (Part 9).
 
-The OMAP loads images, sets registers and carries metadata. Audio never goes through it.
+The OMAP is the metadata and control plane, never an audio path. The design has it collecting the FPGA and DSP meters plus batched register and health reads from the Cyclone and SHARCs. The Zynq should keep that sideband, with its provenance and its stale, gap and loss markers, instead of losing it once audio moves on. No transport from the OMAP to the Zynq has been verified; that interface is open.
 
-Every event the coordinator sends has to say exactly where it came from: array and boot epoch, the exact sample range, beam or channel, gaps and padding, which model and preprocessing produced the score, and what the score means. If two events can't be aligned on samples, they don't get joined. A rounded wall-clock time isn't a join key. Raw audio and the scores derived from it stay separate, so I can always go back to the audio.
+The hub link runs both ways. Commands, config, acks, time and health go from the hub to the array. Evidence and telemetry come back. Messages between sister arrays are a separate, versioned path. Data and control stay on separate planes, and whether arrays talk directly or through the hub is undecided.
+
+Every event the Zynq stage sends has to say exactly where it came from: array and boot epoch, the exact sample range, beam or channel, gaps and padding, which model and preprocessing produced the score, and what the score means. If two events can't be aligned on samples, they don't get joined. A rounded wall-clock time isn't a join key. Raw audio and the scores derived from it stay separate, so I can always go back to the audio.
 
 ## What an ant computes
 
@@ -84,7 +86,7 @@ Before the BMA, the MB core ran on two other boards:
 ![iCE40 HX1K results: RTL simulation matches 2,762 of 2,762 vectors; hardware in the loop matches 3,386 of 3,387 with one timeout and no wrong answers.](/images/bma/p10-hil-match-light.svg){: .only-light}
 ![iCE40 HX1K results: RTL simulation matches 2,762 of 2,762 vectors; hardware in the loop matches 3,386 of 3,387 with one timeout and no wrong answers.](/images/bma/p10-hil-match-dark.svg){: .only-dark}
 
-I still owe the iCE40 an explanation for that one timeout. A newer core on a VU47P ran 722 inferences/s, and training on it was at most about 1.2x faster, so the FPGA's job is inference at the edge.
+I still owe the iCE40 an explanation for that one timeout. A newer core on a VU47P ran 722 inferences/s, and training on it was at most about 1.2x faster, so for inference the FPGA is fast. That benchmark measures inference only; it doesn't settle the FPGA's whole role, and learning on the chip is still a research question.
 
 ## A retracted result
 
@@ -105,7 +107,7 @@ So the features carry the information, and the head should be whatever is cheape
 
 ## Feeding 121 mics
 
-The ant above reads one beam. A shared engine on the Cyclone reads all 121 mic channels and computes eight magnitude bands for each, for the ants to share:
+The ant above reads one beam. A proposed shared engine on the Cyclone would read all 121 mic channels and computes eight magnitude bands for each, for the ants to share:
 
 ![Cyclone feature engine: 121 mic channels, tagged windows with gap handling, 8 magnitude bands per channel, an output register that holds under backpressure, then a FlyBrain adapter and MB core that are not built yet.](/images/bma/p10-feature-engine-light.svg){: .only-light}
 ![Cyclone feature engine: 121 mic channels, tagged windows with gap handling, 8 magnitude bands per channel, an output register that holds under backpressure, then a FlyBrain adapter and MB core that are not built yet.](/images/bma/p10-feature-engine-dark.svg){: .only-dark}
@@ -120,8 +122,9 @@ It passes five RTL tests on synthetic vectors, and breaking the gap handling on 
 | MB core | Bit-exact in simulation; ran on an iCE40 and a VU47P; not in any BMA image |
 | 121-mic feature engine | Five RTL tests on synthetic vectors; not routed |
 | SHARC results into the Cyclone | No receive RTL yet |
-| Cyclone→Zynq link | Frame and pins agreed; the results sideband is a draft and sends zeros |
-| Zynq coordinator (`bk3_brain`) | Simulation only, being rebuilt around that sideband |
+| Cyclone→Zynq link | Partial contract (2026-11-15): 10.0, 10.2 stage 1 and 10.3 signed; the 10.4 result sideband is a draft and sends zeros. Only the frame-sync pin is accepted; the clock and remaining pin mapping aren't proven |
+| OMAP metadata to Zynq | Design only; no verified transport |
+| Zynq second stage (`bk3_brain`) | Simulation only, being rebuilt around that sideband |
 | Hub models | Running on Dante audio |
 
 No FlyBrain logic has been loaded onto a BMA board.
@@ -129,9 +132,9 @@ No FlyBrain logic has been loaded onto a BMA board.
 ## Next
 
 1. Freeze the Cyclone→Zynq contract and the exact bit mapping, and get it reviewed against the source.
-2. Replay recorded event streams offline, including resets, gaps, reordering and model changes, and check the coordinator joins only what it should.
+2. Replay recorded event streams offline, including resets, gaps, reordering and model changes, and check the Zynq stage joins only what it should.
 3. Compare features and heads on real array recordings with clean train/test splits, calibrated scores and per-class numbers, with the linear and nearest-neighbour baselines on the same examples.
 4. Synthesis, timing and an independent RTL review.
-5. Only after that, a bench load on one array, with its own review and sign-off. Our Cyclone images already go through that gate. The latest one, a link probe with no FlyBrain logic in it, was sent back: it wasn't packaged for the loader, it was a new build without the required comparison against the vendor image, and the target board wasn't pinned down.
+5. Only after that, a bench load on one array, with its own review and sign-off. Our Cyclone images already go through that gate. The latest one, a link probe with no FlyBrain logic in it, was reviewed on 2026-11-20 and got a NO-GO, so it hasn't been loaded.
 
 The FlyBrain, training, and firmware repos are private for now. A public version needs a sanitized snapshot, pinned tool versions, data provenance, and the golden vectors.
