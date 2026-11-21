@@ -17,7 +17,7 @@ FlyBrain is my side project for learning small-model design from insect brains: 
 
 FlyBrain isn't a claim that grown brains beat engineered ones. It's how I learn small-model design from biology: read how an insect circuit is wired, rebuild the idea in code, and see what survives on real data. The tools that fall out of it are useful alone. The cloud training pipeline and the Rust simulator both work without an insect in the loop.
 
-The ants come from a different project of mine, dama-gotchi, a pet-style monitoring app with an ant-farm interface. In it, each ant is a small model watching a raw data stream. No ant is clever. The useful behaviour comes from many of them running together and reacting to each other, which gives patterns that none of them was written to produce. In the app they do two jobs: anomaly detection, and fast reflex responses to things that change.
+The ants come from a separate project of mine that isn't released. In it, each ant is a small model watching a raw data stream, and you watch the colony in an ant-farm view. No ant is clever. The useful behaviour comes from many of them running together and reacting to each other, which gives patterns that none of them was written to produce. There they do two jobs: anomaly detection, and fast reflex responses to things that change.
 
 On the array I want the same pieces doing three jobs:
 - **Target acquisition.** Notice that something just appeared in a beam.
@@ -26,7 +26,7 @@ On the array I want the same pieces doing three jobs:
 
 The array needs this because raw audio from 121 microphones can't all go to the hub. Each array has to decide locally what is worth sending, and quickly. The big models (Perch, BirdNET) stay on the hub, where the GPU is.
 
-What I've built so far is the first small piece: the feature encoder and a tiny classifier head, in simulation. Acquisition, tracking and enrichment across many ants don't exist yet. dama-gotchi's ants are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
+What I've built so far is the first small piece: the feature encoder and a tiny classifier head, in simulation. Acquisition, tracking and enrichment across many ants don't exist yet. The ants in that project are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
 
 ## Where it fits
 
