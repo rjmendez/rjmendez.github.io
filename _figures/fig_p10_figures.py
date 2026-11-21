@@ -500,11 +500,104 @@ def system_split(p):
     return "\n".join(s)
 
 
+
+# ---------------------------------------------------------------- how ants communicate, how tracking works
+
+def _lines(x, y, lines, p, size=11.5, step=16, anchor="middle", fill=None):
+    return "".join(
+        f'<text x="{x}" y="{y + i * step}" text-anchor="{anchor}" font-size="{size}" '
+        f'fill="{fill or p["muted"]}">{t}</text>' for i, t in enumerate(lines))
+
+
+def _dbox(x, y, w, h, stroke, title, p, dash=True, fill=None):
+    d = ' stroke-dasharray="5 4"' if dash else ""
+    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{fill or p["panel2"]}" '
+            f'stroke="{stroke}" stroke-width="1.5"{d}/>'
+            f'<text x="{x + w / 2}" y="{y + 22}" text-anchor="middle" font-size="13" font-weight="600">{title}</text>')
+
+
+def ant_comms(p):
+    s = ['<text x="20" y="22" font-weight="600" font-size="14">Where ants would talk to each other and to the hub '
+         '(design; nothing here is wired)</text>']
+    s.append(_dbox(20, 44, 300, 250, p["blue"], "Cyclone V, at the mics", p, fill=p["panel"]))
+    for i in range(3):
+        x = 34 + i * 92
+        s.append(_box(x, 78, 80, 30, p["panel"], p["blue"], f"ant {i + 1}", None, p, size=12))
+        s.append(_arrow(x + 40, 108, x + 40, 134, p, dash=True))
+    s.append(_dbox(32, 136, 276, 148, p["faint"], "pheromone bus (proposal)", p))
+    s.append(_lines(170, 176, ["per ant: trail, alarm, resource", "(8 bits each) + a detail word", "leaky decay once per 21.3 ms window",
+                               "alarms combine by MAX", "N-of-M quorum, hysteresis, cooldown"], p, size=11))
+    s.append(_arrow(320, 150, 410, 150, p, dash=True))
+    s.append(_lines(365, 136, ["results", "sideband"], p, size=10.5, step=12))
+    s.append(_lines(365, 172, ["draft;", "zero on", "the wire"], p, size=10.5, step=12))
+    s.append(_dbox(412, 44, 280, 250, p["blue"], "Zynq: second FlyBrain stage", p, fill=p["panel"]))
+    s.append(_lines(552, 84, ["receives ant results and beam levels,", "keeps what it can prove aligned;", "stale or missing input is reported",
+                              "as unavailable, never as clear;", "retransmits do not count as extra ants;", "",
+                              "runs the tracker (next figure), packs", "events for the hub"], p, size=11.5))
+    s.append(_lines(552, 270, ["two sideband layouts compete for one", "slot; neither is approved"], p, size=10.5, fill=p["red"], step=13))
+    s.append(_arrow(692, 120, 790, 120, p, dash=True))
+    s.append(_lines(741, 106, ["evidence:", "events, bounded", "track hints"], p, size=10.5, step=12)
+             if False else _lines(741, 104, ["evidence"], p, size=10.5))
+    s.append(_arrow(790, 190, 692, 190, p, dash=True))
+    s.append(_lines(741, 208, ["commands", "(proposal)"], p, size=10.5, step=12))
+    s.append(_dbox(792, 44, 278, 250, p["green"], "Hub: fleet brain", p, dash=False, fill=p["panel"]))
+    s.append(_lines(931, 84, ["Perch, BirdNET, review;", "matches events across arrays;", "each array counts as one ant,",
+                              "quorum of two or more arrays (proposal);", "", "commands: authenticated, expiring,", "acknowledged; receipt is not applied"], p, size=11.5))
+    s.append(_dbox(792, 330, 278, 70, p["faint"], "Sister array", p))
+    s.append(_lines(931, 372, ["same stages, its own epoch and clock"], p, size=11))
+    s.append(_arrow(931, 294, 931, 330, p, dash=True))
+    s.append(f'<line x1="931" y1="330" x2="931" y2="294" stroke="{p["muted"]}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>')
+    s.append(f'<path d="M552,294 L552,365 L792,365" fill="none" stroke="{p["muted"]}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>')
+    s.append(_lines(560, 355, ["peer path: through the hub or direct, undecided"], p, size=10.5, anchor="start"))
+    s.append(f'<rect x="20" y="420" width="1050" height="74" rx="6" fill="{p["panel"]}" stroke="{p["faint"]}" stroke-width="1.5"/>')
+    s.append(_lines(36, 442, ["A peer's signal is evidence, never a command. Ants that see the same thing are not independent witnesses.",
+                              "Shared trail and alarm values are environment, separate from anything a model has learned.",
+                              "No PCM and no precise coordinates in event metadata. Loops are stopped by origin and event identity."],
+                    p, size=11.5, anchor="start", fill=p["fg"]))
+    return "\n".join(s)
+
+
+def tracking(p):
+    s = ['<text x="20" y="22" font-weight="600" font-size="14">How a track is meant to live and drive beams '
+         '(design; the tracker code is not proven on microphone audio)</text>']
+    names = [("Ant onset", "an ant goes active", p["blue"], False), ("Candidate", "evidence kept", p["faint"], True),
+             ("Track", "compatible hits", p["faint"], True), ("Coasting", "bounded, flagged", p["faint"], True),
+             ("Expired", "ends explicitly", p["faint"], True)]
+    xs = [20, 247, 474, 701, 928]
+    for (t, sub, st, dash), x in zip(names, xs):
+        s.append(_box(x, 50, 140, 56, p["panel"] if not dash else p["panel2"], st, t, sub, p, size=13, dash=dash))
+    for a, b, lab in [(0, 1, ["beam and", "window"]), (1, 2, ["later", "match"]), (2, 3, ["no compatible", "hit"]), (3, 4, ["bound", "reached"])]:
+        s.append(_arrow(xs[a] + 140, 84, xs[b], 84, p, dash=True))
+        s.append(_lines(xs[a] + 183, 66, lab, p, size=10, step=11))
+    s.append(f'<path d="M771,106 L771,128 L544,128 L544,108" fill="none" stroke="{p["muted"]}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>')
+    s.append(f'<text x="657" y="143" text-anchor="middle" font-size="10" fill="{p["muted"]}">a compatible hit returns</text>')
+    s.append(_lines(20, 160, ["Competing candidates are kept side by side,", "not merged. A single ring sum is not a bearing."], p, size=11, anchor="start"))
+    # inputs and outputs
+    s.append(_dbox(20, 196, 330, 150, p["blue"], "Inputs", p, fill=p["panel"]))
+    s.append(_lines(185, 236, ["ant events: which beam, which window", "beam levels across the output streams", "(default 32, hard maximum 64)",
+                               "direction from beams (Part 8 estimator,", "run on generated signals only)"], p, size=11.5))
+    s.append(_arrow(350, 270, 400, 270, p, dash=True))
+    s.append(_dbox(402, 196, 270, 150, p["faint"], "Tracker", p))
+    s.append(_lines(537, 236, ["associates new hits to a track", "predicts only while coasting", "gives each track an id that", "survives re-steering"], p, size=11.5))
+    s.append(_arrow(672, 270, 722, 270, p, dash=True))
+    s.append(_dbox(724, 196, 346, 150, p["faint"], "What a track drives", p))
+    s.append(_lines(897, 236, ["a bounded bearing hint inside events", "beams re-pointed between reads: in the", "firmware source, not run on mic audio",
+                               "a reflex steer request: needs its own", "authorization, deadline and allowlist"], p, size=11.5))
+    s.append(f'<rect x="20" y="372" width="1050" height="70" rx="6" fill="{p["panel"]}" stroke="{p["faint"]}" stroke-width="1.5"/>')
+    s.append(_lines(36, 394, ["Today the ring-sum feature has no direction in it; tracking needs a spatial front end first.",
+                              "Stale or invalid input stops a response and is reported as unavailable.",
+                              "Whether steering changes what a beam hears has not been shown on this hardware."],
+                    p, size=11.5, anchor="start", fill=p["fg"]))
+    return "\n".join(s)
+
+
 def build():
     out = []
     out += save_mpl("p10-ant-stream", ant_stream, figsize=(10, 7.4))
     out += _write("p10-ant-pipeline", 1060, 420, ant_pipeline)
     out += _write("p10-system-split", 1090, 470, system_split)
+    out += _write("p10-ant-comms", 1090, 510, ant_comms)
+    out += _write("p10-tracking", 1090, 460, tracking)
     out += _write("p10-mb-model", 1020, 406, mb_model)
     out += _write("p10-hil-match", 960, 212, hil_match)
     out += save_mpl("p10-accuracy-snr", accuracy_snr, figsize=(8.6, 4.6))
