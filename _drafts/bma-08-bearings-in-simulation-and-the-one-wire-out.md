@@ -81,11 +81,7 @@ The corrected levels hook is merged and host-tested, not loaded on a board; muta
 What's left
 ======
 
-1. Load the fixed levels hook on a board, and check the multi-frame delay ring, which probe v2 didn't cover.
-2. Build R9 TX against W13 RX, settle the lead-in and clock, load both images, check alignment, CRC and payload on the wire.
-3. Real samples through the PL ring reader and egress path, run through the audio checker and listen mode.
-4. A controlled capture to pin down the eight Dante channels (Part 7).
-5. A bearing on a known source, then two arrays with measured poses and verified slot-to-mic geometry.
-6. The 24 silent elements (mics 97-120). That's a fabric rewrite, and the Cyclone bitstream self-loads from its own flash with no way to round-trip it yet (Part 4).
+![Six undone steps in order: the fixed levels hook on a board, R9 TX against W13 RX, real samples through the PL ring reader and egress, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-light.svg){: .only-light}
+![Six undone steps in order: the fixed levels hook on a board, R9 TX against W13 RX, real samples through the PL ring reader and egress, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-dark.svg){: .only-dark}
 
 Part 9 is the path that runs today: the hub and dashboard on the stock Dante stream.
