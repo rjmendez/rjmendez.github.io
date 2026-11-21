@@ -15,13 +15,18 @@ FlyBrain is my side project for learning small-model design from insect brains: 
 
 ## Why FlyBrain, and why ants
 
-FlyBrain isn't a claim that grown brains beat engineered ones. It's how I learn small-model design from biology: read how an insect circuit is wired, rebuild the idea in code, and see what survives when it has to run on real data. The tools that fall out of that are useful on their own. The cloud training pipeline and the Rust simulator both work without any insect in the loop.
+FlyBrain isn't a claim that grown brains beat engineered ones. It's how I learn small-model design from biology: read how an insect circuit is wired, rebuild the idea in code, and see what survives on real data. The tools that fall out of it are useful alone. The cloud training pipeline and the Rust simulator both work without an insect in the loop.
 
-The array gave it a job with hard limits. Raw audio from 121 microphones per array can't all go to the hub, so each array has to decide locally what is worth sending. Most of that decision is a narrow question asked over and over: is this window quiet, bird-like, or drone-like? That doesn't need a big model. It needs something small, fixed and cheap enough to run next to every beam.
+The ants come from a different project of mine, dama-gotchi, a pet-style monitoring app with an ant-farm interface. In it, each ant is a small model watching a raw data stream. No ant is clever. The useful behaviour comes from many of them running together and reacting to each other, which gives patterns that none of them was written to produce. In the app they do two jobs: anomaly detection, and fast reflex responses to things that change.
 
-I call those small classifiers ants. An ant takes one stimulus, answers one narrow question, and the one I've built so far is about two thousand cells in synthesis. There are many of them, each with its own job, and none of them does anything clever alone. The name marks the pattern: many tiny specialists with integer arithmetic and weights fixed at load time, in place of one large model.
+On the array I want the same pieces doing three jobs:
+- **Target acquisition.** Notice that something just appeared in a beam.
+- **Tracking.** Keep following it across beams and windows.
+- **Data enrichment.** Attach what the ants saw to the event, so the hub gets a labelled event and not just audio.
 
-The big models still exist. They run on the hub, where the GPU is.
+The array needs this because raw audio from 121 microphones can't all go to the hub. Each array has to decide locally what is worth sending, and quickly. The big models (Perch, BirdNET) stay on the hub, where the GPU is.
+
+What I've built so far is the first small piece: the feature encoder and a tiny classifier head, in simulation. Acquisition, tracking and enrichment across many ants don't exist yet. dama-gotchi's ants are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
 
 ## Where it fits
 
