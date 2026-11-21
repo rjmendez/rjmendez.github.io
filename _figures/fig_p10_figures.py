@@ -591,11 +591,57 @@ def tracking(p):
     return "\n".join(s)
 
 
+
+def ant_messages(p):
+    s = ['<text x="20" y="22" font-weight="600" font-size="14">What an ant can say, and its anomaly states '
+         '(draft contract; nothing produces or consumes these yet)</text>']
+    # state machine
+    s.append(_dbox(20, 44, 500, 250, p["blue"], "Anomaly state of one ant", p, fill=p["panel"]))
+    pos = {"warming": (44, 100), "ready": (204, 100), "active": (364, 100)}
+    subs = {"warming": "baseline settling", "ready": "baseline trusted", "active": "off baseline"}
+    for k, (x, y) in pos.items():
+        s.append(_box(x, y, 130, 54, p["panel"], p["blue"], k, subs[k], p, size=13, dash=False))
+    s.append(_arrow(174, 127, 204, 127, p, dash=True))
+    s.append(_arrow(334, 117, 364, 117, p, dash=True))
+    s.append(_arrow(364, 139, 334, 139, p, dash=True))
+    s.append(_lines(349, 108, ["onset"], p, size=9.5, step=0) if False else
+             f'<text x="349" y="110" text-anchor="middle" font-size="9.5" fill="{p["muted"]}">onset</text>'
+             f'<text x="349" y="156" text-anchor="middle" font-size="9.5" fill="{p["muted"]}">clear</text>')
+    s.append(_box(204, 214, 130, 54, p["panel2"], p["red"], "unavailable", "input stale or missing", p, size=13, dash=True))
+    for x in (109, 269, 429):
+        s.append(f'<line x1="{x}" y1="154" x2="{x}" y2="214" stroke="{p["red"]}" stroke-width="1.2" stroke-dasharray="3 4" opacity="0.0"/>')
+    s.append(f'<path d="M269,154 L269,214" fill="none" stroke="{p["red"]}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>')
+    s.append(f'<path d="M429,154 L429,241 L334,241" fill="none" stroke="{p["red"]}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>')
+    s.append(_lines(36, 232, ["Unavailable is never", "reported as clear."], p, size=11.5, anchor="start", fill=p["red"]))
+    s.append(_lines(36, 188, ["Onset and clear are sent once,", "as transitions."], p, size=11, anchor="start"))
+    # message cards
+    msgs = [("Anomaly", "left or rejoined baseline"), ("Reflex", "trigger fired; response applied,", "rejected or failed"),
+            ("Acquire / track", "candidate appeared, updated,", "coasted or ended"), ("Enrichment", "extra class + model, calibration,", "uncertainty"),
+            ("Colony signal", "trail, alarm or resource,", "bounded, with expiry"), ("Health / loss", "warm-up, stale input,", "drops, reset")]
+    s.append(_dbox(540, 44, 530, 250, p["faint"], "Six message kinds", p))
+    for i, m in enumerate(msgs):
+        x = 556 + (i % 2) * 255
+        y = 78 + (i // 2) * 70
+        s.append(f'<rect x="{x}" y="{y}" width="240" height="60" rx="6" fill="{p["panel"]}" stroke="{p["faint"]}" '
+                 f'stroke-width="1.5" stroke-dasharray="5 4"/><text x="{x + 120}" y="{y + 20}" text-anchor="middle" '
+                 f'font-size="12.5" font-weight="600">{m[0]}</text>')
+        s.append(_lines(x + 120, y + 38, list(m[1:]), p, size=10.5, step=12))
+    s.append(f'<rect x="20" y="316" width="1050" height="118" rx="6" fill="{p["panel"]}" stroke="{p["faint"]}" stroke-width="1.5"/>')
+    s.append(_lines(36, 340, ["A score is not an alarm, an alarm is not a target, and none of them is a command.",
+                              "A peer's signal is evidence. A retransmission is not another ant. Ants seeing the same thing are not independent witnesses.",
+                              "Shared trails and alarms are environment, separate from anything a model has learned.",
+                              "A single-channel energy change is not a direction. A reflex path never blocks audio.",
+                              "Acceptance: exact tests for every transition, and timing from a defined onset to the response. Synthetic replay is development evidence only."],
+                    p, size=11.5, step=17, anchor="start", fill=p["fg"]))
+    return "\n".join(s)
+
+
 def build():
     out = []
     out += save_mpl("p10-ant-stream", ant_stream, figsize=(10, 7.4))
     out += _write("p10-ant-pipeline", 1060, 420, ant_pipeline)
     out += _write("p10-system-split", 1090, 470, system_split)
+    out += _write("p10-ant-messages", 1090, 450, ant_messages)
     out += _write("p10-ant-comms", 1090, 510, ant_comms)
     out += _write("p10-tracking", 1090, 460, tracking)
     out += _write("p10-mb-model", 1020, 406, mb_model)

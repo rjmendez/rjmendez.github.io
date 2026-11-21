@@ -34,51 +34,24 @@ FlyBrain itself is a private research repo with two halves. One is a data half: 
 
 ## How ants report and interact
 
-The five jobs have to stay distinguishable in what an ant sends. A score isn't an alarm, an alarm isn't a target, and none of them is a command. A draft contract, not implemented anywhere, separates six kinds of message:
+None of this is implemented. It is a draft contract for what an ant may send, and it keeps the jobs apart.
 
-| Message | What it says |
-|---|---|
-| Anomaly | A feature left its baseline (onset), or came back (clear). |
-| Reflex | A local trigger fired, and separately what response was applied, rejected or failed. |
-| Acquisition or track | A candidate appeared, updated, coasted or ended. |
-| Enrichment | An extra classification, with the model, calibration and uncertainty. |
-| Colony signal | A bounded trail, alarm or resource contribution from one ant, with an expiry. |
-| Health or loss | Warm-up, stale input, dropped records or a reset. |
-
-A few rules from it matter most:
-- **Anomaly lifecycle.** An ant goes through warming, ready, active and back to ready. Onset and clear are transitions, sent once. Missing or stale input moves it to unavailable. It is never reported as "clear".
-- **Signals are evidence.** A peer's signal can't become a command, and a retransmission can't count as another ant in a quorum. Ants that see the same thing aren't independent witnesses.
-- **Shared signals aren't shared memory.** Trails and alarms that ants leave for each other are separate from what any model has learned.
-- **No bearing from a non-spatial signal.** A single-channel energy change isn't a direction.
-- **Bounded delivery.** A reflex path never blocks audio, and a missing record is reported as missing, never inferred.
-
-Acceptance needs exact tests for every transition and recovery, and timing measured from a defined onset to the actual response. Synthetic replay is development evidence only. This is an exploratory proposal. Nothing produces or consumes these messages yet.
+![Draft contract for ant messages. An ant moves from warming to ready to active and back, with unavailable for stale or missing input, which is never reported as clear. Six message kinds: anomaly, reflex, acquire or track, enrichment, colony signal, health or loss. A peer signal is evidence, not a command; a retransmission is not another ant.](/images/bma/p10-ant-messages-light.svg){: .only-light}
+![Draft contract for ant messages. An ant moves from warming to ready to active and back, with unavailable for stale or missing input, which is never reported as clear. Six message kinds: anomaly, reflex, acquire or track, enrichment, colony signal, health or loss. A peer signal is evidence, not a command; a retransmission is not another ant.](/images/bma/p10-ant-messages-dark.svg){: .only-dark}
 
 ## Where the ants talk
 
-There are three places ants could exchange information, and none is wired yet.
-
-**Inside one FPGA.** Ants leave each other short signals on a shared bus: a trail value, an alarm value and a resource value per ant, each 8 bits, plus a detail word. The values decay a little each window. Alarms combine by taking the maximum, and a quorum of N out of M ants with hysteresis and a cooldown decides when the group counts as alarmed. That bus is a proposal in my roadmap, and its widths and decay constants are still to be re-derived for a 21.3 ms tick.
-
-**Between the Cyclone and the Zynq.** The existing link has one slot where a results sideband could go. Two draft layouts compete for it, and neither is approved. Nothing is sent over it today.
-
-**Between arrays and the hub.** Events and bounded track hints go up to the hub. Commands come down, and a command must be authenticated, expire, and be acknowledged. Whether sister arrays talk directly or through the hub is undecided. On the hub I'd treat each array as one ant, and require two or more arrays to agree before calling something a fleet event.
+Three places, none wired.
 
 ![Design map of where ants communicate. Ants in the Cyclone share a proposed pheromone bus of trail, alarm and resource values. Results go to the Zynq over a sideband that is draft only, with two competing layouts. The Zynq sends events to the hub and receives commands. Sister arrays connect through the hub or directly, undecided. Nothing is wired.](/images/bma/p10-ant-comms-light.svg){: .only-light}
 ![Design map of where ants communicate. Ants in the Cyclone share a proposed pheromone bus of trail, alarm and resource values. Results go to the Zynq over a sideband that is draft only, with two competing layouts. The Zynq sends events to the hub and receives commands. Sister arrays connect through the hub or directly, undecided. Nothing is wired.](/images/bma/p10-ant-comms-dark.svg){: .only-dark}
 
-Whatever the path, a received signal is evidence. It never becomes a command or local truth because it arrived.
-
 ## How tracking is meant to work
-
-Tracking starts with an ant going active. The tracker makes a candidate that records which beam and window it came from. A later observation that is compatible with the candidate turns it into a track. If a window passes with no compatible hit, the track coasts for a bounded time, marked as predicted. A hit brings it back. If the bound is reached, it expires, and it expires explicitly. Competing candidates stay as separate candidates and are not merged.
 
 ![Design for a track's life: an ant goes active, a candidate is created with its evidence, later compatible hits make it a track, with no hit it coasts for a bounded time and then expires explicitly. Inputs are ant events, beam levels and direction from beams; a track drives a bounded bearing hint, beams re-pointed between reads, and a separately authorized reflex steer request.](/images/bma/p10-tracking-light.svg){: .only-light}
 ![Design for a track's life: an ant goes active, a candidate is created with its evidence, later compatible hits make it a track, with no hit it coasts for a bounded time and then expires explicitly. Inputs are ant events, beam levels and direction from beams; a track drives a bounded bearing hint, beams re-pointed between reads, and a separately authorized reflex steer request.](/images/bma/p10-tracking-dark.svg){: .only-dark}
 
-A track feeds three things. It puts a bounded bearing hint in the events sent to the hub. It can re-point beams between reads: the firmware source on master has an adaptive mode that does this for up to 64 output streams, with 32 by default, and I haven't run it on microphone audio. And it can raise a reflex steer request, to point beams at an impulse in anticipation of more sound. That request needs its own authorization, deadline and allowlist, which aren't defined.
-
-Two limits are worth stating. The ring-sum feature the ant reads today has no direction in it, so tracking needs a spatial front end before it means anything. And I haven't shown that re-pointing changes what a beam hears on this hardware: an earlier vendor-command test echoed the commands back with no measurable change in level.
+The adaptive re-steering code is in the firmware source on master, and I haven't run it on microphone audio.
 
 ## Where it fits
 
