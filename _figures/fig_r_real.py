@@ -69,7 +69,7 @@ def edge_classify(p):
     steps = [("Any sound", "cars, drones, birds, voices", "the array hears it", p["edge"]),
              ("Ants", "features and flags", "simulation", p["blue"]),
              ("Follow", "bearing hint, beam steer", "design", p["faint"]),
-             ("Features ride along", "bands or an embedding", "design", p["faint"]),
+             ("Code rides along", "versioned, experimental", "design", p["faint"]),
              ("Zynq filter", "drops stale or false", "design", p["faint"]),
              ("Hub names it", "BirdNET, Perch", "runs today", p["edge"])]
     w, gap = 155, 22
@@ -80,9 +80,9 @@ def edge_classify(p):
         if i:
             s.append(_arrow(x - gap, 72, x, 72, p))
     ideas = [("Measure the reflex", ["First sound to beam steer, impulse", "recall and false triggers, on real", "audio. None measured yet."]),
-             ("Windows that fit impulses", ["A 21 ms window and two flagged", "windows can miss one chirp or click.", "Try a shorter path for impulses."]),
-             ("Wire the flag to an actor", ["The activity gate flag is read out,", "not connected to anything.", "Connect it to a steer request."]),
-             ("Pick what rides along", ["Ant code, mel-style bands or a", "learned embedding. Judge each by", "whether the hub does better with it."]),
+             ("A separate onset path", ["A 21 ms window and two flagged", "windows can miss one chirp or click.", "Add a short-window onset path."]),
+             ("Direction, then steer", ["One broadside sum has no direction.", "A direction estimator and track", "manager guide steer requests."]),
+             ("Prove what rides along", ["The 64-bit code is not mel and not", "proven useful to the hub. Version it,", "stamp it, test it against hub verdicts."]),
              ("False triggers are cheap", ["Wrong reflexes cost a beam move.", "The Zynq and hub filter them, so", "tune the ant for speed."]),
              ("Several sources at once", ["Different ants on different beams", "can hold different sources. The", "tracker decides who is who."])]
     bw, bh = 340, 86

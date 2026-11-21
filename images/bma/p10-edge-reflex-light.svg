@@ -9,7 +9,7 @@
 <rect x="374" y="44" width="155" height="56" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/><text x="451.5" y="68.0" text-anchor="middle" font-size="12.5" font-weight="600">Follow</text><text x="451.5" y="85.0" text-anchor="middle" font-size="11.5" fill="#555555">bearing hint, beam steer</text>
 <text x="451.5" y="118" text-anchor="middle" font-size="10.5" fill="#555555">design</text>
 <line x1="352" y1="72" x2="374" y2="72" stroke="#555555" stroke-width="1.5" marker-end="url(#ar)"/>
-<rect x="551" y="44" width="155" height="56" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/><text x="628.5" y="68.0" text-anchor="middle" font-size="12.5" font-weight="600">Features ride along</text><text x="628.5" y="85.0" text-anchor="middle" font-size="11.5" fill="#555555">bands or an embedding</text>
+<rect x="551" y="44" width="155" height="56" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/><text x="628.5" y="68.0" text-anchor="middle" font-size="12.5" font-weight="600">Code rides along</text><text x="628.5" y="85.0" text-anchor="middle" font-size="11.5" fill="#555555">versioned, experimental</text>
 <text x="628.5" y="118" text-anchor="middle" font-size="10.5" fill="#555555">design</text>
 <line x1="529" y1="72" x2="551" y2="72" stroke="#555555" stroke-width="1.5" marker-end="url(#ar)"/>
 <rect x="728" y="44" width="155" height="56" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/><text x="805.5" y="68.0" text-anchor="middle" font-size="12.5" font-weight="600">Zynq filter</text><text x="805.5" y="85.0" text-anchor="middle" font-size="11.5" fill="#555555">drops stale or false</text>
@@ -22,14 +22,14 @@
 <text x="32" y="171" font-size="12.5" font-weight="600">Measure the reflex</text>
 <text x="32" y="191" text-anchor="start" font-size="11" fill="#555555">First sound to beam steer, impulse</text><text x="32" y="206" text-anchor="start" font-size="11" fill="#555555">recall and false triggers, on real</text><text x="32" y="221" text-anchor="start" font-size="11" fill="#555555">audio. None measured yet.</text>
 <rect x="375" y="150" width="340" height="86" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="387" y="171" font-size="12.5" font-weight="600">Windows that fit impulses</text>
-<text x="387" y="191" text-anchor="start" font-size="11" fill="#555555">A 21 ms window and two flagged</text><text x="387" y="206" text-anchor="start" font-size="11" fill="#555555">windows can miss one chirp or click.</text><text x="387" y="221" text-anchor="start" font-size="11" fill="#555555">Try a shorter path for impulses.</text>
+<text x="387" y="171" font-size="12.5" font-weight="600">A separate onset path</text>
+<text x="387" y="191" text-anchor="start" font-size="11" fill="#555555">A 21 ms window and two flagged</text><text x="387" y="206" text-anchor="start" font-size="11" fill="#555555">windows can miss one chirp or click.</text><text x="387" y="221" text-anchor="start" font-size="11" fill="#555555">Add a short-window onset path.</text>
 <rect x="730" y="150" width="340" height="86" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="742" y="171" font-size="12.5" font-weight="600">Wire the flag to an actor</text>
-<text x="742" y="191" text-anchor="start" font-size="11" fill="#555555">The activity gate flag is read out,</text><text x="742" y="206" text-anchor="start" font-size="11" fill="#555555">not connected to anything.</text><text x="742" y="221" text-anchor="start" font-size="11" fill="#555555">Connect it to a steer request.</text>
+<text x="742" y="171" font-size="12.5" font-weight="600">Direction, then steer</text>
+<text x="742" y="191" text-anchor="start" font-size="11" fill="#555555">One broadside sum has no direction.</text><text x="742" y="206" text-anchor="start" font-size="11" fill="#555555">A direction estimator and track</text><text x="742" y="221" text-anchor="start" font-size="11" fill="#555555">manager guide steer requests.</text>
 <rect x="20" y="248" width="340" height="86" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="32" y="269" font-size="12.5" font-weight="600">Pick what rides along</text>
-<text x="32" y="289" text-anchor="start" font-size="11" fill="#555555">Ant code, mel-style bands or a</text><text x="32" y="304" text-anchor="start" font-size="11" fill="#555555">learned embedding. Judge each by</text><text x="32" y="319" text-anchor="start" font-size="11" fill="#555555">whether the hub does better with it.</text>
+<text x="32" y="269" font-size="12.5" font-weight="600">Prove what rides along</text>
+<text x="32" y="289" text-anchor="start" font-size="11" fill="#555555">The 64-bit code is not mel and not</text><text x="32" y="304" text-anchor="start" font-size="11" fill="#555555">proven useful to the hub. Version it,</text><text x="32" y="319" text-anchor="start" font-size="11" fill="#555555">stamp it, test it against hub verdicts.</text>
 <rect x="375" y="248" width="340" height="86" rx="6" fill="#f7f9fc" stroke="#999999" stroke-width="1.5" stroke-dasharray="5 4"/>
 <text x="387" y="269" font-size="12.5" font-weight="600">False triggers are cheap</text>
 <text x="387" y="289" text-anchor="start" font-size="11" fill="#555555">Wrong reflexes cost a beam move.</text><text x="387" y="304" text-anchor="start" font-size="11" fill="#555555">The Zynq and hub filter them, so</text><text x="387" y="319" text-anchor="start" font-size="11" fill="#555555">tune the ant for speed.</text>
