@@ -11,7 +11,17 @@ tags:
   - BMA360
 ---
 
-FlyBrain is my side project for learning small-model design from insect brains. It has a training pipeline in the cloud, a Rust simulator, a Python reference, and integer RTL for FPGAs. The BMA360 gives it a real job: put small classifiers next to the microphones and send the hub fewer, better-labelled events.
+FlyBrain is my side project for learning small-model design from insect brains: a training pipeline in the cloud, a Rust simulator, a Python reference, and integer RTL for FPGAs. The BMA360 gives it a real job. This post covers the job, what an ant computes, and which parts exist.
+
+## Why FlyBrain, and why ants
+
+FlyBrain isn't a claim that grown brains beat engineered ones. It's how I learn small-model design from biology: read how an insect circuit is wired, rebuild the idea in code, and see what survives when it has to run on real data. The tools that fall out of that are useful on their own. The cloud training pipeline and the Rust simulator both work without any insect in the loop.
+
+The array gave it a job with hard limits. Raw audio from 121 microphones per array can't all go to the hub, so each array has to decide locally what is worth sending. Most of that decision is a narrow question asked over and over: is this window quiet, bird-like, or drone-like? That doesn't need a big model. It needs something small, fixed and cheap enough to run next to every beam.
+
+I call those small classifiers ants. An ant takes one stimulus, answers one narrow question, and the one I've built so far is about two thousand cells in synthesis. There are many of them, each with its own job, and none of them does anything clever alone. The name marks the pattern: many tiny specialists with integer arithmetic and weights fixed at load time, in place of one large model.
+
+The big models still exist. They run on the hub, where the GPU is.
 
 ## Where it fits
 
