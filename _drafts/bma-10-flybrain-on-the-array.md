@@ -28,7 +28,7 @@ On the array the ants are meant to do five jobs. All of it is design, and only t
 
 The array needs this because raw audio from 121 microphones can't all go to the hub. Each array has to decide locally what is worth sending, and quickly. The big models (Perch, BirdNET) stay on the hub, where the GPU is.
 
-What I've built so far is the first small piece: the feature encoder and a tiny classifier head, run in simulation on synthetic audio. The baseline alarm, the reflex path, acquisition, tracking and enrichment across many ants don't exist yet, and no ant output has come from a live array. The ants in that project are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
+What I've built so far is the first small piece: the feature encoder and a tiny classifier head, run in simulation on synthetic audio. The parts of the list that exist are small. A per-channel activity gate is in the audio core's RTL: it keeps a running baseline and deviation for each of 128 channels and flags a channel after two consecutive windows well off its baseline, once a 4.1 s warm-up is done. It matches its Python reference window by window in simulation. That gate is one piece of anomaly detection. It isn't the full ant pipeline, and with a 4.1 s warm-up and two flagged windows it can't by itself meet a one-tick reflex deadline. The reflex path, acquisition, tracking, enrichment and the ant-to-ant signalling don't exist yet, and no ant output has come from a live array. The ants in that project are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
 
 ## Where it fits
 
@@ -142,6 +142,7 @@ It passes five RTL tests on synthetic vectors, and breaking the gap handling on 
 | Cyclone→Zynq link | Partial contract (2026-11-15): 10.0, 10.2 stage 1 and 10.3 signed; the 10.4 result sideband is a draft and sends zeros. Only the frame-sync pin is accepted; the clock and remaining pin mapping aren't proven |
 | OMAP metadata to Zynq | Design only; no verified transport |
 | Zynq second stage (`bk3_brain`) | Simulation only, being rebuilt around that sideband |
+| Per-channel activity gate (`chan_gate`) | In the audio core RTL; replayed against its Python reference in simulation; not an ant pipeline, no latency claim |
 | Hub models | Running on Dante audio |
 
 No FlyBrain logic has been loaded onto a BMA board.
