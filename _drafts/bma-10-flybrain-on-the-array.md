@@ -21,14 +21,36 @@ The ants come from a separate project of mine that isn't released. In it, each a
 
 On the array the ants are meant to do five jobs. All of it is design, and only the first small piece exists, in simulation:
 - **Anomaly detection.** Keep a running baseline for each feature and raise an alarm when a window leaves it, with a cap on the alarm rate.
-- **Fast reflex.** Turn an alarm into an outgoing event within a fixed, short delay. The target isn't set yet. One 21.3 ms tick is the placeholder upper bound, and it's unvalidated.
-- **Target acquisition.** Notice that something just appeared in a beam.
-- **Tracking.** Keep following it across beams and windows.
+- **Fast reflex.** Respond to a fast impulse, like a chirp or an insect, without waiting for a full classification or a trip to the hub. The response can be an urgent event, or a request to steer beams toward the impulse in anticipation of more sound. The delay target isn't set. One 21.3 ms tick is the placeholder upper bound, and it's unvalidated.
+- **Target acquisition.** Notice that something just appeared in a beam, and keep the evidence that supports it.
+- **Tracking.** Keep following it across beams and windows, and let the candidate expire when the input stops being usable.
 - **Data enrichment.** Attach what the ants saw to the event, so the hub gets a labelled event and not just audio.
 
-The array needs this because raw audio from 121 microphones can't all go to the hub. Each array has to decide locally what is worth sending, and quickly. The big models (Perch, BirdNET) stay on the hub, where the GPU is.
+The array needs this because raw audio from 121 microphones can't all go to the hub. All 121 are used at the edge, and the heavy work, such as time-difference-of-arrival, happens before the hub. Each array has to decide locally what is worth sending, and quickly. The big models (Perch, BirdNET) stay on the hub, where the GPU is.
 
 What I've built so far is the first small piece: the feature encoder and a tiny classifier head, run in simulation on synthetic audio. The parts of the list that exist are small. A per-channel activity gate is in the audio core's RTL: it keeps a running baseline and deviation for each of 128 channels and flags a channel after two consecutive windows well off its baseline, once a 4.1 s warm-up is done. It matches its Python reference window by window in simulation. That gate is one piece of anomaly detection. It isn't the full ant pipeline, and with a 4.1 s warm-up and two flagged windows it can't by itself meet a one-tick reflex deadline. The reflex path, acquisition, tracking, enrichment and the ant-to-ant signalling don't exist yet, and no ant output has come from a live array. The ants in that project are floating point and tick about every two seconds, while an ant in the FPGA ticks every 21.3 ms on integers, so its decay and hysteresis constants have to be re-derived instead of copied.
+
+## How ants report and interact
+
+The five jobs have to stay distinguishable in what an ant sends. A score isn't an alarm, an alarm isn't a target, and none of them is a command. A draft contract, not implemented anywhere, separates six kinds of message:
+
+| Message | What it says |
+|---|---|
+| Anomaly | A feature left its baseline (onset), or came back (clear). |
+| Reflex | A local trigger fired, and separately what response was applied, rejected or failed. |
+| Acquisition or track | A candidate appeared, updated, coasted or ended. |
+| Enrichment | An extra classification, with the model, calibration and uncertainty. |
+| Colony signal | A bounded trail, alarm or resource contribution from one ant, with an expiry. |
+| Health or loss | Warm-up, stale input, dropped records or a reset. |
+
+A few rules from it matter most:
+- **Anomaly lifecycle.** An ant goes through warming, ready, active and back to ready. Onset and clear are transitions, sent once. Missing or stale input moves it to unavailable. It is never reported as "clear".
+- **Signals are evidence.** A peer's signal can't become a command, and a retransmission can't count as another ant in a quorum. Ants that see the same thing aren't independent witnesses.
+- **Shared signals aren't shared memory.** Trails and alarms that ants leave for each other are separate from what any model has learned.
+- **No bearing from a non-spatial signal.** A single-channel energy change isn't a direction.
+- **Bounded delivery.** A reflex path never blocks audio, and a missing record is reported as missing, never inferred.
+
+Acceptance needs exact tests for every transition and recovery, and timing measured from a defined onset to the actual response. Synthetic replay is development evidence only. This is an exploratory proposal. Nothing produces or consumes these messages yet.
 
 ## Where it fits
 
@@ -130,6 +152,8 @@ The ant above reads one beam. A proposed shared engine on the Cyclone would read
 ![Cyclone feature engine: 121 mic channels, tagged windows with gap handling, 8 magnitude bands per channel, an output register that holds under backpressure, then a FlyBrain adapter and MB core that are not built yet.](/images/bma/p10-feature-engine-dark.svg){: .only-dark}
 
 It passes five RTL tests on synthetic vectors, and breaking the gap handling on purpose fails the comparison.
+
+To compare beam layouts before building anything, there is also an analytic tool that takes a microphone geometry or subset, several steering and source directions, and the ideal noise gain of 10 log10 N. Its output is labelled an exploratory prediction. It assumes far-field plane waves, ideal fractional delays and equal weights, and it is not a measurement or a hardware result.
 
 ## What exists
 
