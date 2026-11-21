@@ -124,6 +124,17 @@ These are detection clips the hub saved from array 1, one Dante channel each, th
   <figcaption>BirdNET called this a White-throated Sparrow at 0.99, November 19, 22:00 UTC, channel 7. The spectrogram shows sharp single calls like the woodpecker's above and none of the sparrow's whistles, so I don't believe the label. Uncalibrated scores do this.</figcaption>
 </figure>
 
+## Reviewing a detection
+
+The dashboard has a review view for going through detections one at a time. This is a 15-second screen recording of one: a Northern Flicker that BirdNET scored 0.82 (uncalibrated), beam 8, on November 21.
+
+<video class="bma-av" controls muted loop playsinline preload="none" poster="/images/bma/p09-review-poster.png">
+  <source src="/files/bma/p09-review.webm" type="video/webm">
+  <source src="/files/bma/p09-review.mp4" type="video/mp4">
+</video>
+
+The clip is a spectrogram with a level trace and a flux trace under it. I drag a box around the call to select it and loop just that part. Noise reduction toggles between off and strong, and playback can be slowed. I can listen to any one of the eight beams, to the mean of them, or flip between two with A and B. The verdict is Wrong or Artifact, and the view says why: the scores can't be calibrated until enough detections carry a verdict. Until then the score on screen is what BirdNET said, and the label is its opinion.
+
 ## A decoder test you can run without a tile
 
 Synthetic values, for catching byte-order and sign-extension mistakes:
