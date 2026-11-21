@@ -452,23 +452,25 @@ def system_split(p):
     s.append(f'<text x="358" y="{y + 78}" text-anchor="middle" font-size="11.5" fill="{p["muted"]}">beam or channel, at the mics</text>')
     # OMAP above Cyclone
     s.append(_box(248, 66, 220, 40, p["panel"], p["green"], "OMAP", None, p, size=12))
-    s.append(f'<text x="480" y="84" font-size="11" fill="{p["muted"]}">loads images, sets registers,</text>')
-    s.append(f'<text x="480" y="98" font-size="11" fill="{p["muted"]}">metadata; not an audio path</text>')
+    s.append(f'<text x="480" y="84" font-size="11" fill="{p["muted"]}">metadata + control only; meters,</text>')
+    s.append(f'<text x="480" y="98" font-size="11" fill="{p["muted"]}">batched health (to Zynq: proposal)</text>')
     s.append(_arrow(526, y + 40, 584, y + 40, p, dash=True))
     s.append(f'<line x1="468" y1="{y + 40}" x2="528" y2="{y + 40}" stroke="{p["muted"]}" stroke-width="1.5" '
              f'stroke-dasharray="5 4"/>')
     s.append(f'<text x="526" y="{y + 30}" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">results sideband</text>')
     s.append(f'<text x="526" y="{y + 60}" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">draft, zero on wire</text>')
     # Zynq
-    s.append(_tbox(586, y, 230, h, p["blue"], "Zynq: the coordinator", p))
-    for i, line in enumerate(["joins ant results and beams", "over short windows, picks", "beams, drops stale or gappy",
-                              "data; never reruns the ants"]):
+    s.append(_tbox(586, y, 230, h, p["blue"], "Zynq: second FlyBrain stage", p))
+    for i, line in enumerate(["fuses ant results, beams and", "metadata; picks beams, drops", "stale or gappy data, tags events;", "never reruns ants on raw TDM"]):
         s.append(f'<text x="701" y="{y + 58 + i * 16}" text-anchor="middle" font-size="11.5" '
                  f'fill="{p["muted"]}">{line}</text>')
     s.append(f'<text x="701" y="{y + h + 16}" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">'
              f'bk3_brain: simulation only, being reworked</text>')
     s.append(_arrow(816, y + 40, 872, y + 40, p, dash=True))
     s.append(f'<text x="844" y="{y + 30}" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">events</text>')
+    s.append(_arrow(872, y + 78, 816, y + 78, p, dash=True))
+    s.append(f'<text x="844" y="{y + 96}" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">commands</text>')
+    s.append(f'<text x="844" y="{y + 110}" text-anchor="middle" font-size="10" fill="{p["muted"]}">(proposal)</text>')
     # Hub
     s.append(_tbox(874, y, 196, h, p["green"], "Hub: fleet brain", p))
     for i, line in enumerate(["Perch, BirdNET,", "cross-array matching,", "review"]):
