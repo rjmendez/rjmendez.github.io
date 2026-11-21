@@ -133,7 +133,9 @@ The dashboard has a review view for going through detections one at a time. This
   <source src="/files/bma/p09-review.mp4" type="video/mp4">
 </video>
 
-The clip is a spectrogram with a level trace and a flux trace under it. I drag a box around the call to select it and loop just that part. Noise reduction toggles between off and strong, and playback can be slowed. I can listen to any one of the eight beams, to the mean of them, or flip between two with A and B. The verdict is Wrong or Artifact, and the view says why: the scores can't be calibrated until enough detections carry a verdict. Until then the score on screen is what BirdNET said, and the label is its opinion.
+The clip is a spectrogram with a level trace and a flux trace under it. I drag a box around the call to select it and loop just that part. Noise reduction toggles between off and strong, and playback can be slowed. I can listen to any one of the eight beams, to the mean of them, or flip between two with A and B. A verdict is one of five: correct, wrong, unsure, artifact, or human voice. A wrong verdict needs a reason (another species, a non-bird sound, machinery, an insect or amphibian, or nothing visible) and can name the right species. Each verdict also records its basis: the field, the clip's spectrogram, or the metadata alone. The scores can't be calibrated until enough detections carry a verdict. Until then the score on screen is what BirdNET said, and the label is its opinion.
+
+Stored audio is deleted 24 hours after capture, and a human-voice verdict deletes the clip immediately. The verdict stays either way, so a label outlives the audio it describes.
 
 ## A decoder test you can run without a tile
 
