@@ -97,6 +97,17 @@ When the sound stops, every field drops back to background within a window or tw
 
 The RTL matches this reference bit for bit in simulation, on every output and on the cycle each code appears. The test benches cover random full-scale input, DC at the most negative value, alternating full scale, tiny signals and a sine, with random gaps between samples. Four deliberate breakages, in the encoder, the slot and the evaluation, each turned the tests red. In Yosys, the encoder alone comes to 1,312 cells, and with the MB core attached it's 2,033 cells and 4 M10K blocks. None of that has been placed, routed, or loaded on a board.
 
+## Real audio, several ants
+
+The same encoder on real array audio: the three clips from Part 9, run through three ants that differ only in where they split the signal. The clips are processed (one channel, high-passed at 1 kHz, boosted 33 to 52 dB, lossy), so this shows behaviour, not calibrated levels.
+
+![Three clips side by side, each with a spectrogram, the band ratio from three ants that split the signal at about 1.9 kHz, 955 Hz and 477 Hz, and the high band above its floor. In the Carolina Wren the high-band trace rises with the song between 1.7 and 3 seconds; in the Hairy Woodpecker and White-throated Sparrow it peaks once per call. The three ants agree on the high band and differ in the ratio by a fixed offset.](/images/bma/p10-ant-real-light.svg){: .only-light}
+![Three clips side by side, each with a spectrogram, the band ratio from three ants that split the signal at about 1.9 kHz, 955 Hz and 477 Hz, and the high band above its floor. In the Carolina Wren the high-band trace rises with the song between 1.7 and 3 seconds; in the Hairy Woodpecker and White-throated Sparrow it peaks once per call. The three ants agree on the high band and differ in the ratio by a fixed offset.](/images/bma/p10-ant-real-dark.svg){: .only-dark}
+
+- **High band above floor.** All three ants rise and fall together with each call, so the call shows up in the code with no tuning.
+- **Band ratio.** It sits at a different level for each split and stays flat between calls. The sparrow's calls move it a few steps; the woodpecker's barely do.
+- **Why several.** The splits disagree about what's low and what's high, which is information a single ant can't give. How to combine them, with MAX or a quorum, isn't built.
+
 ## The head
 
 The first head I tried copies the insect mushroom body (MB). Each code fans out to a few hundred Kenyon cells, each wired to six random input bits. Only the 16 strongest cells stay on, and an int8 readout scores the classes from those:
@@ -112,6 +123,13 @@ Weights come from the host: training data, a Python trainer and reference, expor
 ![Flow: training data to host trainer and reference, exported weights with a SHA-256 sidecar, golden vectors into Python tests and the FPGA testbench, with the BMA audio path as the next step.](/images/bma/p10-flow-dark.svg){: .only-dark}
 
 All the learning happens on the host for now, because that's what the FPGA testing needed. Nothing rules out learning on the chip, and learning rules borrowed from biology are part of what FlyBrain is for. None of that runs on the BMA hardware.
+
+## Classifying at the edge
+
+![Seven stages from one beam through ants, 64-bit codes, a head, a class with three scores, an event to the hub and the hub classifier, then six dashed ideas: train on real audio, several ants per beam, keep level out of the class, the cheapest head that works, hub verdicts as labels, and an unsure result.](/images/bma/p10-edge-classify-light.svg){: .only-light}
+![Seven stages from one beam through ants, 64-bit codes, a head, a class with three scores, an event to the hub and the hub classifier, then six dashed ideas: train on real audio, several ants per beam, keep level out of the class, the cheapest head that works, hub verdicts as labels, and an unsure result.](/images/bma/p10-edge-classify-dark.svg){: .only-dark}
+
+The head is trained only on synthetic audio, so it has no accuracy on real birds. The dashed boxes are what I would do next.
 
 ## Two FPGA prototypes
 
