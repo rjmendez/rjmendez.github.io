@@ -65,29 +65,26 @@ def real_ants(fig, p, theme):
 
 
 def edge_classify(p):
-    s = ['<text x="20" y="22" font-weight="600" font-size="14">Classifying at the edge, and six ways to make it better</text>']
-    steps = [("One beam", "48 kHz PCM", "exists", p["edge"]),
-             ("Ants", "one or several per beam", "simulation", p["blue"]),
-             ("Codes", "64 bits, 8 to 12 hot", "simulation", p["blue"]),
-             ("Head", "linear or MB", "simulation,", p["blue"]),
-             ("Result", "class and 3 scores", "simulation", p["blue"]),
-             ("Event to hub", "no PCM in it", "design", p["faint"]),
-             ("Hub classifier", "BirdNET, Perch", "runs today", p["edge"])]
-    w, gap = 130, 23
+    s = ['<text x="20" y="22" font-weight="600" font-size="14">Following at the edge: fast reflex first, the hub names it later</text>']
+    steps = [("Any sound", "cars, drones, birds, voices", "the array hears it", p["edge"]),
+             ("Ants", "features and flags", "simulation", p["blue"]),
+             ("Follow", "bearing hint, beam steer", "design", p["faint"]),
+             ("Features ride along", "bands or an embedding", "design", p["faint"]),
+             ("Zynq filter", "drops stale or false", "design", p["faint"]),
+             ("Hub names it", "BirdNET, Perch", "runs today", p["edge"])]
+    w, gap = 155, 22
     for i, (t, sub, st, col) in enumerate(steps):
         x = 20 + i * (w + gap)
         s.append(_box(x, 44, w, 56, p["panel"], col, t, sub, p, size=12.5, dash=(col == p["faint"])))
-        s.append(f'<text x="{x + w / 2}" y="118" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">{st if i != 3 else "simulation, synthetic"}</text>')
-        if i == 3:
-            s.append(f'<text x="{x + w / 2}" y="131" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">training only</text>')
+        s.append(f'<text x="{x + w / 2}" y="118" text-anchor="middle" font-size="10.5" fill="{p["muted"]}">{st if i else "the array hears it"}</text>')
         if i:
             s.append(_arrow(x - gap, 72, x, 72, p))
-    ideas = [("Train on real audio", ["Hub detections label real windows.", "Today the head has only seen", "synthetic audio."]),
-             ("Several ants per beam", ["Different split points, as in the", "plot above. Combine with MAX", "or a quorum."]),
-             ("Keep level out of the class", ["Ratio and crossings moved by at", "most 0.002 under a 12 dB shift.", "Level gets its own gate."]),
-             ("Cheapest head that works", ["Linear is at most 12 int8 adds", "per class. Keep the MB head only", "if it wins on real recordings."]),
-             ("The hub corrects the edge", ["Hub verdicts become labels, the", "head is retrained, weights are", "re-exported with a hash."]),
-             ("Say unsure", ["Low scores or a code never seen in", "training go up as unclassified,", "never as a guess."])]
+    ideas = [("Measure the reflex", ["First sound to beam steer, impulse", "recall and false triggers, on real", "audio. None measured yet."]),
+             ("Windows that fit impulses", ["A 21 ms window and two flagged", "windows can miss one chirp or click.", "Try a shorter path for impulses."]),
+             ("Wire the flag to an actor", ["The activity gate flag is read out,", "not connected to anything.", "Connect it to a steer request."]),
+             ("Pick what rides along", ["Ant code, mel-style bands or a", "learned embedding. Judge each by", "whether the hub does better with it."]),
+             ("False triggers are cheap", ["Wrong reflexes cost a beam move.", "The Zynq and hub filter them, so", "tune the ant for speed."]),
+             ("Several sources at once", ["Different ants on different beams", "can hold different sources. The", "tracker decides who is who."])]
     bw, bh = 340, 86
     for i, (t, lines) in enumerate(ideas):
         x = 20 + (i % 3) * (bw + 15)
@@ -101,5 +98,5 @@ def edge_classify(p):
 
 def build():
     out = save_mpl("p10-ant-real", real_ants, figsize=(11, 6.2))
-    out += _write("p10-edge-classify", 1090, 340, edge_classify)
+    out += _write("p10-edge-reflex", 1090, 340, edge_classify)
     return out
