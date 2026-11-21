@@ -448,7 +448,7 @@ def system_split(p):
     s.append(f'<text x="218" y="{y + 30}" text-anchor="middle" font-size="10.5" fill="{p["red"]}">no rx RTL</text>')
     # Cyclone
     s.append(_tbox(248, y, 220, h, p["blue"], "Cyclone V: the ants", p))
-    s.append(f'<text x="358" y="{y + 62}" text-anchor="middle" font-size="11.5" fill="{p["muted"]}">one small classifier per</text>')
+    s.append(f'<text x="358" y="{y + 62}" text-anchor="middle" font-size="11.5" fill="{p["muted"]}">one small follower per</text>')
     s.append(f'<text x="358" y="{y + 78}" text-anchor="middle" font-size="11.5" fill="{p["muted"]}">beam or channel, at the mics</text>')
     # OMAP above Cyclone
     s.append(_box(248, 66, 220, 40, p["panel"], p["green"], "OMAP", None, p, size=12))
