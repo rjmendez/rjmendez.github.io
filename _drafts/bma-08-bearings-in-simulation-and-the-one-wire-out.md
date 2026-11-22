@@ -38,7 +38,7 @@ On the stock image the Zynq's PL packetizes audio somewhere the processor can't 
 ```
 bma_egressd sources:
   synthetic   -> framing/transport tests
-  zynq-pl     -> PL ring reader; waiting on a PL ring writer + Cyclone wiring
+  zynq-pl     -> PL ring reader; the ring now fills from the Cyclone link (below)
   omap-emif   -> not written
 ```
 
@@ -66,24 +66,28 @@ Here is the transmitter RTL in Icarus, fed the `ramp8` fixture (words 1, -1, 0x7
 ![Simulated R9 waveform: 40 disabled cells, then the 17-cell lead-in, preamble, header 0x18 and the eight words; the zoom shows the header bits 00011000 and the first word 0x000001 as Manchester cells](/images/bma/p08-link1w-wave-light.svg){: .only-light}
 ![Simulated R9 waveform: 40 disabled cells, then the 17-cell lead-in, preamble, header 0x18 and the eight words; the zoom shows the header bits 00011000 and the first word 0x000001 as Manchester cells](/images/bma/p08-link1w-wave-dark.svg){: .only-dark}
 
-All 483 cells match the reference model's checked-in vector. The Zynq receiver and image top pass RTL and open-flow checks. The Cyclone transmitter and the SHARC return block pass 12 Icarus simulations on synthetic fixtures. Those are the simulation results. Since then the link has run on boards, in logged runs I haven't had independently reviewed: the Zynq receiver writes records into a DDR ring, and one run on board B captured 8,509,310 records with no gaps, no duplicates and no CRC violations, at about 48.1k records per second against the card's own timer. A small program on the card sends the ring out as UDP to the host, and a longer capture of 4.4 million records arrived with no sequence gaps. Board C's Cyclone now runs my own image and its ring runs too. A host bridge feeds the ring into the hub's existing eight-slot path, and the operator saw a waveform in the dashboard.
+All 483 cells match the reference model's checked-in vector. The Zynq receiver and image top pass RTL and open-flow checks. The Cyclone transmitter and the SHARC return block pass 12 Icarus simulations on synthetic fixtures. Since then the link has run on boards. The Zynq receiver writes records into a DDR ring. One run on board B captured 8,509,310 records with no gaps, no duplicates and no CRC violations. A small program on the card sends the ring out as UDP, and a 4.4 million record capture arrived with no sequence gaps. Board C's Cyclone runs my own image and its ring runs too. A host bridge feeds the ring into the hub's eight-slot path, and the dashboard shows a waveform.
 
-That proves the transport. It doesn't prove the payload is microphone audio: the eight lanes correlate at 0.92 to 0.98 and are dominated by a tone near 103 Hz, so a common electrical source isn't excluded. Which microphone is which lane is assumed, not mapped. I fitted the lanes against the measured 121-microphone layout with a search over ordered eight-microphone subsets; the search is too big to enumerate, so the fit is a lower bound. The result is inconclusive and leans toward a fixed per-lane skew rather than real acoustic delay. The 48 kHz is the card's timer, not a reference clock, so the skew against a true 48 kHz is unmeasured. Each record is eight lanes, not the adaptive 32 or 64 streams, and Dante isn't in this path. The ring-enable step doesn't survive a power cycle yet. An install script that flashes the Cyclone, arms the link, starts the sender and registers a watchdog is written and tested, and its cold power-cycle run is still to do. The bearings the hub draws from this feed aren't evidence of direction: replaying one capture through the hub's estimator, 91.7% of windows failed the coherence gate and 5.6% produced a bearing.
+The frame counter advances at 48,010.5 Hz against the host clock, 220 ppm above 48 kHz, steady to 0.1 ppm over 150 seconds. The two cards differ by 0.3 Hz. The Cyclone's 98.3 MHz clock is 2,048 cycles per frame, not the 24.576 MHz I assumed, and that sets the rate. An earlier 48.7k figure had no measurement behind it, and I removed it.
 
-One mismatch is already known: at non-nominal rates the receiver's documented acquisition rule wants at least 20 idle edges, and the transmitter sends a 17-cell lead-in. The source of the 24.576 MHz clock and the physical return mapping are also open. Those are the first things to put a scope on once both images are loaded.
+What the ring carries is not yet shown to be microphone audio. The eight lanes correlate at 0.92 to 0.98 and a tone near 103 Hz dominates. Which microphone is which lane is not mapped. A lane-map search against the measured 121-microphone layout was inconclusive and leans toward a fixed skew per lane. Records are eight lanes, not 32 or 64 streams, and Dante is not in this path.
+
+A script flashes the Cyclone, arms the link, starts the sender and registers a watchdog. The ring-enable step is lost on a power cycle, and the script's cold-start run is still to do.
+
+Replaying one capture through the hub's estimator, 91.7% of windows failed the coherence gate and 5.6% produced a bearing. Those bearings are not evidence of direction.
 
 Scorecard
 ======
 
-![Status matrix of every result in Parts 2 to 8: eight on real silicon (Parts 2 to 6), one mechanism-only beam and one failed probe in Part 6, two unresolved items in Part 7, five host or RTL test results and one simulation in Part 8](/images/bma/p08-scorecard-light.svg){: .only-light}
-![Status matrix of every result in Parts 2 to 8: eight on real silicon (Parts 2 to 6), one mechanism-only beam and one failed probe in Part 6, two unresolved items in Part 7, five host or RTL test results and one simulation in Part 8](/images/bma/p08-scorecard-dark.svg){: .only-dark}
+![Status matrix of every result in Parts 2 to 8: eight on real silicon (Parts 2 to 6), one mechanism-only beam and one failed probe in Part 6, two unresolved items in Part 7, three on real silicon, three host or RTL test results and one simulation in Part 8](/images/bma/p08-scorecard-light.svg){: .only-light}
+![Status matrix of every result in Parts 2 to 8: eight on real silicon (Parts 2 to 6), one mechanism-only beam and one failed probe in Part 6, two unresolved items in Part 7, three on real silicon, three host or RTL test results and one simulation in Part 8](/images/bma/p08-scorecard-dark.svg){: .only-dark}
 
 The corrected levels hook is merged and host-tested, not loaded on a board; mutating out its scale conversion fails 25 of the host tests. A static review flagged that delayed beam history might survive an epoch change in the egress path. That gets a fix or a test before the combined path goes on a board.
 
 What's left
 ======
 
-![Six undone steps in order: the fixed levels hook on a board, R9 TX against W13 RX, real samples through the PL ring reader and egress, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-light.svg){: .only-light}
-![Six undone steps in order: the fixed levels hook on a board, R9 TX against W13 RX, real samples through the PL ring reader and egress, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-dark.svg){: .only-dark}
+![Six undone steps in order: the fixed levels hook on a board, showing the ring carries microphone audio, mapping ring lanes to microphones, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-light.svg){: .only-light}
+![Six undone steps in order: the fixed levels hook on a board, showing the ring carries microphone audio, mapping ring lanes to microphones, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-dark.svg){: .only-dark}
 
 Part 9 is the path that runs today: the hub and dashboard on the stock Dante stream.
