@@ -23,7 +23,7 @@ A conference-phone ceiling tile combines microphones into voice pickups. In the 
 ![Signal path from the 121 elements to the eight Dante channels, the two readings of those channels with what each predicts, and the five-step capture that would decide between them](/images/bma/eight-channel-question-light.svg){: .only-light}
 ![Signal path from the 121 elements to the eight Dante channels, the two readings of those channels with what each predicts, and the five-step capture that would decide between them](/images/bma/eight-channel-question-dark.svg){: .only-dark}
 
-The two sources disagree. One project status description calls the Dante output eight processed or gated beams and says raw ungated audio is not available on that path. The host direction-estimation code describes its input as an eight-microphone stream and models microphone positions. An estimator's input assumption is not a measurement of the card's output, so for the November 3 captures these are **eight Dante channels of unresolved identity**. What the channels carry depends on how the card's input matrix is routed: my later notes (November 14) find the matrix inputs that carry the raw rim microphones and routed the channels that way, so the identity is a matter of configuration, and these stock-configuration captures do not show which one was in force. The Windows bridge repackages the samples into a host format called BMAA; it does not turn them into microphones.
+The two sources disagree. One project status description calls the Dante output eight processed or gated beams and says raw ungated audio is not available on that path. The host direction-estimation code describes its input as an eight-microphone stream and models microphone positions. An estimator's input assumption is not a measurement of the card's output, so for the November 3 captures these are **eight Dante channels of unresolved identity**. What the channels carry depends on how the card's input matrix is routed: the repository's later board scripts and control manual describe routing matrix inputs 14 to 21 (the register 0xEC group, raw microphones) to the eight Dante outputs. That routing is reported, not verified: the manual marks its effect as untested, and I have not confirmed it against a capture. So the identity may be a matter of configuration, and these stock-configuration captures do not show which one was in force. The Windows bridge repackages the samples into a host format called BMAA; it does not turn them into microphones.
 
 What the packets look like
 ======
@@ -48,21 +48,21 @@ No channel is ever exactly zero, so nothing gated shut during these windows. Cor
 An ambient-event fit
 ======
 
-There is something between "no geometry" and "measured microphone map." I fit the relative delays among the eight Dante channels for ambient-event slices, at 48 kHz with sound speed taken as 343 m/s. The filter kept 86 of 1,033 events for one tile and 60 of 640 for the other: under one sample RMS closure error across all 28 channel pairs, and a minimum normalized pair peak above 0.08. The kept delay patterns fit a circle with RMS residuals of 0.705 and 0.537 samples.
+There is something between "no geometry" and "measured microphone map." I fit the relative delays among the eight Dante channels for ambient-event slices, at 48 kHz with sound speed taken as 343 m/s. The filter kept events with under one sample RMS closure error across all 28 channel pairs and a minimum normalized pair peak above 0.08. The kept delay patterns fit a circle. I earlier quoted event counts and per-tile residuals for this fit; I have found no saved log or script output behind them, so they are unreproduced and I have removed them.
 
-That gives a ring-like *relative* channel geometry under the model. It does not say which physical microphone is slot 0, the circle's rotation or reflection, or the Dante routing. The radii, about 261 mm and 256 mm, come from treating the 99th-percentile delay amplitude as an in-plane arrival, so a source above or below the plane shrinks them.
+That gives a ring-like *relative* channel geometry under the model. It does not say which physical microphone is slot 0, the circle's rotation or reflection, or the Dante routing. The radii I got (unreproduced, about 260 mm) came from treating the 99th-percentile delay amplitude as an in-plane arrival, so a source above or below the plane shrinks them.
 
 Fitting both tiles together lands on two layouts at once:
 
 ![Top view in the model frame: array 1 at the origin, array 2 at (0.135, 0.942) m in the ordinary layout and at (0.942, 0.135) m in the mirrored one, reflections of each other across x = z, with identical cost 55.81, offset -10 samples, 98% of residuals within 2 samples, and range 0.969 m](/images/bma/p07-mirror-fit-light.svg){: .only-light}
 ![Top view in the model frame: array 1 at the origin, array 2 at (0.135, 0.942) m in the ordinary layout and at (0.942, 0.135) m in the mirrored one, reflections of each other across x = z, with identical cost 55.81, offset -10 samples, 98% of residuals within 2 samples, and range 0.969 m](/images/bma/p07-mirror-fit-dark.svg){: .only-dark}
 
-Every fit statistic is the same for both. This data and objective cannot choose between the mirror images, and no source at a surveyed bearing has picked one yet. The event counts and fit statistics come from recorded delay arrays that are not published here.
+Every fit statistic is the same for both. This data and objective cannot choose between the mirror images, and no source at a surveyed bearing has picked one yet. The fit statistics above come from recorded delay arrays that are not published here, so treat the circle fit as a description, not a reproducible result.
 
 Two loose ends
 ======
 
-Separately, in my array-to-array commissioning notes there is a consistent lag of 602 to 603 samples between two arrays' streams that I expected to line up. It is an inter-array offset, not something inside one tile's eight channels. I have the number and no confirmed cause.
+Separately, in my array-to-array commissioning notes there is a consistent lag of 602 to 603 samples between two arrays' streams that I expected to line up. It is an inter-array offset, not something inside one tile's eight channels, and the commissioning notes say it mixes the cards' clock offset with the acoustic path. I have the number and no confirmed cause.
 
 The hub can process per-array tracks and attempt fusion. One November 19 fleet snapshot had two arrays, 42 bearing rays and zero fused tracks (Part 9).
 
