@@ -162,7 +162,7 @@ RESULTS = [
     ("mech", 6, "in-memory bit-exact beam, one DSP4 snapshot"),
     ("fail", 6, "indexed-copy probe v1: 42/48 wrong"),
     ("open", 7, "eight Dante channels: gated beams or raw mics"),
-    ("open", 7, "602-603 sample lag"),
+    ("open", 7, "602-603 sample inter-array lag"),
     ("host", 8, "levels-hook indexed caller: 474 pass, 110 skip"),
     ("host", 8, "Cyclone TX / SHARC return: 12 synthetic RTL tests"),
     ("si", 8, "own egress on a card: 8 synthetic streams, 0.00% loss"),

@@ -391,7 +391,7 @@ z
     </g>
    </g>
    <g id="text_19">
-    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #f2f2f2" x="275.605063" y="248.134812" transform="rotate(-0 275.605063 248.134812)">602-603 sample lag</text>
+    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #f2f2f2" x="275.605063" y="248.134812" transform="rotate(-0 275.605063 248.134812)">602-603 sample inter-array lag</text>
    </g>
    <g id="PathCollection_19">
     <defs>
