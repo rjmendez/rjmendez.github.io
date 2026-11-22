@@ -420,7 +420,7 @@ z
     </g>
    </g>
    <g id="text_21">
-    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="282.694812" transform="rotate(-0 275.605063 282.694812)">Cyclone TX / SHARC return: 12 synthetic RTL tests</text>
+    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="282.694812" transform="rotate(-0 275.605063 282.694812)">Cyclone TX / SHARC return: synthetic RTL tests</text>
    </g>
    <g id="PathCollection_21">
     <g clip-path="url(#pc7e7cf8e2f)">
@@ -428,7 +428,7 @@ z
     </g>
    </g>
    <g id="text_22">
-    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="299.974812" transform="rotate(-0 275.605063 299.974812)">own egress on a card: 8 synthetic streams, 0.00% loss</text>
+    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="299.974812" transform="rotate(-0 275.605063 299.974812)">own egress on a card: 8 synthetic streams (unreproduced run)</text>
    </g>
    <g id="PathCollection_22">
     <g clip-path="url(#pc7e7cf8e2f)">
