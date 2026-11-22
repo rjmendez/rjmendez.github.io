@@ -207,13 +207,13 @@ L 540.478481 254.376062
 " clip-path="url(#pc7e7cf8e2f)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: square"/>
    </g>
    <g id="line2d_12">
-    <path d="M 10.731646 306.216062 
-L 540.478481 306.216062 
+    <path d="M 10.731646 288.936062 
+L 540.478481 288.936062 
 " clip-path="url(#pc7e7cf8e2f)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: square"/>
    </g>
    <g id="line2d_13">
-    <path d="M 10.731646 323.496062 
-L 540.478481 323.496062 
+    <path d="M 10.731646 340.776062 
+L 540.478481 340.776062 
 " clip-path="url(#pc7e7cf8e2f)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: square"/>
    </g>
    <g id="line2d_14">
@@ -420,15 +420,15 @@ z
     </g>
    </g>
    <g id="text_21">
-    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="282.694812" transform="rotate(-0 275.605063 282.694812)">Zynq receive top + ring path</text>
+    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="282.694812" transform="rotate(-0 275.605063 282.694812)">Cyclone TX / SHARC return: 12 synthetic RTL tests</text>
    </g>
    <g id="PathCollection_21">
     <g clip-path="url(#pc7e7cf8e2f)">
-     <use xlink:href="#m8b8fcdf095" x="240.288608" y="297.576062" style="fill: #2c6cb0; stroke: #2c6cb0"/>
+     <use xlink:href="#mb2dddc5300" x="240.288608" y="297.576062" style="fill: #2e7d32; stroke: #2e7d32"/>
     </g>
    </g>
    <g id="text_22">
-    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="299.974812" transform="rotate(-0 275.605063 299.974812)">Cyclone TX / SHARC return: 12 synthetic RTL tests</text>
+    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="299.974812" transform="rotate(-0 275.605063 299.974812)">own egress on a card: 8 synthetic streams, 0.00% loss</text>
    </g>
    <g id="PathCollection_22">
     <g clip-path="url(#pc7e7cf8e2f)">
@@ -436,15 +436,15 @@ z
     </g>
    </g>
    <g id="text_23">
-    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="317.254812" transform="rotate(-0 275.605063 317.254812)">own egress on a card: 8 synthetic streams, 0.00% loss</text>
+    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="317.254812" transform="rotate(-0 275.605063 317.254812)">Cyclone to Zynq link into a DDR ring: 8.5M records, 0 gaps</text>
    </g>
    <g id="PathCollection_23">
     <g clip-path="url(#pc7e7cf8e2f)">
-     <use xlink:href="#m8b8fcdf095" x="240.288608" y="332.136062" style="fill: #2c6cb0; stroke: #2c6cb0"/>
+     <use xlink:href="#mb2dddc5300" x="240.288608" y="332.136062" style="fill: #2e7d32; stroke: #2e7d32"/>
     </g>
    </g>
    <g id="text_24">
-    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="334.534812" transform="rotate(-0 275.605063 334.534812)">Zynq-PL egress source: needs a live PL ring</text>
+    <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #1a1a1a" x="275.605063" y="334.534812" transform="rotate(-0 275.605063 334.534812)">ring to UDP to the host: 4.4M records, 0 gaps</text>
    </g>
    <g id="PathCollection_24">
     <g clip-path="url(#pc7e7cf8e2f)">
