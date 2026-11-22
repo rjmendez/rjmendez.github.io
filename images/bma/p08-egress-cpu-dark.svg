@@ -318,8 +318,8 @@ L 683.098805 21.841172
    </g>
    <g id="patch_8">
     <path d="M 432.88686 28.469888 
-L 507.757568 28.469888 
-L 507.757568 75.512391 
+L 507.950443 28.469888 
+L 507.950443 75.512391 
 L 432.88686 75.512391 
 z
 " clip-path="url(#pc5f22da92f)" style="fill: #ff8a7a"/>
@@ -343,7 +343,7 @@ L 708.12 167.67293
 " style="fill: none; stroke: #8a8a8a; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_18">
-    <text style="font-size: 10.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #f2f2f2" x="512.761807" y="54.708425" transform="rotate(-0 512.761807 54.708425)">29.9%</text>
+    <text style="font-size: 10.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #f2f2f2" x="512.954682" y="54.708425" transform="rotate(-0 512.954682 54.708425)">30.0%</text>
    </g>
    <g id="text_19">
     <text style="font-size: 10.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #f2f2f2" x="437.891098" y="140.240247" transform="rotate(-0 437.891098 140.240247)">0.0%</text>
@@ -353,7 +353,7 @@ L 708.12 167.67293
    </g>
   </g>
   <g id="text_21">
-   <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #c9c9c9" x="7.2" y="208.972172" transform="rotate(-0 7.2 208.972172)">Synthetic payload; this measures the card's transport, not microphone audio. Running: 64,050 of 214,050 frames skipped.</text>
+   <text style="font-size: 9.5px; font-family: 'Segoe UI', 'DejaVu Sans', 'Arial', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #c9c9c9" x="7.2" y="208.972172" transform="rotate(-0 7.2 208.972172)">Approximate, one unreproduced bench run (no saved log). Synthetic payload; not microphone audio.</text>
   </g>
  </g>
  <defs>

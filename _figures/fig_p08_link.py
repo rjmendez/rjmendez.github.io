@@ -164,8 +164,8 @@ RESULTS = [
     ("open", 7, "eight Dante channels: gated beams or raw mics"),
     ("open", 7, "602-603 sample inter-array lag"),
     ("host", 8, "levels-hook indexed caller: 474 pass, 110 skip"),
-    ("host", 8, "Cyclone TX / SHARC return: 12 synthetic RTL tests"),
-    ("si", 8, "own egress on a card: 8 synthetic streams, 0.00% loss"),
+    ("host", 8, "Cyclone TX / SHARC return: synthetic RTL tests"),
+    ("si", 8, "own egress on a card: 8 synthetic streams (unreproduced run)"),
     ("si", 8, "Cyclone to Zynq link into a DDR ring: 8.5M records, 0 gaps"),
     ("si", 8, "ring to UDP to the host: 4.4M records, 0 gaps"),
     ("host", 8, "virtual-edge tracks on live input: noise level"),
@@ -214,9 +214,9 @@ def scorecard():
     return save_mpl("p08-scorecard", draw, figsize=(10, 7.2))
 
 
-# 2026-11-11, board A's card, vendor stack up; 5 s /proc deltas and bma-egressd status.
+# Board A's card, vendor stack up. One bench run, no saved log found: values are approximate and unreproduced.
 EGRESS = [  # (label, cpu busy %, frames skipped %)
-    ("ipcore_manager running", 100.0, 64050 / 214050 * 100),
+    ("ipcore_manager running", 100.0, 30.0),
     ("ipcore_manager paused", 30.0, 0.0),
 ]
 
@@ -237,8 +237,7 @@ def egress_cpu():
             for y, v in enumerate(vals):
                 ax.text(v + 2, y, f"{v:.0f}%" if k == 1 else f"{v:.1f}%", va="center", color=p["fg"], fontsize=10.5)
         axes[1].set_yticklabels([])
-        fig.text(0.01, -0.06, "Synthetic payload; this measures the card's transport, not microphone audio. "
-                 "Running: 64,050 of 214,050 frames skipped.", color=p["muted"], fontsize=9.5)
+        fig.text(0.01, -0.06, "Approximate, one unreproduced bench run (no saved log). Synthetic payload; not microphone audio.", color=p["muted"], fontsize=9.5)
         fig.tight_layout()
 
     return save_mpl("p08-egress-cpu", draw, figsize=(10, 2.8))
