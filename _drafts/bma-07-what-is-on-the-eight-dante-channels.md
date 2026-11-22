@@ -23,7 +23,7 @@ A conference-phone ceiling tile combines microphones into voice pickups. In the 
 ![Signal path from the 121 elements to the eight Dante channels, the two readings of those channels with what each predicts, and the five-step capture that would decide between them](/images/bma/eight-channel-question-light.svg){: .only-light}
 ![Signal path from the 121 elements to the eight Dante channels, the two readings of those channels with what each predicts, and the five-step capture that would decide between them](/images/bma/eight-channel-question-dark.svg){: .only-dark}
 
-The two sources disagree. One project status description calls the Dante output eight processed or gated beams and says raw ungated audio is not available on that path. The host direction-estimation code describes its input as an eight-microphone stream and models microphone positions. An estimator's input assumption is not a measurement of the card's output, so for now these are **eight Dante channels of unresolved identity**. The Windows bridge repackages the samples into a host format called BMAA; it does not turn them into microphones.
+The two sources disagree. One project status description calls the Dante output eight processed or gated beams and says raw ungated audio is not available on that path. The host direction-estimation code describes its input as an eight-microphone stream and models microphone positions. An estimator's input assumption is not a measurement of the card's output, so for the November 3 captures these are **eight Dante channels of unresolved identity**. What the channels carry depends on how the card's input matrix is routed: my later notes (November 14) find the matrix inputs that carry the raw rim microphones and routed the channels that way, so the identity is a matter of configuration, and these stock-configuration captures do not show which one was in force. The Windows bridge repackages the samples into a host format called BMAA; it does not turn them into microphones.
 
 What the packets look like
 ======
@@ -35,7 +35,7 @@ I went back to three short Dante captures of one tile from November 3, stock fir
   1          4                  4                  384
 ```
 
-The frame counter steps by 16 per packet. The card sends two transmit flows, six frames apart, and on every overlapping sample they carry the same eight channels bit for bit. Decoded, de-duplicated and ordered, that gives 0.07 s, 0.62 s and 0.24 s of ambient room sound, no controlled source:
+The frame counter steps by 16 per packet. The card sends two transmit flows (in capture C they sit six frames apart; the offset differs between captures), and on every overlapping sample they carry the same eight channels bit for bit. Decoded, de-duplicated and ordered, that gives 0.07 s, 0.62 s and 0.24 s of ambient room sound, no controlled source:
 
 ![Left: RMS level of each of the eight Dante channels in three captures; channel 0 is loudest by 1 to 2 dB and the rest sit within about 1 dB. Right: power spectrum of each channel in capture B; the eight curves coincide below about 200 Hz and spread by up to about 9 dB above 400 Hz.](/images/bma/p07-channel-levels-light.svg){: .only-light}
 ![Left: RMS level of each of the eight Dante channels in three captures; channel 0 is loudest by 1 to 2 dB and the rest sit within about 1 dB. Right: power spectrum of each channel in capture B; the eight curves coincide below about 200 Hz and spread by up to about 9 dB above 400 Hz.](/images/bma/p07-channel-levels-dark.svg){: .only-dark}
@@ -62,7 +62,7 @@ Every fit statistic is the same for both. This data and objective cannot choose 
 Two loose ends
 ======
 
-There is a consistent lag of 602 to 603 samples between references I expected to line up. I have the number and no confirmed cause.
+Separately, in my array-to-array commissioning notes there is a consistent lag of 602 to 603 samples between two arrays' streams that I expected to line up. It is an inter-array offset, not something inside one tile's eight channels. I have the number and no confirmed cause.
 
 The hub can process per-array tracks and attempt fusion. One November 19 fleet snapshot had two arrays, 42 bearing rays and zero fused tracks (Part 9).
 

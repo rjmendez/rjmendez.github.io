@@ -56,7 +56,7 @@ A Python web service tails the analysis logs and the fleet feed, handles rotatio
 ![Live view: 60-second waterfall, spectrum with peak hold, per-beam level rose and beam list, and latest detections.](/images/bma/p09-live-light.png){: .only-light}
 ![Live view: 60-second waterfall, spectrum with peak hold, per-beam level rose and beam list, and latest detections.](/images/bma/p09-live-dark.png){: .only-dark}
 
-The live view, with the last 60 seconds in the waterfall and one small waterfall per beam under it. Ignore the 100% on the detection: the dashboard runs the classifier's raw score through a sigmoid, and the top score is always big enough to round to 100. It ranks detections; it isn't a confidence.
+The live view, with the last 60 seconds in the waterfall and one small waterfall per beam under it. Ignore the 100% on the detection: the top score is routinely saturated on screen, and I have not traced exactly why. It ranks detections; it isn't a confidence.
 
 <video class="bma-av" controls muted loop playsinline preload="none" poster="/images/bma/p09-waterfall-poster.png">
   <source src="/files/bma/p09-waterfall.webm" type="video/webm">
@@ -133,9 +133,9 @@ The dashboard has a review view for going through detections one at a time. This
   <source src="/files/bma/p09-review.mp4" type="video/mp4">
 </video>
 
-The clip is a spectrogram with a level trace and a flux trace under it. I drag a box around the call to select it and loop just that part. Noise reduction toggles between off and strong, and playback can be slowed. I can listen to any one of the eight beams, to the mean of them, or flip between two with A and B. A verdict is one of five: correct, wrong, unsure, artifact, or human voice. A wrong verdict needs a reason (another species, a non-bird sound, machinery, an insect or amphibian, or nothing visible) and can name the right species. Each verdict also records its basis: the field, the clip's spectrogram, or the metadata alone. The scores can't be calibrated until enough detections carry a verdict. Until then the score on screen is what BirdNET said, and the label is its opinion.
+The clip is a spectrogram with a level trace and a flux trace under it. I drag a box around the call to select it and loop just that part. Noise reduction toggles between off and strong, and playback can be slowed. The saved clips are single-channel, so the buttons for the other beams are greyed out and the A/B flip does nothing on them. The review page offers four verdicts: correct, wrong, unsure or artifact. The hub also accepts a fifth, human voice, through its API and command line, but the page has no button for it. A wrong verdict needs a reason (another species, a non-bird sound, machinery, an insect or amphibian, or nothing visible). The page does not let me name the right species. Each verdict also records its basis: the field, the clip's spectrogram, or the metadata alone. The scores can't be calibrated until enough detections carry a verdict. Until then the score on screen is what BirdNET said, and the label is its opinion.
 
-Stored audio is deleted 24 hours after capture, and a human-voice verdict deletes the clip immediately. The verdict stays either way, so a label outlives the audio it describes.
+Clip audio is off by default and is only saved when the hub is started with the clip-audio option. When it is on, stored audio is deleted 24 hours after capture, and a human-voice verdict, entered through the API or command line, deletes the clip immediately. The verdict stays either way, so a label outlives the audio it describes.
 
 ## A decoder test you can run without a tile
 
