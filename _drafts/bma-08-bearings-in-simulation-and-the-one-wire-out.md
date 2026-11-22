@@ -76,6 +76,13 @@ A script flashes the Cyclone, arms the link, starts the sender and registers a w
 
 Replaying one capture through the hub's estimator, 91.7% of windows failed the coherence gate and 5.6% produced a bearing. Those bearings are not evidence of direction.
 
+GNU Radio
+======
+
+I wrote a GNU Radio 3.10 module, `gr-bma360`, in Python with no C++ build. It reads the ring's UDP stream, decodes the hub's metadata packets and estimates pairwise lane delays with GCC-PHAT. It also exports a capture to SigMF and back byte for byte, and bridges lanes and metadata over ZeroMQ.
+
+The kernels have 130 host tests, with real loopback sockets for the ZeroMQ bridge. Replaying one capture of 27,432 packets and 960,120 records gave no lost packets, frame-counter gaps or header mismatches. The SigMF exports validate with the official package. The block wrappers have only run against a fake GNU Radio API, and the flowgraphs have never been opened in GRC. Lane delays are relative and uncalibrated, and the module is not yet installed into GNU Radio proper.
+
 Scorecard
 ======
 
