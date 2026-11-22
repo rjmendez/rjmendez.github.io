@@ -164,10 +164,10 @@ RESULTS = [
     ("open", 7, "eight Dante channels: gated beams or raw mics"),
     ("open", 7, "602-603 sample lag"),
     ("host", 8, "levels-hook indexed caller: 474 pass, 110 skip"),
-    ("host", 8, "Zynq receive top + ring path"),
     ("host", 8, "Cyclone TX / SHARC return: 12 synthetic RTL tests"),
     ("si", 8, "own egress on a card: 8 synthetic streams, 0.00% loss"),
-    ("host", 8, "Zynq-PL egress source: needs a live PL ring"),
+    ("si", 8, "Cyclone to Zynq link into a DDR ring: 8.5M records, 0 gaps"),
+    ("si", 8, "ring to UDP to the host: 4.4M records, 0 gaps"),
     ("host", 8, "virtual-edge tracks on live input: noise level"),
     ("sim", 8, "DOA bearings from generated sources"),
 ]

@@ -85,8 +85,8 @@ def bitstream(p):
 def whats_left(p):
     s = [_title("What stands between here and a bearing from live array audio")]
     steps = [("1", "Fixed levels hook on a board", "multi-frame delay ring still to check"),
-             ("2", "R9 TX against W13 RX", "settle lead-in and clock; check alignment, CRC, payload on the wire"),
-             ("3", "Real samples through the PL ring reader and egress", "audio checker, then listen mode"),
+             ("2", "Show the ring carries microphone audio", "the link and ring run; the payload is not yet shown to be mics"),
+             ("3", "Map each ring lane to a microphone", "the 121-mic fit was inconclusive; needs a source at a known bearing"),
              ("4", "A controlled capture of the eight Dante channels", "Part 7"),
              ("5", "A bearing on a known source", "then two arrays with measured poses and verified geometry"),
              ("6", "The 24 silent elements, mics 97 to 120", "a fabric rewrite; blocked by Part 4")]
