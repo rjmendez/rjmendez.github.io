@@ -92,7 +92,7 @@ The system view lists every producer. Three of eighteen needed attention, includ
 
 ## What it hears
 
-These are detection clips the hub saved from array 1, one Dante channel each, through the stock vendor path. Clip-audio is on for this run, and each one passed the speech guard before it was kept at all — more on that guard under Reviewing a detection, below. I high-passed them at 1 kHz and turned them up a lot (33 to 52 dB) so they're audible on a laptop; nothing here is beamformed. The species names are BirdNET's labels, not mine.
+These are detection clips the hub saved from array 1, one Dante channel each, through the stock vendor path, with clip-audio on and the speech guard clearing each one. I high-passed them at 1 kHz and turned them up a lot (33 to 52 dB) so they're audible on a laptop; nothing here is beamformed. The species names are BirdNET's labels, not mine.
 
 <figure class="bma-av">
   <audio controls preload="none">
@@ -135,7 +135,7 @@ The dashboard has a review view for going through detections one at a time. This
 
 The clip is a spectrogram with a level trace and a flux trace under it. I drag a box around the call to select it and loop just that part. Noise reduction toggles between off and strong, and playback can be slowed. The saved clips are single-channel, so the buttons for the other beams are greyed out and the A/B flip does nothing on them. The review page offers four verdicts: correct, wrong, unsure or artifact. The hub also accepts a fifth, human voice, through its API and command line, but the page has no button for it. A wrong verdict needs a reason (another species, a non-bird sound, machinery, an insect or amphibian, or nothing visible). The page does not let me name the right species. Each verdict also records its basis: the field, the clip's spectrogram, or the metadata alone. The scores can't be calibrated until enough detections carry a verdict. Until then the score on screen is what BirdNET said, and the label is its opinion.
 
-Clip audio is off by default; without the clip-audio option the hub keeps only the spectrogram, the signature, and the index record, never the sound. Turn it on and I still only keep a clip if a speech guard clears it first: across the clip's span plus a five-second margin on each side, no tagger window may show speech, no BirdNET label may say human voice, and a window the tagger never got to, or never verdicted in time, fails the clip instead of passing it. Audio that clears the guard is deleted 24 hours after capture; a human-voice verdict, entered through the API or command line, deletes the clip immediately. The verdict stays either way, so a label outlives the audio it describes. I still listen to every clip myself before it goes in a post like this one.
+Clip audio is off by default; the hub keeps only the spectrogram, the signature, and the index record. With clip-audio on, a speech guard still has to clear the clip: it checks the clip's span plus a five-second margin either side for speech or a human-voice label, and treats a missing or late verdict as a reason to drop the clip, not keep it. What survives is deleted 24 hours after capture, and a human-voice verdict, entered through the API or command line, deletes it immediately. The verdict stays either way, so a label outlives the audio it describes. I listen to every clip before it goes in a post.
 
 ## A decoder test you can run without a tile
 
