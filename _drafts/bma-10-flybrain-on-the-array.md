@@ -3,7 +3,7 @@ layout: single
 title: "BMA360, Part 10: FlyBrain and the Array"
 header:
   og_image: bma/og/bma360-part-10.png
-excerpt: "Small insect-inspired followers (ants) at the mics, a second FlyBrain stage on the Zynq, the big models on the hub. What an ant computes, what it looks like running, and which parts exist."
+excerpt: "Small insect-inspired followers (ants) at the mics, a second FlyBrain stage on the Zynq, the big models on the hub. What an ant computes and what it looks like running."
 tags:
   - Hardware
   - FPGA
@@ -11,7 +11,7 @@ tags:
   - BMA360
 ---
 
-FlyBrain is my side project for learning small-model design from insect brains: a training pipeline in the cloud, a Rust simulator, a Python reference, and integer RTL for FPGAs. The BMA360 gives it a real job. This post covers the job, what an ant computes, and which parts exist.
+FlyBrain is my side project for learning small-model design from insect brains: a training pipeline in the cloud, a Rust simulator, a Python reference, and integer RTL for FPGAs. The BMA360 gives it a real job. This post covers the job and what an ant computes.
 
 ## Why FlyBrain, and why ants
 
@@ -170,23 +170,4 @@ It passes five RTL tests on synthetic vectors, and breaking the gap handling on 
 
 To compare beam layouts before building anything, there is also an analytic tool that takes a microphone geometry or subset, several steering and source directions, and the ideal noise gain of 10 log10 N. Its output is labelled an exploratory prediction. It assumes far-field plane waves, ideal fractional delays and equal weights, and it is not a measurement or a hardware result.
 
-## What exists
-
-| Piece | State |
-|---|---|
-| Ant encoder v2 + `brain_slot` | RTL bit-exact with the reference in simulation; synthesised; not in any top-level design |
-| MB core | Bit-exact in simulation; ran on an iCE40 and a VU47P; not in any BMA image |
-| 121-mic feature engine | Five RTL tests on synthetic vectors; not routed |
-| SHARC results into the Cyclone | No integrated receive RTL; anything drafted is simulation-only, not fitted and not proven on hardware |
-| Cyclone→Zynq link | Partial contract (2026-11-15): 10.0, 10.2 stage 1 and 10.3 signed; the 10.4 result sideband is a draft and sends zeros. Only the frame-sync pin is accepted; the clock and remaining pin mapping aren't proven |
-| OMAP metadata to Zynq | Design only; no verified transport |
-| Zynq second stage (`bk3_brain`) | Simulation only, being rebuilt around that sideband |
-| Per-channel activity gate (`chan_gate`) | In the audio core RTL; replayed against its Python reference in simulation; not an ant pipeline, no latency claim |
-| Hub models | Running on Dante audio |
-
 No FlyBrain logic has been loaded onto a BMA board.
-
-## Next
-
-![Five gates before a FlyBrain bench load, none passed: freeze the Cyclone to Zynq contract, replay recorded events offline, compare on real recordings with baselines, synthesis and independent RTL review, then a bench load on one array with its own sign-off.](/images/bma/p10-next-gates-light.svg){: .only-light}
-![Five gates before a FlyBrain bench load, none passed: freeze the Cyclone to Zynq contract, replay recorded events offline, compare on real recordings with baselines, synthesis and independent RTL review, then a bench load on one array with its own sign-off.](/images/bma/p10-next-gates-dark.svg){: .only-dark}
