@@ -72,9 +72,20 @@ I ran the transmitter RTL in Icarus, feeding it a `ramp8` fixture of eight words
 
 All 483 cells matched the reference model's checked-in vector. The Zynq receiver and image top passed RTL and open-flow checks, and the Cyclone transmitter and the SHARC return block passed their Icarus simulations on synthetic fixtures.
 
-Then I put it on boards, and it worked. The Zynq receiver writes records into a DDR ring. One run on board B captured 8,509,310 records with no gaps, no duplicates and no CRC violations. A small program on the card sends that ring out as UDP, and a capture of 4.4 million records arrived with no sequence gaps. Board C's Cyclone runs my own image, and its ring runs too. A host bridge feeds the ring into the hub's eight-slot path, and the dashboard draws a waveform from it.
+Then I put it on boards, and it worked. The Zynq receiver writes records into a DDR ring, a small program on the card sends the ring out as UDP, and a host bridge feeds it into the hub's eight-slot path, where the dashboard draws a waveform from it:
 
-I also measured how fast the two cards' frame counters advance, against my host PC's clock, over 150 seconds: 48,010.71 records a second on board B and 48,010.39 on board C. That is about 220 ppm above 48 kHz, but my PC's clock is not disciplined by PTP or GPS, so the absolute rate is only good to about 10 Hz and some of the 220 ppm may be my PC's crystal. The two boards cannot be told apart at roughly 20 ppm, and the 0.3 Hz between them comes from one run. The transmitter sends one frame per 512 Cyclone audio-clock edges, so a 24.576 MHz clock would give exactly 48 kHz. One run against an undisciplined clock cannot say which clock, if either, is off, so I am not calling this a clock error.
+| Run | Records | Result |
+|---|---|---|
+| Board B, receiver into the DDR ring | 8,509,310 | no gaps, no duplicates, no CRC violations |
+| Board B, ring sent out as UDP | 4.4 million | no sequence gaps |
+| Board C, running my own Cyclone image | — | its ring runs too |
+
+I also timed the two cards' frame counters against my PC's clock over 150 seconds:
+
+![Frame-counter rates of boards B and C against the host PC's clock: 48,010.71 and 48,010.39 records per second, each with a plus or minus 10 Hz bar for the host clock's absolute uncertainty, and a dashed line at the nominal 48,000.](/images/bma/p08-link-rate-light.svg){: .only-light}
+![Frame-counter rates of boards B and C against the host PC's clock: 48,010.71 and 48,010.39 records per second, each with a plus or minus 10 Hz bar for the host clock's absolute uncertainty, and a dashed line at the nominal 48,000.](/images/bma/p08-link-rate-dark.svg){: .only-dark}
+
+Both boards read about 220 ppm above 48 kHz, but my PC's clock is not disciplined by PTP or GPS, so the bars are as wide as the whole offset and some of it may be my PC's crystal. The two boards cannot be told apart at roughly 20 ppm, and the 0.3 Hz between them comes from one run. The transmitter sends one frame per 512 Cyclone audio-clock edges, so a 24.576 MHz clock would give exactly 48 kHz, and one run against an undisciplined clock cannot say which clock, if either, is off. I am not calling this a clock error.
 
 What I cannot yet say is what the ring carries. It is not yet shown to be microphone audio. The eight lanes correlate with each other at 0.92 to 0.98 and a tone near 103 Hz dominates. I have not mapped which microphone is which lane, and a lane-map search against the measured 121-microphone layout was inconclusive, leaning toward a fixed skew per lane. These records are eight lanes, not the 32 or 64 streams of the egress daemon's adaptive mode, and Dante is not in this path at all.
 
@@ -91,7 +102,10 @@ The module has 148 host tests covering the kernels, a ZeroMQ loopback with real 
 
 The bridge fans out per-lane packets, so the module decodes those as well. To check the live stream I first read 150 seconds of it with a standalone numpy script: 1,646,068 packets, 7.2 million samples per lane, no lost packets and no frame-counter gaps. The module itself has only replayed that saved capture, through its file source and into the delay estimator, in 34 seconds. Its live UDP source has so far been exercised only by the kernel tests.
 
-Where the module earned its keep was in showing that the lane delays do not hold still. Across six captures the median correlation peak is only 0.08 to 0.09, and at most 4 of the 28 lane pairs keep 80% of their windows within one sample of their median. The lag between lanes 0 and 1 swings from +3.3 to -7.6 samples from one capture to the next. Only lanes 6 and 7 are steady, and the saved live capture agrees: 2 of 28 pairs steady over 1,500 windows.
+Where the module earned its keep was in showing that the lane delays do not hold still. Across six captures the median correlation peak is only 0.08 to 0.09, and the lag between lanes 0 and 1 swings across the range below. Only lanes 6 and 7 are steady:
+
+![Left: the lane 0 to 1 lag across six captures spans from minus 7.6 to plus 3.3 samples. Right: of the 28 lane pairs, at most 4 keep 80 percent of their windows within one sample of their median in the best of six captures, and 2 do in the saved live capture over 1,500 windows.](/images/bma/p08-lane-delays-light.svg){: .only-light}
+![Left: the lane 0 to 1 lag across six captures spans from minus 7.6 to plus 3.3 samples. Right: of the 28 lane pairs, at most 4 keep 80 percent of their windows within one sample of their median in the best of six captures, and 2 do in the saved live capture over 1,500 windows.](/images/bma/p08-lane-delays-dark.svg){: .only-dark}
 
 The lane-map search leans toward a fixed skew per lane, which would make it a property of the hardware. An earlier onset-estimator test found that the lag depends on where the sound comes from, which points to the sound field. The two disagree, so I cannot recover the lane-to-microphone map from this data. A real-audio test against a known bearing would settle it. Until then the lane delays are relative and uncalibrated, and the module is not yet installed into GNU Radio proper.
 

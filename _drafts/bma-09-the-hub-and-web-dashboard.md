@@ -142,16 +142,36 @@ A score is only a guess, so the dashboard has a review view for going through de
 
 The clip appears as a spectrogram with a level trace and a flux trace under it. I drag a box around the call to select it and loop just that part. Noise reduction toggles between off and strong, and playback can be slowed. The saved clips are single-channel, so the buttons for the other beams are greyed out and the A/B flip does nothing on them.
 
-Then I give a verdict. The page offers four: correct, wrong, unsure or artifact. A wrong verdict needs a reason, such as another species, a non-bird sound, machinery, an insect or amphibian, or nothing visible. Each verdict also records its basis, whether that was the field, the clip's spectrogram or the metadata alone. The page does not let me name the right species. The hub also accepts a fifth verdict, human voice, through its API and command line, but the page has no button for it.
+Then I give a verdict:
+
+| Verdict | Notes |
+|---|---|
+| correct | |
+| wrong | needs a reason: another species, a non-bird sound, machinery, an insect or amphibian, or nothing visible |
+| unsure | |
+| artifact | |
+| human voice | API and command line only; the page has no button for it |
+
+Each verdict also records its basis: the field, the clip's spectrogram, or the metadata alone. The page does not let me name the right species.
 
 I am collecting these verdicts because the scores cannot be calibrated until enough detections carry one. Until then the score on screen is what BirdNET said, and the label is its opinion.
 
 What the hub keeps, and what it does not
 ======
 
-This is the part of the design that decides what gets stored. By default the hub keeps no clip audio at all. It stores only the spectrogram, the signature and the index record.
+This is the part of the design that decides what gets stored.
 
-Clip audio is an option, and even with it on, a speech guard has to clear each clip before it is kept. The guard looks at the clip's span plus a five-second margin on either side, for speech or a human-voice label. If the verdict is missing or arrives late, the clip is dropped, not kept. Whatever survives is deleted 24 hours after capture, and a human-voice verdict, entered through the API or the command line, deletes the clip immediately. The verdict stays either way, so a label can outlive the audio it describes. And I listen to every clip myself before it goes into a post like this one.
+Clip audio is an option, and even with it on a speech guard has to clear each clip before it is kept:
+
+| Situation | What the hub does |
+|---|---|
+| default | keeps the spectrogram, the signature and the index record; no audio |
+| clip-audio on, guard finds speech or a human-voice label within the clip's span plus 5 s either side | drops the clip |
+| clip-audio on, verdict missing or late | drops the clip |
+| clip-audio on, guard clears it | keeps it for 24 hours after capture, then deletes it |
+| a human-voice verdict, entered through the API or command line | deletes the clip immediately |
+
+The verdict stays in every case, so a label can outlive the audio it describes. And I listen to every clip myself before it goes into a post like this one.
 
 A decoder test you can run without a tile
 ======
