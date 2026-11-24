@@ -32,7 +32,7 @@ A bridge per tile repacks the channels I select into 256-sample blocks, about 5.
 ![Timeline: a full 256-sample block, then a 240-sample block flushed short at index 1240 when a 16-sample packet is lost, then the next block starting at 1256 with gap_before set.](/images/bma/p09-reblock-light.svg){: .only-light}
 ![Timeline: a full 256-sample block, then a 240-sample block flushed short at index 1240 when a 16-sample packet is lost, then the next block starting at 1256 with gap_before set.](/images/bma/p09-reblock-dark.svg){: .only-dark}
 
-A supervisor runs one bridge per tile and restarts any that die. It reports packet arrival, nonzero audio and calibrated level as three separate things, because a stream can arrive perfectly and still be silent. On November 19 it read zero loss, with the input-gain check still marked unverified.
+A supervisor runs one bridge per tile and restarts any that die. It reports packet arrival, nonzero audio and calibrated level as three separate things, because a stream can arrive perfectly and still be silent. On November 19 it read zero loss.
 
 On the WSL side the audio splits. A mono branch feeds BirdNET, and an analysis branch does levels, spectra and multichannel classification, gating on activity and logging each detection along with where it came from.
 
@@ -200,10 +200,3 @@ sample_index = 123 * 48000 + 456
 assert sample_index == 5904456
 assert first_frame == [-8388608, -1, 0, 1, 8388607, 42, -42, 17]
 ```
-
-Back on the bench
-======
-
-The next session uses the Dante path as the control. A fixed source goes at a measured spot while I log both bridges' loss and gap counts, each array's angles and sample indices, the hub's clock eligibility and pose state, and any fused position. Then silence, then the source moved.
-
-For the custom path from Part 8, the first test is a real DSP payload captured at the Zynq receiver and followed through the ring into the host. Before that, the 17-cell lead-in gets checked against the receiver's 20-idle-edge rule, and the host gets a regression test that rejects delayed samples from a previous epoch.

@@ -3,7 +3,7 @@ layout: single
 title: "BMA360, Part 8: Bearings in Simulation, and the One Wire Out"
 header:
   og_image: bma/og/bma360-part-8.png
-excerpt: "A DOA estimator running on generated signals, an egress daemon, and a one-wire link from the Cyclone to the Zynq that passes RTL simulation. Plus a scorecard for the whole series."
+excerpt: "A DOA estimator running on generated signals, an egress daemon, and a one-wire link from the Cyclone to the Zynq that passes RTL simulation."
 tags:
   - Hardware
   - FPGA
@@ -89,7 +89,7 @@ Both boards read about 220 ppm above 48 kHz, but my PC's clock is not discipline
 
 What I cannot yet say is what the ring carries. It is not yet shown to be microphone audio. The eight lanes correlate with each other at 0.92 to 0.98 and a tone near 103 Hz dominates. I have not mapped which microphone is which lane, and a lane-map search against the measured 121-microphone layout was inconclusive, leaning toward a fixed skew per lane. These records are eight lanes, not the 32 or 64 streams of the egress daemon's adaptive mode, and Dante is not in this path at all.
 
-A script now flashes the Cyclone, arms the link, starts the sender and registers a watchdog. The ring-enable step is lost on a power cycle, so a cold-start run of the whole script is still to do.
+A script now flashes the Cyclone, arms the link, starts the sender and registers a watchdog. The ring-enable step is lost on a power cycle.
 
 I also replayed one capture through the hub's estimator. 91.7% of the windows failed the coherence gate and 5.6% produced a bearing, and those bearings are not evidence of direction.
 
@@ -109,19 +109,4 @@ Where the module earned its keep was in showing that the lane delays do not hold
 
 The lane-map search leans toward a fixed skew per lane, which would make it a property of the hardware. An earlier onset-estimator test found that the lag depends on where the sound comes from, which points to the sound field. The two disagree, so I cannot recover the lane-to-microphone map from this data. A real-audio test against a known bearing would settle it. Until then the lane delays are relative and uncalibrated, and the module is not yet installed into GNU Radio proper.
 
-Where the series stands
-======
-
-![Status matrix of every result in Parts 2 to 8: eight on real silicon (Parts 2 to 6), one mechanism-only beam and one failed probe in Part 6, two unresolved items in Part 7, three on real silicon, three host or RTL test results and one simulation in Part 8](/images/bma/p08-scorecard-light.svg){: .only-light}
-![Status matrix of every result in Parts 2 to 8: eight on real silicon (Parts 2 to 6), one mechanism-only beam and one failed probe in Part 6, two unresolved items in Part 7, three on real silicon, three host or RTL test results and one simulation in Part 8](/images/bma/p08-scorecard-dark.svg){: .only-dark}
-
-That matrix is the honest picture of Parts 2 to 8. Most of the hardware results are the early ones, getting in and reading things. The results that would show the array hearing and locating a sound are the ones still missing.
-
-One fix is merged but not yet proven on a board: the corrected levels hook is host-tested, and mutating out its scale conversion fails 25 of those tests, but it has not been loaded on a card. A static review also flagged that delayed beam history in the egress path might survive an epoch change. That needs a fix or a test before the combined path goes on a board.
-
-![Six undone steps in order: the fixed levels hook on a board, showing the ring carries microphone audio, mapping ring lanes to microphones, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-light.svg){: .only-light}
-![Six undone steps in order: the fixed levels hook on a board, showing the ring carries microphone audio, mapping ring lanes to microphones, a controlled capture of the eight Dante channels, a bearing on a known source, and the 24 silent elements, which are blocked. Beside them, the stock Dante path through the hub and dashboard, which runs today.](/images/bma/p08-whats-left-dark.svg){: .only-dark}
-
-The order of what is left is the order of the picture. Load the fixed levels hook and show that the ring carries microphone audio. Map the ring's lanes to microphones. Capture the eight Dante channels under controlled conditions. Get a bearing on a source at a known position. The 24 silent elements are blocked.
-
-The path that runs today is the stock one, through the hub and the dashboard, and that is Part 9.
+Part 9 is the path that runs today: the hub and the dashboard, on the stock Dante stream.
